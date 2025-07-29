@@ -1,0 +1,88 @@
+name: 'doc-flow'
+
+services:
+  app:
+    container_name: doc-flow-backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    ports:
+      - "3000:3000"
+    networks:
+      - network-doc-flow
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: doc-flow-postgres
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - network-doc-flow
+
+  adminer:
+    container_name: doc-flow-adminer
+    image: adminer
+    ports:
+      - 8081:8080
+    networks:
+      - network-doc-flow
+
+  migrate:
+    container_name: doc-flow-migrate
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: db-actions-build
+    networks:
+      - network-doc-flow
+    depends_on:
+      - postgres
+    command: [
+      "sh",
+      "-c",
+      "/var/www/app/database-actions.sh migrate"
+    ]
+
+  seed:
+    container_name: doc-flow-seed
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: db-actions-build
+    networks:
+      - network-doc-flow
+    depends_on:
+      - migrate
+      - postgres
+    command: [
+      "sh",
+      "-c",
+      "/var/www/app/database-actions.sh seed"
+    ]
+
+  redis:
+    container_name: doc-flow-redis
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    networks:
+      - network-doc-flow
+
+networks:
+  network-doc-flow:
+    driver: bridge
+
+volumes:
+  pgdata:
