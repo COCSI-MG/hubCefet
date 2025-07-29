@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado de Participação</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', serif;
+            width: 297mm;
+            min-height: 210mm;
+            position: relative;
+            background: white;
+            overflow: visible;
+        }
+        
+        .header-image {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            object-position: top center;
+            display: block;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        
+        .content-container {
+            padding: 0 20px;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 80px;
+        }
+        
+        .text-container {
+            margin: 0 auto;
+            width: 80%;
+            margin-bottom: 0;
+        }
+        
+        .main-text {
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: justify;
+        }
+        
+        .date-container {
+            width: 100%;
+            margin-top: 40px;
+        }
+        
+        .date-text {
+            text-align: right;
+            font-size: 14px;
+            margin-right: 20px;
+        }
+        
+        .signatures {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 60px;
+        }
+        
+        .signature-image {
+            width: 220px;
+            height: 80px;
+        }
+        
+        .footer-image {
+            width: 100%;
+            height: auto;
+            max-height: 100px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            object-fit: contain;
+            object-position: center;
+        }
+        
+        .nome-destaque {
+            font-weight: bold;
+        }
+        
+        .atividade-destaque {
+            font-weight: bold;
+        }
+        
+        .horas-destaque {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <img class="header-image" src="{{headerImage}}" alt="Header SEPEX" />
+    
+    <div class="content-container">
+        <div class="text-container">
+            <p class="main-text">
+                O Centro Federal de Educação Tecnológica Celso Suckow da Fonseca
+                certifica que <span class="nome-destaque">{{userName}}</span> apresentou a Atividade 
+                <span class="atividade-destaque">{{eventName}}</span>, com
+                duração de <span class="horas-destaque">{{totalHours}} horas</span>, durante a realização da Semana de
+                Ensino, Pesquisa e Extensão 2024 – "Biomas do Brasil: diversidade,
+                saberes e tecnologias sociais" evento anual promovido pelo
+                Departamento de Extensão e Assuntos Comunitário – DEAC, no período
+                de {{checkInDate}} a {{checkOutDate}}.
+            </p>
+        </div>
+        
+        <div class="date-container">
+            <p class="date-text">
+                Rio de Janeiro, {{currentDate}}
+            </p>
+        </div>
+        
+        <div class="signatures">
+            <img class="signature-image" src="{{mariaSignature}}" alt="Assinatura Maria" />
+            <img class="signature-image" src="{{renataSignature}}" alt="Assinatura Renata" />
+        </div>
+    </div>
+    
+    <img class="footer-image" src="{{footerImage}}" alt="Footer SEPEX" />
+</body>
+</html> 
