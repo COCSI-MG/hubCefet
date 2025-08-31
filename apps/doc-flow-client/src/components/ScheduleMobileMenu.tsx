@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Menu, User, Calendar, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -13,16 +13,16 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export function ScheduleMobileMenu() {
   const [open, setOpen] = useState(false);
   const { token } = useAuth();
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
-  
+
   useEffect(() => {
     const getUserProfile = () => {
       try {
         if (token) {
           const decoded: any = jwtDecode(token);
-          
+
           let profileName = '';
           if (typeof decoded.profile === 'string') {
             profileName = decoded.profile;
@@ -31,9 +31,9 @@ export function ScheduleMobileMenu() {
           } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
             profileName = decoded.profile.roles[0];
           }
-          
+
           const profileLower = profileName.toLowerCase();
-          
+
           setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
           setIsProfessor(profileLower === 'professor');
         }
@@ -41,7 +41,7 @@ export function ScheduleMobileMenu() {
         console.error('Erro ao decodificar token:', err);
       }
     };
-    
+
     getUserProfile();
   }, [token]);
 
@@ -65,7 +65,7 @@ export function ScheduleMobileMenu() {
                 <Menu className="h-5 w-5" />
                 <span>Voltar para Apps</span>
               </Link>
-              
+
               {!isAdmin && (
                 <Link
                   to={`/horarios`}
@@ -76,7 +76,7 @@ export function ScheduleMobileMenu() {
                   <span>Meus Horários</span>
                 </Link>
               )}
-              
+
               {(isAdmin || isProfessor) && (
                 <Link
                   to={`/horarios/gerenciar`}
@@ -87,7 +87,7 @@ export function ScheduleMobileMenu() {
                   <span>Gestão do Sistema</span>
                 </Link>
               )}
-              
+
               <Link
                 to={`/profile`}
                 className="flex items-center space-x-2 text-sm font-medium"
@@ -103,4 +103,4 @@ export function ScheduleMobileMenu() {
       <Calendar />
     </header>
   );
-} 
+}

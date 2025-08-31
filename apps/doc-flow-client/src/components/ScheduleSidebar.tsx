@@ -12,7 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import NavMenuItem from "./NavMenuItem";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import AppsIcon from '@mui/icons-material/Apps';
@@ -26,16 +26,16 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, token } = useAuth();
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
-  
+
   useEffect(() => {
     const getUserProfile = () => {
       try {
         if (token) {
           const decoded: any = jwtDecode(token);
-          
+
           let profileName = '';
           if (typeof decoded.profile === 'string') {
             profileName = decoded.profile;
@@ -44,9 +44,9 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
           } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
             profileName = decoded.profile.roles[0];
           }
-          
+
           const profileLower = profileName.toLowerCase();
-          
+
           setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
           setIsProfessor(profileLower === 'professor');
         }
@@ -54,7 +54,7 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
         console.error('Erro ao decodificar token:', err);
       }
     };
-    
+
     getUserProfile();
   }, [token]);
 
@@ -78,14 +78,14 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
               activeNavItem={location.pathname === "/apps"}
               icon={<AppsIcon />}
             />
-            
+
             <NavMenuItem
               text="Todos os Horários"
               onClick={() => navigate("/horarios/todos")}
               activeNavItem={location.pathname === "/horarios/todos"}
               icon={<ViewListIcon />}
             />
-            
+
             {!isAdmin && (
               <NavMenuItem
                 text="Meus Horários"
@@ -94,7 +94,7 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
                 icon={<ScheduleIcon />}
               />
             )}
-            
+
             {(isAdmin || isProfessor) && (
               <NavMenuItem
                 text="Gestão do Sistema"

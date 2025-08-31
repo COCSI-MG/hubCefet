@@ -10,7 +10,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import ConfirmPassword from "@/components/ConfirmPassword";
 import { changePassword } from "@/api/data/auth.data";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 export default function ChangePasswordForm() {
   const navigate = useNavigate();

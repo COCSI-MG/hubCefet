@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/SquareAvatar";
 import { Button } from "@/components/ui/button";
 import UserEditDialog from "@/components/user/UserEditDialog";
 import useAuth from "@/hooks/useAuth";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const { user } = useAuth();

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccessToken } from "@/api/data/auth.data";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import AuthForm from "@/components/AuthForm";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { checkAuthentication } = useAuth();
   const { setError } = useAuthError();
-  
+
   const [showMagicLogin, setShowMagicLogin] = useState(false);
   const [magicEmail, setMagicEmail] = useState("");
   const [magicLoading, setMagicLoading] = useState(false);
@@ -54,7 +54,7 @@ export default function Login() {
       setMagicLoading(true);
       setMagicError("");
       setMagicMessage("");
-      
+
       const response = await authService.requestMagicLogin(magicEmail);
       setMagicMessage(response.message);
     } catch (error: any) {

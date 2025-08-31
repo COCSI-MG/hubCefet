@@ -12,7 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import NavMenuItem from "./NavMenuItem";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import AppsIcon from '@mui/icons-material/Apps';
@@ -27,17 +27,17 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, token } = useAuth();
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
   const [isStudent, setIsStudent] = useState(false);
-  
+
   useEffect(() => {
     const getUserProfile = () => {
       try {
         if (token) {
           const decoded: any = jwtDecode(token);
-          
+
           let profileName = '';
           if (typeof decoded.profile === 'string') {
             profileName = decoded.profile;
@@ -46,9 +46,9 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
           } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
             profileName = decoded.profile.roles[0];
           }
-          
+
           const profileLower = profileName.toLowerCase();
-          
+
           setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
           setIsProfessor(profileLower === 'professor');
           setIsStudent(profileLower === 'student');
@@ -57,7 +57,7 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
         console.error('Erro ao decodificar token:', err);
       }
     };
-    
+
     getUserProfile();
   }, [token]);
 
@@ -81,14 +81,14 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
               activeNavItem={location.pathname === "/apps"}
               icon={<AppsIcon />}
             />
-            
+
             <NavMenuItem
               text="Seus Arquivos"
               onClick={() => navigate("/docflow/files")}
               activeNavItem={location.pathname === "/docflow/files"}
               icon={<FolderIcon />}
             />
-            
+
             {(isAdmin || isProfessor) && (
               <NavMenuItem
                 text="Criar Arquivo"
@@ -138,4 +138,4 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
       <SidebarRail />
     </Sidebar>
   );
-} 
+}

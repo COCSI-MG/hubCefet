@@ -5,7 +5,7 @@ import { getUserEvents } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import ViewUserEventsBox from "@/components/events/ViewUserEventsBox";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";

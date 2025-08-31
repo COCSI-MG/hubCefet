@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
 import logo from "@/assets/cefet-logo.png";
 import { useState, useEffect, createContext } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

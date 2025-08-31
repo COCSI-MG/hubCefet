@@ -1,7 +1,7 @@
 import { getEvent } from "@/api/data/events.data";
 import { EventCreateSchema, Event, createEventSchema } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import EventsForm from "@/components/events/EventsForm";

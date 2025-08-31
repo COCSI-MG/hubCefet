@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
@@ -18,16 +18,16 @@ export function EventsMobileMenu() {
   const location = useLocation();
   const { user, logout, token } = useAuth();
   const [open, setOpen] = useState(false);
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
-  
+
   useEffect(() => {
     const getUserProfile = () => {
       try {
         if (token) {
           const decoded: any = jwtDecode(token);
-          
+
           let profileName = '';
           if (typeof decoded.profile === 'string') {
             profileName = decoded.profile;
@@ -36,9 +36,9 @@ export function EventsMobileMenu() {
           } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
             profileName = decoded.profile.roles[0];
           }
-          
+
           const profileLower = profileName.toLowerCase();
-          
+
           setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
           setIsProfessor(profileLower === 'professor');
         }
@@ -46,7 +46,7 @@ export function EventsMobileMenu() {
         console.error('Erro ao decodificar token:', err);
       }
     };
-    
+
     getUserProfile();
   }, [token]);
 
@@ -58,7 +58,7 @@ export function EventsMobileMenu() {
   return (
     <header className="bg-sky-900 text-white p-4 flex justify-between items-center">
       <h1 className="text-xl font-bold">Eventos</h1>
-      
+
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="text-white">
@@ -77,7 +77,7 @@ export function EventsMobileMenu() {
                   <AppsIcon className="mr-2 h-4 w-4" />
                   Voltar para Apps
                 </Button>
-                
+
                 {(isAdmin || isProfessor) && (
                   <Button
                     variant="ghost"
@@ -88,7 +88,7 @@ export function EventsMobileMenu() {
                     Criar Evento
                   </Button>
                 )}
-                
+
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
@@ -97,7 +97,7 @@ export function EventsMobileMenu() {
                   <EventIcon className="mr-2 h-4 w-4" />
                   Todos Eventos
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
@@ -108,7 +108,7 @@ export function EventsMobileMenu() {
                 </Button>
               </nav>
             </div>
-            
+
             <div className="border-t pt-4">
               <div className="mb-4 text-sm">
                 <p className="font-medium">{user?.fullName || "Nome não encontrado"}</p>
@@ -126,4 +126,4 @@ export function EventsMobileMenu() {
       </Sheet>
     </header>
   );
-} 
+}

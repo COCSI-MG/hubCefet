@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signup } from "@/api/data/auth.data";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";

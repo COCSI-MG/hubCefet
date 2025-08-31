@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import DefaultLayout from "@/layouts/DefaultLayout";
 import DocFlowLayout from "@/layouts/DocFlowLayout";
 import EventsLayout from "@/layouts/EventsLayout";
 import ScheduleLayout from "@/layouts/ScheduleLayout";
@@ -49,12 +48,12 @@ export default function Router() {
       <Routes>
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<Navigate to="/apps" replace />} />
-          
+
           <Route path="/apps" element={<AppSelection />} />
 
           <Route path="/docflow" element={<DocFlowLayout />}>
             <Route index element={<Navigate to="/docflow/files" replace />} />
-            
+
             <Route path="files">
               <Route index element={<File />} />
               <Route
@@ -81,7 +80,7 @@ export default function Router() {
 
           <Route path="/events" element={<EventsLayout />}>
             <Route index element={<Navigate to="/events/all" replace />} />
-            
+
             <Route path="all" element={<EventsView />} />
             <Route
               element={<ProfileRoute profile={['Admin', 'Professor']} />}
@@ -105,7 +104,7 @@ export default function Router() {
               <Route path="disciplina/:id" element={<SubjectDetails />} />
               <Route path="aulas/detalhes/:id" element={<ClassDetails />} />
               <Route path="aulas/detalhes-publicos/:id" element={<PublicClassDetails />} />
-              
+
               {/* Rotas restritas para Admin e Professor */}
               <Route element={<AdminProfessorRoute />}>
                 <Route path="gerenciar" element={<ManagementHome />} />
@@ -138,7 +137,6 @@ export default function Router() {
           <Route path="signup" element={<Signup />} />
         </Route>
 
-        {/* Rota pública para Magic Login (fora do AuthLayout) */}
         <Route path="/auth/magic-login" element={<MagicLogin />} />
 
         <Route path="/forbidden" element={<Forbidden />} />

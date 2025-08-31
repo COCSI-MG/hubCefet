@@ -4,7 +4,7 @@ import { SignupFormSchema } from "@/lib/types";
 import type { useForm } from "react-hook-form";
 import FormItemField from "./FormItemField";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 import { Label } from "./ui/label";
 import { getProfileId } from "../api/data/profile.data";
 import ConfirmPassword from "./ConfirmPassword";

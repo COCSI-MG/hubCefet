@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
@@ -14,7 +14,7 @@ const StudentRoute = () => {
       try {
         if (token) {
           const decoded: any = jwtDecode(token);
-          
+
           let profileName = '';
           if (typeof decoded.profile === 'string') {
             profileName = decoded.profile;
@@ -23,10 +23,10 @@ const StudentRoute = () => {
           } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
             profileName = decoded.profile.roles[0];
           }
-          
+
           const profileLower = profileName.toLowerCase();
           const resolvedIsStudent = profileLower === 'student' || profileLower === 'aluno';
-          
+
           setIsStudent(resolvedIsStudent);
         } else {
           setIsStudent(false);
@@ -38,7 +38,7 @@ const StudentRoute = () => {
         setLoading(false);
       }
     };
-    
+
     getUserProfile();
   }, [token]);
 
@@ -52,11 +52,11 @@ const StudentRoute = () => {
       '/horarios/disciplina',
       '/horarios/aulas/detalhes'
     ];
-    
-    const isAllowedPath = allowedPaths.some(path => 
+
+    const isAllowedPath = allowedPaths.some(path =>
       location.pathname === path || location.pathname.startsWith(path + '/')
     );
-    
+
     if (isAllowedPath) {
       return <Outlet />;
     } else {
@@ -67,4 +67,4 @@ const StudentRoute = () => {
   return <Outlet />;
 };
 
-export default StudentRoute; 
+export default StudentRoute;

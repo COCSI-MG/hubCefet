@@ -6,7 +6,7 @@ import {
   userPayloadSchema,
   type AuthContextType,
 } from "@/lib/types";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import LoadingOverlay from "@/components/LoadingOverlay";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const checkAuthentication = useCallback(async () => {
     const accessToken = localStorage.getItem("accessToken");
-    
+
     if (!accessToken) {
       setIsLoading(false);
       return;
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         logout();
         return;
       }
-      
+
       setToken(accessToken);
       setIsAuthenticated(true);
       await loadUser(accessToken);
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (isLoading) return;
-    
+
     if (
       isAuthenticated &&
       (location.pathname === "/login" || location.pathname === "/signup")

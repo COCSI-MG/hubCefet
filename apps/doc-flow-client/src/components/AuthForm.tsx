@@ -4,7 +4,7 @@ import { AuthFormSchema } from "@/lib/types";
 import type { useForm } from "react-hook-form";
 import FormItemField from "./FormItemField";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 
 interface AuthFormProps {
   form: ReturnType<typeof useForm<AuthFormSchema>>;

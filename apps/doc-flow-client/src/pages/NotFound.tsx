@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export default function NotFound() {
   const baseUrl = import.meta.env.DEV ? "doc-flow.dev" : "doc-flow.com";
