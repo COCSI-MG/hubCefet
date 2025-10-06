@@ -28,6 +28,30 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="w-full p-6 space-y-4 max-sm:w-full">
+            <h1 className="text-2xl text-sky-900 font-bold mb-2">
+              Nome do Evento
+            </h1>
+            <span className="text-sky-800">
+              <strong>Descricao do evento:</strong>
+            </span>
+            <FormField
+              control={form.control}
+              name="description"
+              defaultValue={
+                (event && event.description) ||
+                `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloribus temporibus consequatur nostrum fuga ipsum vel, modi nesciunt hic provident quod praesentium eveniet sed earum doloremque quam error asperiores unde blanditiis.`
+              }
+              render={({ field }) => (
+                <FormItemField
+                  field={field}
+                  error={form.formState.errors.description?.message}
+                  type="textarea" // ← Now supported!
+                  placeholder="Insira uma descrição detalhada..."
+                />
+              )}
+            />
+          </div>
           <div className="grid grid-cols-3 p-4 gap-x-8 gap-y-4  max-md:space-x-0 max-md:flex max-md:flex-col max-md:space-y-4">
             <div className="p-4 flex flex-col space-y-3 border rounded-xl max-md:col-span-0">
               <div>
@@ -208,6 +232,25 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                     />
                   )}
                 />
+              </div>
+              <div className="flex items-end">
+                <div className="w-2/6">
+                  <FormField
+                    control={form.control}
+                    name="radius"
+                    defaultValue={event && event.radius ? event.radius : 0}
+                    render={({ field }) => (
+                      <FormItemField
+                        field={{ ...field }}
+                        label="Raio"
+                        error={form.formState.errors.radius?.message}
+                        type="number"
+                        placeholder="Raio do evento"
+                      />
+                    )}
+                  />
+                </div>
+                <span className="text-xs ml-2">metro(s)</span>
               </div>
             </div>
           </div>

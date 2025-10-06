@@ -114,6 +114,18 @@ export class Event extends Model {
   })
   vacancies: number;
 
+  @Column({
+    type: DataType.STRING(500),
+    allowNull: true,
+  })
+  description: string;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  radius: number;
+
   @HasMany(() => Presence, 'event_id')
   presences: Presence[];
 

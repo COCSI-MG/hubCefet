@@ -104,18 +104,22 @@ export class UsersController {
   ) {
     try {
       let findAllUserResult;
-      
+
       if (searchTerm && searchTerm.trim()) {
         findAllUserResult = await this.usersService.search(
           searchTerm.trim(),
-          limit, 
-          offset, 
-          profileName
+          limit,
+          offset,
+          profileName,
         );
       } else {
-        findAllUserResult = await this.usersService.findAll(limit, offset, profileName);
+        findAllUserResult = await this.usersService.findAll(
+          limit,
+          offset,
+          profileName,
+        );
       }
-      
+
       const getAllResponseDto = new ApiResponseDto<{ users: User[] }>(
         200,
         findAllUserResult.success,

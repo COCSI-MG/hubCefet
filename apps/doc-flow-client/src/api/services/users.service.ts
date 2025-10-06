@@ -14,9 +14,17 @@ export default class UserService extends AbstractService {
   async getAll(args: {
     limit: number;
     offset: number;
+    search?: string;
+    profileName?: string;
   }): Promise<UsersGetAllResponse> {
     return await this.api.get(
-      this.basePath + `?limit=${args.limit}&offset=${args.offset}`,
+      `${this.basePath}/limit/${args.limit}/offset/${args.offset}`,
+      {
+        params: {
+          search: args.search,
+          profileName: args.profileName,
+        },
+      }
     );
   }
 
@@ -26,8 +34,16 @@ export default class UserService extends AbstractService {
 
   async patch(
     id: string,
-    data: CreateUser,
+    data: CreateUser
   ): Promise<ApiResponse<{ user: User }>> {
     return await this.api.patch(this.basePath + `/${id}`, { ...data });
+  }
+
+  async delete(id: string): Promise<ApiResponse<null>> {
+    return await this.api.delete(this.basePath + `/${id}`);
+  }
+
+  async create(data: CreateUser): Promise<ApiResponse<{ user: User }>> {
+    return await this.api.post(this.basePath, { ...data });
   }
 }

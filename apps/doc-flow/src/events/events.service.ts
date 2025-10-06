@@ -52,6 +52,8 @@ export class EventsService {
       latitude: createEventDto.latitude,
       longitude: createEventDto.longitude,
       vacancies: createEventDto.vacancies,
+      radius: createEventDto.radius,
+      description: createEventDto.description,
     });
   }
 

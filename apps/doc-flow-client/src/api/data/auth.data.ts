@@ -16,7 +16,7 @@ export const getAccessToken = async ({
   try {
     const data: AuthSigninResponse = await authServiceInstance.signin(
       email,
-      password,
+      password
     );
     return data.access_token;
   } catch (error) {
@@ -29,10 +29,9 @@ export const signup = async ({
   password,
   enrollment,
   fullName,
-  profileId,
 }: AuthSignupBody): Promise<string | undefined> => {
   try {
-    if (!enrollment || !fullName || !profileId) {
+    if (!enrollment || !fullName) {
       throw new Error("Campos vazios não são permitidos");
     }
     const authServiceInstance = new AuthService();
@@ -40,8 +39,7 @@ export const signup = async ({
       email,
       password,
       enrollment,
-      fullName,
-      profileId,
+      fullName
     );
     return data.access_token;
   } catch (err) {

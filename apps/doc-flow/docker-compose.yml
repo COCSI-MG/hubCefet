@@ -1,9 +1,9 @@
-name: 'doc-flow'
+name: "doc-flow"
 
 services:
   app:
     container_name: doc-flow-backend
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
       target: app
@@ -13,6 +13,8 @@ services:
       - network-doc-flow
     depends_on:
       - postgres
+    env_file:
+      - ./.env
 
   postgres:
     container_name: doc-flow-postgres
@@ -41,7 +43,7 @@ services:
 
   migrate:
     container_name: doc-flow-migrate
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
       target: db-actions-build
@@ -49,15 +51,15 @@ services:
       - network-doc-flow
     depends_on:
       - postgres
-    command: [
-      "sh",
-      "-c",
-      "/var/www/app/database-actions.sh migrate"
-    ]
+    env_file:
+      - ./.env
+    command: ["bash", "/scripts/database-actions.sh", "migrate"]
+    volumes:
+      - ./scripts:/scripts
 
   seed:
     container_name: doc-flow-seed
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
       target: db-actions-build
@@ -66,11 +68,11 @@ services:
     depends_on:
       - migrate
       - postgres
-    command: [
-      "sh",
-      "-c",
-      "/var/www/app/database-actions.sh seed"
-    ]
+    env_file:
+      - ./.env
+    command: ["bash", "/scripts/database-actions.sh", "seed"]
+    volumes:
+      - ./scripts:/scripts
 
   redis:
     container_name: doc-flow-redis

@@ -5,11 +5,13 @@ export default class ApiService {
   private axiosInstance: AxiosInstance;
 
   constructor(privateInstance = false) {
-    this.axiosInstance = privateInstance ? privateAxiosInstance : publicAxiosInstance;
+    this.axiosInstance = privateInstance
+      ? privateAxiosInstance
+      : publicAxiosInstance;
   }
 
-  async get(url: string) {
-    const response = await this.axiosInstance.get(url);
+  async get(url: string, config?: AxiosRequestConfig<object>) {
+    const response = await this.axiosInstance.get(url, config);
     return response.data;
   }
 

@@ -5,10 +5,12 @@ import { hash, compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
 import { SignUpAuthDto } from './dto/singup-auth.dto';
-import { Logger } from '@nestjs/common';
 import { MagicLoginService } from './magic-login.service';
 import { MagicLoginRequestDto } from './dto/magic-login-request.dto';
 import { MagicLoginVerifyDto } from './dto/magic-login-verify.dto';
+import { ProfileService } from 'src/profile/profile.service';
+
+const UNAUTHED_SIGNUP_PROFILE = 'student';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private magicLoginService: MagicLoginService,
+    private profileService: ProfileService,
   ) {}
 
   private async authenticate(email: string, password: string): Promise<User> {
@@ -37,7 +40,7 @@ export class AuthService {
       fullName: user.full_name,
       profile: user.profile,
     };
-    
+
     return await this.jwtService.signAsync(payload);
   }
 
@@ -62,17 +65,26 @@ export class AuthService {
 
   async signUp(signupDto: SignUpAuthDto): Promise<{ access_token: string }> {
     const user = await this.usersService.findByEmail(signupDto.email);
-    Logger.log(signupDto.profileId);
+
+    const defaultProfile = await this.profileService.findByProfileName(
+      UNAUTHED_SIGNUP_PROFILE,
+    );
+
+    if (!defaultProfile) {
+      throw new Error('Default profile not found');
+    }
+
     if (user) {
       throw new Error('User already exists');
     }
+
     const hashedPassword = await this.hashPassword(signupDto.password);
     const newUser = await this.usersService.create({
       email: signupDto.email,
       password: hashedPassword,
       enrollment: signupDto.enrollment,
       full_name: signupDto.fullName,
-      profileId: signupDto.profileId,
+      profileId: defaultProfile?.id,
     });
     const accessToken = await this.generateJwtPayloadAndGetAccessToken(
       newUser.data.user,
@@ -82,13 +94,17 @@ export class AuthService {
     };
   }
 
-  async requestMagicLogin(requestDto: MagicLoginRequestDto): Promise<{ message: string }> {
+  async requestMagicLogin(
+    requestDto: MagicLoginRequestDto,
+  ): Promise<{ message: string }> {
     return await this.magicLoginService.requestMagicLink(requestDto.email);
   }
 
-  async verifyMagicLogin(verifyDto: MagicLoginVerifyDto): Promise<{ access_token: string }> {
+  async verifyMagicLogin(
+    verifyDto: MagicLoginVerifyDto,
+  ): Promise<{ access_token: string }> {
     const user = await this.magicLoginService.verifyMagicLink(verifyDto.token);
-    
+
     const accessToken = await this.generateJwtPayloadAndGetAccessToken(user);
     return {
       access_token: accessToken,

@@ -86,9 +86,13 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Link de acesso enviado para seu email. Verifique sua caixa de entrada.' }
-      }
-    }
+        message: {
+          type: 'string',
+          example:
+            'Link de acesso enviado para seu email. Verifique sua caixa de entrada.',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -113,10 +117,10 @@ export class AuthController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       const status = err.status || 500;
       const message = err.message || 'Internal server error';
-      
+
       return res
         .status(status)
         .json(new ApiResponseDto(status, false, null, message));
@@ -147,10 +151,10 @@ export class AuthController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       const status = err.status || 500;
       const message = err.message || 'Internal server error';
-      
+
       return res
         .status(status)
         .json(new ApiResponseDto(status, false, null, message));

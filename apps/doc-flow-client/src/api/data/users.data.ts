@@ -28,9 +28,21 @@ export const getUser = async (id: string): Promise<User | undefined> => {
   }
 };
 
+export const createUser = async (
+  data: CreateUser
+): Promise<User | undefined> => {
+  try {
+    const response = await userService.create(data);
+    return response.data.user;
+  } catch (err) {
+    if (import.meta.env.DEV) console.error(err);
+    return undefined;
+  }
+};
+
 export const updateUserPatchVerb = async (
   id: string,
-  data: CreateUser,
+  data: CreateUser
 ): Promise<User | undefined> => {
   try {
     const response = await userService.patch(id, data);
@@ -38,5 +50,26 @@ export const updateUserPatchVerb = async (
   } catch (err) {
     if (import.meta.env.DEV) console.error(err);
     return undefined;
+  }
+};
+
+export const deleteUser = async (id: string): Promise<boolean> => {
+  try {
+    const response = await userService.delete(id);
+    return response.success;
+  } catch (err) {
+    if (import.meta.env.DEV) console.error(err);
+    return false;
+  }
+};
+
+export const deleteUsers = async (ids: string[]): Promise<boolean> => {
+  try {
+    const deletePromises = ids.map((id) => userService.delete(id));
+    const results = await Promise.all(deletePromises);
+    return results.every((result) => result.success);
+  } catch (err) {
+    if (import.meta.env.DEV) console.error(err);
+    return false;
   }
 };

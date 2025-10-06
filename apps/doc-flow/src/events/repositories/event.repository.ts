@@ -16,6 +16,8 @@ export class EventRepositoryImpl implements EventRepository {
   async create(createEventDto: CreateEventDto): Promise<Event> {
     return await this.eventModel.scope('withoutTimestamps').create({
       name: createEventDto.name,
+      description: createEventDto.description,
+      radius: createEventDto.radius,
       start_at: createEventDto.eventStartDate,
       end_at: createEventDto.eventEndDate,
       status: createEventDto.status,
@@ -81,7 +83,7 @@ export class EventRepositoryImpl implements EventRepository {
     console.log('🕐 [CRON DEBUG] Buscando eventos upcoming para iniciar');
     console.log('🕐 [CRON DEBUG] Data atual:', now.toISOString());
     console.log('🕐 [CRON DEBUG] Data atual local:', now.toString());
-    
+
     const events = await this.eventModel.scope('withoutTimestamps').findAll({
       where: {
         status: EventStatus.STATUS_UPCOMING,
@@ -96,15 +98,18 @@ export class EventRepositoryImpl implements EventRepository {
         },
       },
     });
-    
-    console.log('🕐 [CRON DEBUG] Eventos encontrados para iniciar:', events.length);
-    events.forEach(event => {
+
+    console.log(
+      '🕐 [CRON DEBUG] Eventos encontrados para iniciar:',
+      events.length,
+    );
+    events.forEach((event) => {
       console.log(`🕐 [CRON DEBUG] Evento: ${event.name}`);
       console.log(`🕐 [CRON DEBUG] - Início: ${event.start_at}`);
       console.log(`🕐 [CRON DEBUG] - Fim: ${event.end_at}`);
       console.log(`🕐 [CRON DEBUG] - Status: ${event.status}`);
     });
-    
+
     return events;
   }
 
