@@ -6,6 +6,7 @@ import { USER_REPOSITORY } from './repositories/user-repository.token';
 import { ProfileService } from '../profile/profile.service';
 import { ServiceLayerDto } from 'src/lib/dto/service-layer.dto';
 import { User } from './entities/user.entity';
+import { hash } from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(
@@ -32,19 +33,19 @@ export class UsersService {
     profileName?: string,
   ): Promise<ServiceLayerDto<{ users: User[] }>> {
     let users: User[];
-    
+
     if (profileName) {
       const profile = await this.profileService.findByProfileName(profileName);
       if (profile) {
         users = await this.userRepository.findAll(limit, offset);
-        users = users.filter(user => user.profile_id === profile.id);
+        users = users.filter((user) => user.profile_id === profile.id);
       } else {
         users = [];
       }
     } else {
       users = await this.userRepository.findAll(limit, offset);
     }
-    
+
     return new ServiceLayerDto<{ users: User[] }>(
       { users },
       users.length > 0 ? true : false,
@@ -57,6 +58,10 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await hash(updateUserDto.password, 10);
+    }
+
     const [number, user] = await this.userRepository.update(id, updateUserDto);
     if (number === 0) {
       throw new Error('User not found');
@@ -79,19 +84,19 @@ export class UsersService {
     profileName?: string,
   ): Promise<ServiceLayerDto<{ users: User[] }>> {
     let users: User[];
-    
+
     if (profileName) {
       const profile = await this.profileService.findByProfileName(profileName);
       if (profile) {
         users = await this.userRepository.search(term, limit, offset);
-        users = users.filter(user => user.profile_id === profile.id);
+        users = users.filter((user) => user.profile_id === profile.id);
       } else {
         users = [];
       }
     } else {
       users = await this.userRepository.search(term, limit, offset);
     }
-    
+
     return new ServiceLayerDto<{ users: User[] }>(
       { users },
       users.length > 0 ? true : false,

@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Res, Get, Req } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { Response } from 'express';
@@ -7,7 +7,6 @@ import { Public } from './decorators/public-auth.decorator';
 import { ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
-import { UserRequest } from 'src';
 import { MagicLoginRequestDto } from './dto/magic-login-request.dto';
 import { MagicLoginVerifyDto } from './dto/magic-login-verify.dto';
 

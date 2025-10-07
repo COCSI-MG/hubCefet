@@ -18,11 +18,14 @@ import { getUserColumns } from "./UserManagementTableColumns";
 import { toast } from "sonner";
 import { Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getProfiles } from "@/api/data/profile.data";
+import { ProfileSchema } from "@/lib/schemas/profile.schema";
 
 type User = components["schemas"]["User"];
 
 export function UserManagementDataTable() {
   const [data, setData] = useState<User[]>([]);
+  const [profiles, setProfiles] = useState<ProfileSchema[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
@@ -40,6 +43,12 @@ export function UserManagementDataTable() {
       console.error("Error fetching users:", err);
       toast.error("Erro ao carregar usuários");
     }
+  };
+
+  const fetchProfiles = async () => {
+    const profiles = await getProfiles();
+    if (!profiles) return;
+    setProfiles(profiles);
   };
 
   const handleDeleteSelected = async () => {
@@ -72,11 +81,12 @@ export function UserManagementDataTable() {
 
   useEffect(() => {
     fetchUsers();
+    fetchProfiles();
   }, []);
 
   const table = useReactTable({
     data,
-    columns: getUserColumns(fetchUsers, navigate),
+    columns: getUserColumns(fetchUsers, navigate, profiles),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,

@@ -22,6 +22,7 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import PeopleIcon from "@mui/icons-material/People";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { Profile } from "@/lib/enum/profile.enum";
 
 export function ScheduleSidebar({
   ...props
@@ -54,9 +55,9 @@ export function ScheduleSidebar({
           const profileLower = profileName.toLowerCase();
 
           setIsAdmin(
-            profileLower === "admin" || profileLower === "coordinator"
+            profileLower === Profile.Admin || profileLower === "coordinator"
           );
-          setIsProfessor(profileLower === "professor");
+          setIsProfessor(profileLower === Profile.Professor);
         }
       } catch (err) {
         console.error("Erro ao decodificar token:", err);

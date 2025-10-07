@@ -21,7 +21,7 @@ export default function FileUploader({
     <div
       className={cn(
         "p-4 border rounded-xl max-md:col-span-0 col-span-2",
-        !canUpload && "opacity-40",
+        !canUpload && "opacity-40"
       )}
     >
       <div
@@ -60,16 +60,14 @@ export default function FileUploader({
           onClick={handleUpload}
           disabled={!canUpload}
         >
-          {
-            isUploading ? (
-              <>
-                <LoaderCircle className="animate-spin w-12 h-12" />
-                Enviando...
-              </>
-            ) : (
-              "Enviar"
-            )
-          }
+          {isUploading ? (
+            <>
+              <LoaderCircle className="animate-spin w-12 h-12" />
+              Enviando...
+            </>
+          ) : (
+            "Enviar"
+          )}
         </Button>
       </div>
     </div>

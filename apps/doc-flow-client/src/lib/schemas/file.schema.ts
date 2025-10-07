@@ -10,7 +10,6 @@ export const createFileSchema = z.object({
     .string()
     .max(30, { message: "Nome do arquivo deve ter no máximo 30 caracteres" }),
   type: z.string(),
-  eventId: z.string(),
 });
 
 export type CreateFile = z.infer<typeof createFileSchema>;

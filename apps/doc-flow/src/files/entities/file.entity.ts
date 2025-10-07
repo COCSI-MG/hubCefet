@@ -7,7 +7,6 @@ import {
   AfterCreate,
 } from 'sequelize-typescript';
 import { User } from 'src/users/entities/user.entity';
-import { Event } from 'src/events/entities/event.entity';
 import { FileType } from '../enum/file-type.enum';
 import { FileStatus } from '../enum/file-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
@@ -64,15 +63,6 @@ export class File extends Model {
   user_id: string;
 
   @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
-  @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
-  })
-  event_id: string;
-
-  @Column({
     type: DataType.ENUM(...Object.values(FileStatus)),
     defaultValue: FileStatus.STATUS_WAITING,
   })
@@ -95,8 +85,6 @@ export class File extends Model {
 
   @BelongsTo(() => User, 'user_id')
   user: User;
-  @BelongsTo(() => Event, 'event_id')
-  event: Event;
 
   @AfterCreate
   static removeColumnAttributesAfterCreate(instance: File) {

@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileRepository } from './repository/files.repository.interface';
@@ -27,28 +21,29 @@ export class FilesService {
   ) {}
 
   async create(createFileDto: CreateFileDto, userId: string) {
-    const existingFiles = await this.fileRepository.findByUserIdAndEventIdAndType(
+    const existingFiles = await this.fileRepository.findByUserNameAndType(
       userId,
-      createFileDto.eventId,
+      createFileDto.name,
       createFileDto.type,
     );
-    
+
     if (existingFiles.length > 0) {
       this.logger.log(
-        `[PDF] Arquivo já existe para usuário ${userId} e evento ${createFileDto.eventId}. Atualizando...`,
+        `[PDF] Arquivo já existe para usuário ${userId}. Atualizando...`,
       );
-      
+
       const existingFile = existingFiles[0];
       await this.fileRepository.update(existingFile.id, {
         name: createFileDto.name,
         url: createFileDto.url,
         type: createFileDto.type,
-        eventId: createFileDto.eventId,
       });
-      
+
       return await this.fileRepository.findOne(existingFile.id);
     }
-    
+
+    console.log('Creating new file record', createFileDto, userId);
+
     return await this.fileRepository.create(createFileDto, userId);
   }
 
@@ -65,11 +60,7 @@ export class FilesService {
   }
 
   async findByUserId(id: string, limit: number, offset: number) {
-    return await this.fileRepository.findByUserId(id, limit, offset);
-  }
-
-  async findByEventId(id: string) {
-    return await this.fileRepository.findByEventId(id);
+    return await this.fileRepository.findByUserIdPaginate(id, limit, offset);
   }
 
   async update(id: string, updateFileDto: UpdateFileDto) {

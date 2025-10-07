@@ -4,6 +4,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import { Menu, User, Calendar, Settings, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Profile } from "@/lib/enum/profile.enum";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
 
@@ -38,9 +39,9 @@ export function ScheduleMobileMenu() {
           const profileLower = profileName.toLowerCase();
 
           setIsAdmin(
-            profileLower === "admin" || profileLower === "coordinator"
+            profileLower === Profile.Admin || profileLower === "coordinator"
           );
-          setIsProfessor(profileLower === "professor");
+          setIsProfessor(profileLower === Profile.Professor);
         }
       } catch (err) {
         console.error("Erro ao decodificar token:", err);

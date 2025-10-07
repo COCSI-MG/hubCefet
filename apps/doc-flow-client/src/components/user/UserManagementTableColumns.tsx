@@ -5,12 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Profile } from "@/lib/enum/profile.enum";
 
 type User = components["schemas"]["User"];
 
 export function getUserColumns(
   onRefresh: () => void,
-  navigate: (path: string) => void
+  navigate: (path: string) => void,
+  profiles: { id: string; name: string }[] = []
 ): ColumnDef<User>[] {
   return [
     {
@@ -101,13 +103,50 @@ export function getUserColumns(
       accessorKey: "profile_id",
       header: "Perfil",
       cell: ({ row }) => {
-        // You might want to fetch profile names and cache them
-        // For now, just show the profile ID
+        const user = row.original;
+        const profile = profiles.find((p) => p.id === user.profile_id);
+
+        if (!profile) {
+          return (
+            <span className="text-sm text-gray-400 italic">Sem perfil</span>
+          );
+        }
+
+        const profileStyle = (() => {
+          switch (profile.name as Profile) {
+            case Profile.Admin:
+              return 'bg-red-100 text-red-800';
+            case Profile.Professor:
+              return 'bg-purple-100 text-purple-800';
+            case Profile.Student:
+              return 'bg-green-100 text-green-800';
+            case Profile.User:
+              return 'bg-sky-100 text-sky-800';
+            default:
+              return 'bg-gray-100 text-gray-800';
+          }
+        })();
+
+        const displayName = (() => {
+          switch (profile.name as Profile) {
+            case Profile.Admin:
+              return 'Admin';
+            case Profile.Professor:
+              return 'Professor';
+            case Profile.Student:
+              return 'Estudante';
+            case Profile.User:
+              return 'Usuário';
+            default:
+              return profile.name;
+          }
+        })();
+
         return (
-          <span className="text-sm">
-            {row.original.profile_id
-              ? row.original.profile_id.substring(0, 8) + "..."
-              : "Sem perfil"}
+          <span
+            className={`text-sm font-medium px-2 py-1 rounded-full ${profileStyle}`}
+          >
+            {displayName}
           </span>
         );
       },

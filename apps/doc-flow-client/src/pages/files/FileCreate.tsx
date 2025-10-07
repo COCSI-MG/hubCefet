@@ -74,7 +74,7 @@ export default function FileCreate() {
       />
       <div className="ml-6 mr-6 mt-6 max-w-full p-6 border rounded-xl">
         <div className="grid grid-cols-3 p-4 gap-x-2 gap-y-4  max-md:space-x-0 max-md:flex max-md:flex-col max-md:space-y-4">
-          <div className="p-4 flex flex-col space-y-3 border rounded-xl max-md:col-span-0 bg-neutral-50">
+          <div className="p-4 flex flex-col space-y-3 border rounded-xl justify-center max-md:col-span-0 bg-neutral-50">
             <div>
               <span className="font-bold">Informações</span>
             </div>

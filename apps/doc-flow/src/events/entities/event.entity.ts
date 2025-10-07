@@ -10,7 +10,6 @@ import {
 } from 'sequelize-typescript';
 import { Presence } from 'src/presences/entities/presence.entity';
 import { EventStatus } from '../enum/event-status.enum';
-import { File } from 'src/files/entities/file.entity';
 import { User } from 'src/users/entities/user.entity';
 @Scopes(() => ({
   withoutTimestamps: {
@@ -128,9 +127,6 @@ export class Event extends Model {
 
   @HasMany(() => Presence, 'event_id')
   presences: Presence[];
-
-  @HasMany(() => File, 'event_id')
-  files: File[];
 
   @BelongsTo(() => User, 'created_by_user_id')
   user: User;

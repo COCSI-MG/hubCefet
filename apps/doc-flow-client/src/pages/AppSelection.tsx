@@ -13,6 +13,7 @@ import EventIcon from "@mui/icons-material/Event";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
+import { Profile } from "@/lib/enum/profile.enum";
 
 export function AppSelection() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export function AppSelection() {
           const profileLower = profileName.toLowerCase();
 
           setIsAdmin(
-            profileLower === "admin" || profileLower === "coordinator"
+            profileLower === Profile.Admin || profileLower === "coordinator"
           );
         }
       } catch (err) {
