@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   Req,
+  Headers,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PresencesService } from './presences.service';
@@ -200,31 +201,102 @@ export class PresencesController {
   async update(
     @Param('id') id: string,
     @Body() updatePresenceDto: UpdatePresenceDto,
+    @Req() req: UserRequest,
     @Res() res: Response,
+    @Headers('x-user-latitude') userLatitude?: string,
+    @Headers('x-user-longitude') userLongitude?: string,
   ) {
     try {
-      const updatedPresence = await this.presencesService.update(
-        id,
-        updatePresenceDto,
-      );
-      if (!updatedPresence) {
+      // Check if this is a check-in request that requires geofencing
+      const isCheckIn =
+        updatePresenceDto.check_in_date &&
+        (updatePresenceDto.status === 'present' ||
+          updatePresenceDto.status === 'present2');
+
+      if (isCheckIn) {
+        // Validate user location headers
+        if (!userLatitude || !userLongitude) {
+          return res
+            .status(400)
+            .json(
+              new ApiResponseDto<null>(
+                400,
+                false,
+                null,
+                'User location is required for check-in',
+              ),
+            );
+        }
+
+        const lat = parseFloat(userLatitude);
+        const lng = parseFloat(userLongitude);
+
+        if (isNaN(lat) || isNaN(lng)) {
+          return res
+            .status(400)
+            .json(
+              new ApiResponseDto<null>(
+                400,
+                false,
+                null,
+                'Invalid location coordinates',
+              ),
+            );
+        }
+
+        // Pass location data to service for geofencing validation
+        const updatedPresence =
+          await this.presencesService.updateWithGeofencing(
+            id,
+            updatePresenceDto,
+            req.user.sub,
+            { latitude: lat, longitude: lng },
+          );
+
+        if (!updatedPresence) {
+          return res
+            .status(404)
+            .json(
+              new ApiResponseDto<null>(404, false, null, 'Presence not found'),
+            );
+        }
+
         return res
-          .status(404)
+          .status(200)
           .json(
-            new ApiResponseDto<null>(404, false, null, 'Presence not found'),
+            new ApiResponseDto<{ presence: Presence }>(
+              200,
+              true,
+              { presence: updatedPresence },
+              null,
+            ),
+          );
+      } else {
+        // Regular update without geofencing
+        const updatedPresence = await this.presencesService.update(
+          id,
+          updatePresenceDto,
+        );
+
+        if (!updatedPresence) {
+          return res
+            .status(404)
+            .json(
+              new ApiResponseDto<null>(404, false, null, 'Presence not found'),
+            );
+        }
+
+        return res
+          .status(200)
+          .json(
+            new ApiResponseDto<{ presence: Presence }>(
+              200,
+              true,
+              { presence: updatedPresence },
+              null,
+            ),
           );
       }
-
-      return res
-        .status(200)
-        .json(
-          new ApiResponseDto<{ presence: Presence }>(
-            200,
-            true,
-            { presence: updatedPresence },
-            null,
-          ),
-        );
     } catch (err) {
       if (process.env.APP_ENV === 'development') {
         console.error(err);

@@ -16,7 +16,7 @@ import {
   presenceSchema,
 } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { BadgeMinus } from "lucide-react";
@@ -29,11 +29,11 @@ import { getAllEvents } from "@/api/data/events.data";
 import { Event } from "@/lib/schemas/event.schema";
 import { Presence } from "@/lib/types";
 import { getColumns } from "./ViewEventsTableColumns";
+import { getUserPresences } from "@/api/data/presence.data";
 import {
-  createPresence,
-  getUserPresences,
-  patchPresence,
-} from "@/api/data/presence.data";
+  createPresenceWithGeolocation as createPresence,
+  patchPresenceWithGeolocation as patchPresence,
+} from "@/lib/utils/presenceWithGeolocation";
 import { patch } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -223,8 +223,9 @@ export function ViewEventsDataTable() {
     },
   });
 
-  const onSubmit: SubmitHandler<PresenceFormSchema> = async (
-    data: PresenceCreate
+  const onSubmit = async (
+    data: PresenceCreate,
+    coordinates?: { latitude: number; longitude: number }
   ) => {
     const eventIdFromForm = form.getValues("event_id");
 
@@ -243,7 +244,7 @@ export function ViewEventsDataTable() {
 
     const presenceId = presence.id;
 
-    const result = await patchPresence(presenceId, data);
+    const result = await patchPresence(presenceId, data, coordinates);
 
     if (!result) {
       setError("Ocorreu um erro ao cadastrar a presença");
@@ -253,8 +254,9 @@ export function ViewEventsDataTable() {
     setSuccess("Presença Criada com sucesso!");
   };
 
-  const onSubmitUpdate: SubmitHandler<PresenceFormSchema> = async (
-    data: PresenceCreate
+  const onSubmitUpdate = async (
+    data: PresenceCreate,
+    coordinates?: { latitude: number; longitude: number }
   ) => {
     const eventIdFromForm = form.getValues("event_id");
 
@@ -271,7 +273,7 @@ export function ViewEventsDataTable() {
 
     const presenceId = presence.id;
 
-    const result = await patchPresence(presenceId, data);
+    const result = await patchPresence(presenceId, data, coordinates);
 
     if (!result) {
       setError("Ocorreu um erro ao cadastrar a presença");

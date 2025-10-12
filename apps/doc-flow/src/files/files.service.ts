@@ -95,7 +95,7 @@ export class FilesService {
     const fileToUploadData: FileToUpload = {
       fileId: fileData.id,
       buffer: file.buffer.toString('base64'),
-      filename: file.originalname,
+      filename: `${fileData.name}_${fileData.type}_${file.originalname}`,
       mimetype: file.mimetype,
       size: file.size,
     };

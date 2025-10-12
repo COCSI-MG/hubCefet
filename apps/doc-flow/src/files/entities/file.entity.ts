@@ -4,7 +4,6 @@ import {
   Table,
   DataType,
   BelongsTo,
-  AfterCreate,
 } from 'sequelize-typescript';
 import { User } from 'src/users/entities/user.entity';
 import { FileType } from '../enum/file-type.enum';
@@ -13,7 +12,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Table({
   tableName: 'files',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 })
 export class File extends Model {
   @Column({
@@ -71,24 +72,9 @@ export class File extends Model {
   })
   status: FileStatus;
 
-  @Column({
-    type: DataType.DATE,
-    defaultValue: DataType.NOW(),
-  })
   created_at: Date;
-
-  @Column({
-    type: DataType.DATE,
-    defaultValue: DataType.NOW(),
-  })
   updated_at: Date;
 
   @BelongsTo(() => User, 'user_id')
   user: User;
-
-  @AfterCreate
-  static removeColumnAttributesAfterCreate(instance: File) {
-    delete instance.dataValues.created_at;
-    delete instance.dataValues.updated_at;
-  }
 }

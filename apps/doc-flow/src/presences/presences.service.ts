@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, ForbiddenException } from '@nestjs/common';
 import { CreatePresenceDto } from './dto/create-presence.dto';
 import { UpdatePresenceDto } from './dto/update-presence.dto';
 import { PresenceRepository } from './repositories/presence.repository.interface';
@@ -8,6 +8,12 @@ import { Presence } from './entities/presence.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PdfGenerationJobData } from '../queues/interfaces/pdf-generation-job.interface';
+import {
+  Coordinates,
+  isValidCoordinates,
+  isWithinGeofence,
+  calculateDistance,
+} from '../lib/utils/geofencing.util';
 
 @Injectable()
 export class PresencesService {
@@ -16,7 +22,8 @@ export class PresencesService {
     private readonly presenceRepository: PresenceRepository,
     private readonly eventService: EventsService,
     private readonly userService: UsersService,
-    @InjectQueue('pdf-generation') private pdfQueue: Queue<PdfGenerationJobData>,
+    @InjectQueue('pdf-generation')
+    private pdfQueue: Queue<PdfGenerationJobData>,
   ) {}
 
   async create(
@@ -28,37 +35,43 @@ export class PresencesService {
       throw new Error('User not found');
     }
 
-    const [event] = await this.eventService.findOne(
-      createPresenceDto.event_id,
-    );
+    const [event] = await this.eventService.findOne(createPresenceDto.event_id);
     if (!event) {
       throw new Error('Event not found');
     }
 
     if (createPresenceDto.check_in_date) {
-        const checkInDate = new Date(createPresenceDto.check_in_date);
-        const eventStartDate = new Date(event.start_at);
-        const eventEndDate = new Date(event.end_at);
-        
-        if (checkInDate < eventStartDate) {
-            throw new Error('Check-in só pode ser feito a partir do horário de início do evento');
-        }
-        
-        if (checkInDate > eventEndDate) {
-            throw new Error('Não é possível fazer check-in em um evento que já terminou');
-        }
+      const checkInDate = new Date(createPresenceDto.check_in_date);
+      const eventStartDate = new Date(event.start_at);
+      const eventEndDate = new Date(event.end_at);
+
+      if (checkInDate < eventStartDate) {
+        throw new Error(
+          'Check-in só pode ser feito a partir do horário de início do evento',
+        );
+      }
+
+      if (checkInDate > eventEndDate) {
+        throw new Error(
+          'Não é possível fazer check-in em um evento que já terminou',
+        );
+      }
     } else if (createPresenceDto.status === 'present') {
-        const currentDate = new Date();
-        const eventStartDate = new Date(event.start_at);
-        const eventEndDate = new Date(event.end_at);
-        
-        if (currentDate < eventStartDate) {
-            throw new Error('Check-in só pode ser feito a partir do horário de início do evento');
-        }
-        
-        if (currentDate > eventEndDate) {
-            throw new Error('Não é possível fazer check-in em um evento que já terminou');
-        }
+      const currentDate = new Date();
+      const eventStartDate = new Date(event.start_at);
+      const eventEndDate = new Date(event.end_at);
+
+      if (currentDate < eventStartDate) {
+        throw new Error(
+          'Check-in só pode ser feito a partir do horário de início do evento',
+        );
+      }
+
+      if (currentDate > eventEndDate) {
+        throw new Error(
+          'Não é possível fazer check-in em um evento que já terminou',
+        );
+      }
     }
 
     const [presence, created] =
@@ -87,80 +100,113 @@ export class PresencesService {
     const previousPresence = await this.presenceRepository.findOne(id);
 
     if (updatePresenceDto.check_in_date && previousPresence) {
-        const [event] = await this.eventService.findOne(previousPresence.event_id);
-        if (event) {
-            const checkInDate = new Date(updatePresenceDto.check_in_date);
-            const eventStartDate = new Date(event.start_at);
-            const eventEndDate = new Date(event.end_at);
-            
-            if (checkInDate < eventStartDate) {
-                throw new Error('Check-in só pode ser feito a partir do horário de início do evento');
-            }
-            
-            if (checkInDate > eventEndDate) {
-                throw new Error('Não é possível fazer check-in em um evento que já terminou');
-            }
+      const [event] = await this.eventService.findOne(
+        previousPresence.event_id,
+      );
+      if (event) {
+        const checkInDate = new Date(updatePresenceDto.check_in_date);
+        const eventStartDate = new Date(event.start_at);
+        const eventEndDate = new Date(event.end_at);
+
+        if (checkInDate < eventStartDate) {
+          throw new Error(
+            'Check-in só pode ser feito a partir do horário de início do evento',
+          );
         }
+
+        if (checkInDate > eventEndDate) {
+          throw new Error(
+            'Não é possível fazer check-in em um evento que já terminou',
+          );
+        }
+      }
     } else if (updatePresenceDto.status === 'present' && previousPresence) {
-        const [event] = await this.eventService.findOne(previousPresence.event_id);
-        if (event) {
-            const currentDate = new Date();
-            const eventStartDate = new Date(event.start_at);
-            const eventEndDate = new Date(event.end_at);
-            
-            if (currentDate < eventStartDate) {
-                throw new Error('Check-in só pode ser feito a partir do horário de início do evento');
-            }
-            
-            if (currentDate > eventEndDate) {
-                throw new Error('Não é possível fazer check-in em um evento que já terminou');
-            }
+      const [event] = await this.eventService.findOne(
+        previousPresence.event_id,
+      );
+      if (event) {
+        const currentDate = new Date();
+        const eventStartDate = new Date(event.start_at);
+        const eventEndDate = new Date(event.end_at);
+
+        if (currentDate < eventStartDate) {
+          throw new Error(
+            'Check-in só pode ser feito a partir do horário de início do evento',
+          );
         }
+
+        if (currentDate > eventEndDate) {
+          throw new Error(
+            'Não é possível fazer check-in em um evento que já terminou',
+          );
+        }
+      }
     }
 
     if (updatePresenceDto.check_in_date && updatePresenceDto.check_out_date) {
-        const checkInDate = new Date(updatePresenceDto.check_in_date);
-        const checkOutDate = new Date(updatePresenceDto.check_out_date);
-        
-        if (checkInDate >= checkOutDate) {
-          throw new Error('Data de check-in deve ser anterior à data de check-out');
-        }
+      const checkInDate = new Date(updatePresenceDto.check_in_date);
+      const checkOutDate = new Date(updatePresenceDto.check_out_date);
+
+      if (checkInDate >= checkOutDate) {
+        throw new Error(
+          'Data de check-in deve ser anterior à data de check-out',
+        );
+      }
     }
 
-    if (updatePresenceDto.check_out_date && updatePresenceDto.status === 'registered' && previousPresence) {
-    const [event] = await this.eventService.findOne(previousPresence.event_id);
-    if (event) {
+    if (
+      updatePresenceDto.check_out_date &&
+      updatePresenceDto.status === 'registered' &&
+      previousPresence
+    ) {
+      const [event] = await this.eventService.findOne(
+        previousPresence.event_id,
+      );
+      if (event) {
         const checkOutDate = new Date(updatePresenceDto.check_out_date);
         const eventEndDate = new Date(event.end_at);
-        
-        const maxCheckOutTime = new Date(eventEndDate.getTime() + (2 * 60 * 60 * 1000));
-        
+
+        const maxCheckOutTime = new Date(
+          eventEndDate.getTime() + 2 * 60 * 60 * 1000,
+        );
+
         if (checkOutDate > maxCheckOutTime) {
-        throw new Error('Check-out deve ser feito até 2 horas após o término do evento');
+          throw new Error(
+            'Check-out deve ser feito até 2 horas após o término do evento',
+          );
         }
+      }
     }
-    }
-    
-    const updatedPresence = await this.presenceRepository.update(id, updatePresenceDto);
-    
-    const isRealCheckOut = updatePresenceDto.check_out_date && 
+
+    const updatedPresence = await this.presenceRepository.update(
+      id,
+      updatePresenceDto,
+    );
+
+    const isRealCheckOut =
+      updatePresenceDto.check_out_date &&
       updatePresenceDto.status === 'registered' &&
-      previousPresence?.status === 'present' && 
+      previousPresence?.status === 'present' &&
       updatedPresence;
 
     if (isRealCheckOut) {
-      
-      const userResult = await this.userService.findOne(updatedPresence.user_id);
+      const userResult = await this.userService.findOne(
+        updatedPresence.user_id,
+      );
       const [event] = await this.eventService.findOne(updatedPresence.event_id);
-      
+
       const user = userResult?.data?.user;
-      
+
       if (user && event && updatedPresence.check_in_date) {
-        
         const checkInDate = new Date(updatedPresence.check_in_date);
         const checkOutDate = new Date(updatePresenceDto.check_out_date);
-        const totalHours = Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60) * 100) / 100;
-        
+        const totalHours =
+          Math.round(
+            ((checkOutDate.getTime() - checkInDate.getTime()) /
+              (1000 * 60 * 60)) *
+              100,
+          ) / 100;
+
         const pdfJobData = {
           presenceId: updatedPresence.id,
           userId: user.id,
@@ -169,15 +215,21 @@ export class PresencesService {
           eventName: event.name,
           checkInDate: updatedPresence.check_in_date.toString(),
           checkOutDate: updatePresenceDto.check_out_date,
-          totalHours
+          totalHours,
         };
-        
-        this.pdfQueue.add('generate-certificate', pdfJobData)
-          .then(job => {
-            Logger.log(`[ASYNC] [QUEUE] Job PDF enfileirado com sucesso para presença ${updatedPresence.id}. Job ID: ${job.id}`);
+
+        this.pdfQueue
+          .add('generate-certificate', pdfJobData)
+          .then((job) => {
+            Logger.log(
+              `[ASYNC] [QUEUE] Job PDF enfileirado com sucesso para presença ${updatedPresence.id}. Job ID: ${job.id}`,
+            );
           })
-          .catch(error => {
-            Logger.error(`[ERROR] Erro ao agendar PDF para presença ${updatedPresence.id}:`, error);
+          .catch((error) => {
+            Logger.error(
+              `[ERROR] Erro ao agendar PDF para presença ${updatedPresence.id}:`,
+              error,
+            );
           });
       } else {
         Logger.warn(`[DEBUG] Condições NÃO atendidas para PDF:`, {
@@ -186,19 +238,27 @@ export class PresencesService {
           hasEvent: !!event,
           hasCheckIn: !!updatedPresence.check_in_date,
           userId: updatedPresence.user_id,
-          eventId: updatedPresence.event_id
+          eventId: updatedPresence.event_id,
         });
       }
     }
-    
+
     return updatedPresence;
   }
 
-  private async scheduleePdfGeneration(presence: Presence, checkOutDate: string) {
+  private async scheduleePdfGeneration(
+    presence: Presence,
+    checkOutDate: string,
+  ) {
     try {
       const checkInTime = new Date(presence.check_in_date);
       const checkOutTime = new Date(checkOutDate);
-      const totalHours = Math.round((checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60) * 100) / 100;
+      const totalHours =
+        Math.round(
+          ((checkOutTime.getTime() - checkInTime.getTime()) /
+            (1000 * 60 * 60)) *
+            100,
+        ) / 100;
 
       const jobData: PdfGenerationJobData = {
         presenceId: presence.id,
@@ -212,21 +272,26 @@ export class PresencesService {
       };
 
       await this.pdfQueue.add('generate-certificate', jobData, {
-        delay: 1000, 
-        attempts: 5, 
+        delay: 1000,
+        attempts: 5,
         backoff: {
           type: 'exponential',
-          delay: 3000, 
+          delay: 3000,
         },
-        removeOnComplete: 10, 
-        removeOnFail: 5, 
-        priority: 1, 
+        removeOnComplete: 10,
+        removeOnFail: 5,
+        priority: 1,
       });
 
-      Logger.log(`[PRESENCE] Job PDF agendado para presença: ${presence.id} (processamento assíncrono)`);
+      Logger.log(
+        `[PRESENCE] Job PDF agendado para presença: ${presence.id} (processamento assíncrono)`,
+      );
     } catch (error) {
-      Logger.error(`[PRESENCE] Erro ao agendar PDF para presença ${presence.id}:`, error);
-      throw error; 
+      Logger.error(
+        `[PRESENCE] Erro ao agendar PDF para presença ${presence.id}:`,
+        error,
+      );
+      throw error;
     }
   }
 
@@ -240,5 +305,65 @@ export class PresencesService {
 
   async findAllByUser(userId: string) {
     return await this.presenceRepository.findAllByUser(userId);
+  }
+
+  async updateWithGeofencing(
+    id: string,
+    updatePresenceDto: UpdatePresenceDto,
+    userId: string,
+    userLocation: Coordinates,
+  ) {
+    // Validate coordinates
+    if (!isValidCoordinates(userLocation.latitude, userLocation.longitude)) {
+      throw new ForbiddenException('Invalid location coordinates');
+    }
+
+    // Get the presence to get the event ID
+    const presence = await this.presenceRepository.findOne(id);
+    if (!presence) {
+      return null;
+    }
+
+    // Check if user is the owner of this presence
+    if (presence.user_id !== userId) {
+      throw new ForbiddenException(
+        'You can only check-in to your own presence',
+      );
+    }
+
+    // Get event details for geofencing
+    const [event] = await this.eventService.findOne(presence.event_id);
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    // Check if event has geofencing enabled
+    if (event.latitude && event.longitude && event.radius) {
+      const eventLocation: Coordinates = {
+        latitude: event.latitude,
+        longitude: event.longitude,
+      };
+
+      // Log coordinates for debugging
+      console.log('Geofencing Debug:');
+      console.log('User location:', userLocation);
+      console.log('Event location:', eventLocation);
+      console.log('Event radius:', event.radius);
+
+      // Calculate distance for debugging
+      const distance = calculateDistance(userLocation, eventLocation);
+      console.log('Calculated distance:', distance, 'meters');
+      console.log('Within geofence:', distance <= event.radius);
+
+      // Check if user is within the geofence
+      if (!isWithinGeofence(userLocation, eventLocation, event.radius)) {
+        throw new ForbiddenException(
+          `Você precisa estar a ${event.radius} metros da localização do evento para fazer check-in`,
+        );
+      }
+    }
+
+    // If geofencing passes, proceed with regular update
+    return await this.update(id, updatePresenceDto);
   }
 }

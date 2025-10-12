@@ -25,6 +25,7 @@ import { LoaderCircle } from "lucide-react";
 
 interface FileFormProps {
   onFileCreated: (fileId: string) => void;
+  onFileModified?: () => void;
   disabled?: boolean;
 }
 
@@ -73,6 +74,7 @@ export default function FileForm({ ...props }: FileFormProps) {
                       if (form.formState.errors.name?.message) {
                         toast.error(form.formState.errors.name.message);
                       }
+                      props.onFileModified?.(); // Call when field is modified
                     }}
                   />
                 </FormControl>
@@ -88,7 +90,10 @@ export default function FileForm({ ...props }: FileFormProps) {
                 <FormControl>
                   <Select
                     defaultValue={field.value}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFileModified?.();
+                    }}
                   >
                     <SelectTrigger className="col-span-5 rounded-2xl">
                       <SelectValue placeholder="Selecione um tipo" />

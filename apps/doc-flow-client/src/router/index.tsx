@@ -54,6 +54,8 @@ export default function Router() {
 
           <Route path="/apps" element={<AppSelection />} />
 
+          <Route path="/profile" element={<Profile />} />
+
           <Route path="/docflow" element={<DocFlowLayout />}>
             <Route index element={<Navigate to="/docflow/files" replace />} />
 
@@ -86,8 +88,6 @@ export default function Router() {
               <Route path="create" element={<EventsCreate />} />
               <Route path=":eventId/edit" element={<EventsEdit />} />
             </Route>
-
-            <Route path="profile" element={<Profile />} />
 
             <Route path="user">
               <Route path="changePassword" element={<ChangePassword />} />

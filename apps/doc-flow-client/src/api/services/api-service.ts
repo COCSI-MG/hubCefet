@@ -25,8 +25,8 @@ export default class ApiService {
     return response.data;
   }
 
-  async patch(url: string, body: object) {
-    const response = await this.axiosInstance.patch(url, body);
+  async patch(url: string, body: object, config?: AxiosRequestConfig<object>) {
+    const response = await this.axiosInstance.patch(url, body, config);
     return response.data;
   }
 
