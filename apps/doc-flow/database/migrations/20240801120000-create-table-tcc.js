@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
-        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        defaultValue: Sequelize.UUIDV4,
       },
       theme: {
         type: Sequelize.STRING(50),
@@ -37,7 +37,7 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
@@ -45,5 +45,5 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
     await queryInterface.dropTable('tcc');
-  }
+  },
 };

@@ -18,13 +18,10 @@ import {
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { search } from "@/api/data/events.data";
 import { Button } from "../ui/button";
 import { create } from "@/api/data/file.data";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
-import AsyncSelect from "react-select/async";
-import { SingleValue } from "react-select";
 
 interface FileFormProps {
   onFileCreated: (fileId: string) => void;
