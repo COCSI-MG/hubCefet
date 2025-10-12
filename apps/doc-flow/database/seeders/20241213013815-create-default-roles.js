@@ -16,35 +16,35 @@ module.exports = {
       'roles',
       [
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'VIEW_ANY ',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'VIEW_OWN',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'CREATE_ANY',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'CREATE_OWN',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'UPDATE_ANY',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'UPDATE_OWN',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'DELETE_ANY',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: Sequelize.UUIDV4,
           name: 'DELETE_OWN',
         },
       ],
