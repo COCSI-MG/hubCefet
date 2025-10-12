@@ -99,15 +99,13 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -139,16 +137,14 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       // Se for um erro de validação (Error do service), retorna a mensagem específica
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -186,15 +182,13 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -235,15 +229,13 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -262,16 +254,14 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       // Se for um erro de validação (Error do service), retorna a mensagem específica
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -302,15 +292,13 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
@@ -341,15 +329,13 @@ export class PresencesController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       if (err instanceof Error) {
         return res
           .status(400)
-          .json(
-            new ApiResponseDto<null>(400, false, null, err.message),
-          );
+          .json(new ApiResponseDto<null>(400, false, null, err.message));
       }
-      
+
       throw new InternalServerErrorException(
         new ApiResponseDto<null>(500, false, null, 'Internal server error'),
       );
