@@ -12,23 +12,25 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
+    const { v4: uuidv4 } = require('uuid');
+
     return await queryInterface.bulkInsert(
       'profiles',
       [
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'admin',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'user',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'professor',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'student',
         },
       ],

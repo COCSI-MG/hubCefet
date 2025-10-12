@@ -12,39 +12,41 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
+    const { v4: uuidv4 } = require('uuid');
+
     await queryInterface.bulkInsert(
       'roles',
       [
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'VIEW_ANY ',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'VIEW_OWN',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'CREATE_ANY',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'CREATE_OWN',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'UPDATE_ANY',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'UPDATE_OWN',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'DELETE_ANY',
         },
         {
-          id: Sequelize.UUIDV4,
+          id: uuidv4(),
           name: 'DELETE_OWN',
         },
       ],
