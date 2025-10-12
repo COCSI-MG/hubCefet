@@ -21,7 +21,7 @@ WORKDIR /var/www/app
 
 # install only sequelize dependencies
 RUN npm i -g sequelize-cli; \
-    npm i pg pg-hstore sequelize dotenv uuid
+    npm i pg pg-hstore sequelize dotenv
 
 COPY ./database ./
 
