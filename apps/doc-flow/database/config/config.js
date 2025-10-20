@@ -7,7 +7,7 @@ module.exports = {
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
     host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_POST || 5432),
+    port: parseInt(process.env.POSTGRES_PORT || 5432),
     dialect: 'postgres',
   },
 };

@@ -18,16 +18,14 @@ import {
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { search } from "@/api/data/events.data";
 import { Button } from "../ui/button";
 import { create } from "@/api/data/file.data";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
-import AsyncSelect from "react-select/async";
-import { SingleValue } from "react-select";
 
 interface FileFormProps {
   onFileCreated: (fileId: string) => void;
+  onFileModified?: () => void;
   disabled?: boolean;
 }
 
@@ -51,17 +49,6 @@ export default function FileForm({ ...props }: FileFormProps) {
     setIsCreating(false);
   };
 
-  const fetchLoadOptions = async (inputValue: string) => {
-    const events = await search(inputValue);
-    if (events) {
-      return events.map((event) => ({
-        value: event.id,
-        label: event.name,
-      }));
-    }
-    return [];
-  };
-
   return (
     <>
       <Form {...form}>
@@ -77,7 +64,7 @@ export default function FileForm({ ...props }: FileFormProps) {
                     className={cn(
                       "rounded-2xl bg-white bg-opacity-60",
                       form.formState.errors?.name && "border-destructive",
-                      "col-span-5",
+                      "col-span-5"
                     )}
                     type="text"
                     placeholder="Nome do Arquivo"
@@ -87,6 +74,7 @@ export default function FileForm({ ...props }: FileFormProps) {
                       if (form.formState.errors.name?.message) {
                         toast.error(form.formState.errors.name.message);
                       }
+                      props.onFileModified?.(); // Call when field is modified
                     }}
                   />
                 </FormControl>
@@ -102,7 +90,10 @@ export default function FileForm({ ...props }: FileFormProps) {
                 <FormControl>
                   <Select
                     defaultValue={field.value}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFileModified?.();
+                    }}
                   >
                     <SelectTrigger className="col-span-5 rounded-2xl">
                       <SelectValue placeholder="Selecione um tipo" />
@@ -118,50 +109,6 @@ export default function FileForm({ ...props }: FileFormProps) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="eventId"
-            render={({ field }) => (
-              <FormItem className="grid grid-cols-6 items-center gap-4">
-                <FormLabel className="text-right">Evento</FormLabel>
-                <FormControl>
-                  <AsyncSelect
-                    className="col-span-5 rounded-2xl"
-                    loadOptions={(input, callback) => {
-                      if (input.length <= 3) {
-                        callback([]);
-                        return;
-                      }
-
-                      fetchLoadOptions(input)
-                        .then((events) => {
-                          if (events) {
-                            callback(events);
-                            return;
-                          }
-                          callback([]);
-                        })
-                        .catch(() => callback([]));
-                    }}
-                    onChange={(option: SingleValue<{
-                      label: string;
-                      value: string;
-                    }>) => {
-                      if (option) {
-                        field.onChange(option?.value);
-                      }
-                    }}
-                    isSearchable
-                    cacheOptions
-                    placeholder={"Selecione um evento"}
-                    noOptionsMessage={() => "Nenhum evento encontrado"}
-                    loadingMessage={() => "Buscando..."}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
           <Button
             type="submit"
             className="w-full bg-sky-700 hover:bg-sky-900 text-white rounded-xl"

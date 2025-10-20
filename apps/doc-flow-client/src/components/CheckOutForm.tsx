@@ -5,10 +5,15 @@ import { UseFormReturn } from "react-hook-form";
 import { getEvent } from "@/api/data/events.data";
 import { useState, useEffect } from "react";
 import { Event } from "@/lib/types";
+import { toast } from "sonner";
+import { getCurrentPosition } from "@/lib/utils/geolocation";
 
 interface PresenceFormCheckouProps {
   form: UseFormReturn<PresenceFormSchema>;
-  onSubmit: (data: PresenceFormSchema) => void;
+  onSubmit: (
+    data: PresenceFormSchema,
+    coordinates?: { latitude: number; longitude: number }
+  ) => void;
   events: Event[];
   presences: Presence[];
 }
@@ -18,7 +23,7 @@ function getDistanceFromLatLonInMeters(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number,
+  lon2: number
 ): number {
   const R = 6371e3;
   const toRad = (value: number) => (value * Math.PI) / 180;
@@ -31,28 +36,18 @@ function getDistanceFromLatLonInMeters(
   return R * c;
 }
 
-const getUserPosition = (): Promise<GeolocationPosition> =>
-  new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("Geolocalização não suportada pelo navegador."));
-    }
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      timeout: 5000,
-    });
-  });
-
 function isWithinRange(
   userLat: number,
   userLon: number,
   eventLat: number,
   eventLon: number,
-  radius: number = DEFAULT_RADIUS,
+  radius: number = DEFAULT_RADIUS
 ): boolean {
   const distance = getDistanceFromLatLonInMeters(
     userLat,
     userLon,
     eventLat,
-    eventLon,
+    eventLon
   );
   return distance <= radius;
 }
@@ -71,29 +66,38 @@ export default function PresencesForm({
 
   const handleCheckOut = async (data: PresenceFormSchema) => {
     if (!event) {
-      alert("Evento não encontrado.");
+      toast.error("Evento não encontrado.");
       return;
     }
 
     try {
-      const position = await getUserPosition();
-      const { latitude, longitude } = position.coords;
+      const coordinates = await getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000, // 1 minute cache
+      });
+      const { latitude, longitude } = coordinates;
 
-      console.log('🌍 LOCALIZAÇÃO DO USUÁRIO (CHECK-OUT):');
+      console.log("🌍 LOCALIZAÇÃO DO USUÁRIO (CHECK-OUT):");
       console.log(`📍 Latitude: ${latitude}`);
       console.log(`📍 Longitude: ${longitude}`);
-      
+      console.log(
+        `🎯 Localização do evento - Lat: ${event.latitude}, Lng: ${event.longitude}`
+      );
+
       if (isWithinRange(latitude, longitude, event.latitude, event.longitude)) {
-        onSubmit(data);
+        onSubmit(data, { latitude, longitude });
       } else {
-        alert(
-          "Você não está dentro da área do evento para realizar o check-in.",
+        toast.error(
+          "Você não está dentro da área do evento para realizar o check-out.",
+          { duration: 5000 }
         );
       }
     } catch (error) {
       console.error(error);
-      alert(
+      toast.error(
         "Erro ao obter sua localização. Verifique se a geolocalização está habilitada.",
+        { duration: 5000 }
       );
     }
   };
@@ -122,16 +126,16 @@ export default function PresencesForm({
 
   useEffect(() => {
     const now = new Date();
-    
+
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
     const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-    
+
     setCheckOutDate(localDateTime);
   }, [event]);
 
@@ -139,14 +143,14 @@ export default function PresencesForm({
     if (!dateString) return "";
 
     const date = new Date(dateString);
-    
+
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   };
 
@@ -163,6 +167,7 @@ export default function PresencesForm({
         setCheckInDate("");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event]);
 
   useEffect(() => {

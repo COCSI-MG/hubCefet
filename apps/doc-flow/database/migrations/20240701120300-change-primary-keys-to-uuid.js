@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
@@ -42,14 +42,48 @@ module.exports = {
     await queryInterface.sequelize.query(
       'ALTER TABLE certificates ALTER COLUMN file_id TYPE uuid USING file_id::uuid::uuid;',
     );
+
+    // Update foreign keys to match the new UUID primary keys
+    await queryInterface.sequelize.query(
+      'ALTER TABLE users ALTER COLUMN profile_id TYPE uuid USING profile_id::uuid::uuid;',
+    );
+
+    await queryInterface.sequelize.query(
+      'ALTER TABLE presences ALTER COLUMN user_id TYPE uuid USING user_id::uuid::uuid;',
+    );
+
+    await queryInterface.sequelize.query(
+      'ALTER TABLE presences ALTER COLUMN event_id TYPE uuid USING event_id::uuid::uuid;',
+    );
+
+    // Check if events table has created_by_user_id column before altering
+    const eventsColumns = await queryInterface.describeTable('events');
+    if (eventsColumns.created_by_user_id) {
+      await queryInterface.sequelize.query(
+        'ALTER TABLE events ALTER COLUMN created_by_user_id TYPE uuid USING created_by_user_id::uuid::uuid;',
+      );
+    }
+
+    // Convert additional foreign keys that were missed in the initial migration
+    await queryInterface.sequelize.query(
+      'ALTER TABLE users ALTER COLUMN profile_id TYPE uuid USING profile_id::uuid::uuid;',
+    );
+
+    await queryInterface.sequelize.query(
+      'ALTER TABLE presences ALTER COLUMN event_id TYPE uuid USING event_id::uuid::uuid;',
+    );
+
+    await queryInterface.sequelize.query(
+      'ALTER TABLE presences ALTER COLUMN user_id TYPE uuid USING user_id::uuid::uuid;',
+    );
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
      * Example:
      * await queryInterface.dropTable('users');
      */
-  }
+  },
 };

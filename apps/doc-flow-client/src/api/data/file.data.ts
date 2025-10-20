@@ -20,7 +20,7 @@ export async function getFilesByUser(args: {
 }
 
 export const create = async (
-  file: CreateFile,
+  file: CreateFile
 ): Promise<FileSchema | undefined> => {
   try {
     const res = await fileService.create(file);
@@ -35,11 +35,11 @@ export const create = async (
 export const upload = async (
   fileId: string,
   fileData: FormData,
-  onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
+  onUploadProgress: (progressEvent: AxiosProgressEvent) => void
 ): Promise<ApiResponse<{ message: string | null }> | undefined> => {
   try {
     const res = await fileService.upload(fileId, fileData, onUploadProgress);
-    return res.data;
+    return res;
   } catch (err) {
     if (import.meta.env.DEV) {
       console.error(err);
@@ -53,7 +53,9 @@ export const upload = async (
   }
 };
 
-export const download = async (fileId: string): Promise<void | ApiResponse<null>> => {
+export const download = async (
+  fileId: string
+): Promise<void | ApiResponse<null>> => {
   try {
     const res = await fileService.download(fileId);
     if (!res) {
@@ -61,7 +63,19 @@ export const download = async (fileId: string): Promise<void | ApiResponse<null>
     }
     const url = window.URL.createObjectURL(res.data);
     const link = document.createElement("a");
-    const fileName = res.headers["content-disposition"].split("filename=")[1];
+
+    // Parse Content-Disposition header properly to extract filename
+    let fileName = "download"; // default fallback
+    const contentDisposition = res.headers["content-disposition"];
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(
+        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+      );
+      if (fileNameMatch && fileNameMatch[1]) {
+        fileName = fileNameMatch[1].replace(/['"]/g, ""); // Remove quotes if present
+      }
+    }
+
     link.href = url;
     link.download = fileName;
     link.click();
@@ -74,9 +88,11 @@ export const download = async (fileId: string): Promise<void | ApiResponse<null>
       return err.response?.data;
     }
   }
-}
+};
 
-export const remove = async (fileId: string): Promise<void | ApiResponse<null>> => {
+export const remove = async (
+  fileId: string
+): Promise<void | ApiResponse<null>> => {
   try {
     const res = await fileService.remove(fileId);
     return res.data;
@@ -88,4 +104,4 @@ export const remove = async (fileId: string): Promise<void | ApiResponse<null>> 
       return err.response?.data;
     }
   }
-}
+};

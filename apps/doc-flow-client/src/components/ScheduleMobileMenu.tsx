@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Menu, User, Calendar, Settings } from "lucide-react";
+import { Menu, User, Calendar, Settings, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Profile } from "@/lib/enum/profile.enum";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
 
@@ -23,22 +24,27 @@ export function ScheduleMobileMenu() {
         if (token) {
           const decoded: any = jwtDecode(token);
 
-          let profileName = '';
-          if (typeof decoded.profile === 'string') {
+          let profileName = "";
+          if (typeof decoded.profile === "string") {
             profileName = decoded.profile;
           } else if (decoded.profile?.name) {
             profileName = decoded.profile.name;
-          } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
+          } else if (
+            decoded.profile?.roles &&
+            decoded.profile.roles.length > 0
+          ) {
             profileName = decoded.profile.roles[0];
           }
 
           const profileLower = profileName.toLowerCase();
 
-          setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
-          setIsProfessor(profileLower === 'professor');
+          setIsAdmin(
+            profileLower === Profile.Admin || profileLower === "coordinator"
+          );
+          setIsProfessor(profileLower === Profile.Professor);
         }
       } catch (err) {
-        console.error('Erro ao decodificar token:', err);
+        console.error("Erro ao decodificar token:", err);
       }
     };
 
@@ -85,6 +91,17 @@ export function ScheduleMobileMenu() {
                 >
                   <Settings className="h-5 w-5" />
                   <span>Gestão do Sistema</span>
+                </Link>
+              )}
+
+              {isAdmin && (
+                <Link
+                  to={`/horarios/gerenciar/usuarios`}
+                  className="flex items-center space-x-2 text-sm font-medium"
+                  onClick={() => setOpen(false)}
+                >
+                  <Users className="h-5 w-5" />
+                  <span>Gerenciar Usuários</span>
                 </Link>
               )}
 

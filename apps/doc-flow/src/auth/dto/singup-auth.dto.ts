@@ -11,7 +11,8 @@ export class SignUpAuthDto {
   @ApiProperty()
   @IsEmail()
   @Matches(/(@cefet-rj\.br|@aluno\.cefet-rj\.br)$/, {
-    message: 'Only emails from cefet-rj.br or aluno.cefet-rj.br domains are allowed',
+    message:
+      'Only emails from cefet-rj.br or aluno.cefet-rj.br domains are allowed',
   })
   @IsNotEmpty()
   email: string;
@@ -33,10 +34,4 @@ export class SignUpAuthDto {
   })
   @IsString()
   enrollment?: string;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsString()
-  profileId?: string;
 }

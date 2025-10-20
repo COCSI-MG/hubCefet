@@ -16,7 +16,7 @@ import {
   presenceSchema,
 } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { BadgeMinus } from "lucide-react";
@@ -29,11 +29,11 @@ import { getAllEvents } from "@/api/data/events.data";
 import { Event } from "@/lib/schemas/event.schema";
 import { Presence } from "@/lib/types";
 import { getColumns } from "./ViewEventsTableColumns";
+import { getUserPresences } from "@/api/data/presence.data";
 import {
-  createPresence,
-  getUserPresences,
-  patchPresence,
-} from "@/api/data/presence.data";
+  createPresenceWithGeolocation as createPresence,
+  patchPresenceWithGeolocation as patchPresence,
+} from "@/lib/utils/presenceWithGeolocation";
 import { patch } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -49,7 +49,7 @@ export function ViewEventsDataTable() {
   const [success, setSuccess] = useState<string | null>(null);
   const [presences, setPresences] = useState<Presence[]>([]);
   const [presencesRegistered, setPresencesRegistered] = useState<Presence[]>(
-    [],
+    []
   );
   const [openCheckIn, setOpenCheckIn] = useState(false);
   const [openCheckOut, setOpenCheckOut] = useState(false);
@@ -58,7 +58,7 @@ export function ViewEventsDataTable() {
   const [activeFilter, setActiveFilter] = useState<string>("");
   const [rowSelection, setRowSelection] = useState({});
   const [eventIdsFromPresences, setEventIdsFromPresences] = useState<string[]>(
-    [],
+    []
   );
   const [eventIdsFromPresencesRegistered, setEventIdsFromPresencesRegistered] =
     useState<string[]>([]);
@@ -87,7 +87,7 @@ export function ViewEventsDataTable() {
       return;
     }
     const newEvents = selectedRows.filter(
-      (row) => !eventIdsFromPresences.includes(row.original.id),
+      (row) => !eventIdsFromPresences.includes(row.original.id)
     );
 
     if (newEvents.length === 0) {
@@ -111,7 +111,7 @@ export function ViewEventsDataTable() {
           const result = await createPresence(payload);
           if (result) {
             toast.success(
-              `Inscrições realizadas com sucesso! Agora você pode realizar check-ins no evento  ${row.original.name}.`,
+              `Inscrições realizadas com sucesso! Agora você pode realizar check-ins no evento  ${row.original.name}.`
             );
             if (valVacancies > 0)
               patch(eventId, {
@@ -126,20 +126,14 @@ export function ViewEventsDataTable() {
             toast.success(
               `Número de vacancies no evento ${row.original.name}: ${
                 row.original.vacancies - 1
-              }`,
+              }`
             );
-          } else {
-            toast.error(`Erro ao inscrever no evento ${row.original.name}`);
           }
         } else {
           toast.error(`vacancies encerradas no evento ${row.original.name}`);
         }
       } catch (error) {
-        console.error(
-          `Erro ao criar presença para o evento ${eventId}:`,
-          error,
-        );
-        toast.error(`Erro ao inscrever no evento ${eventId}`);
+        console.error("Error while subscribing to event:", error);
       }
     }
   };
@@ -161,7 +155,6 @@ export function ViewEventsDataTable() {
           .map((presence) => presence.event_id);
 
         setEventIdsFromPresences(filteredEventIds);
-
       } else {
         setPresences([]);
         setEventIdsFromPresences([]);
@@ -230,19 +223,20 @@ export function ViewEventsDataTable() {
     },
   });
 
-  const onSubmit: SubmitHandler<PresenceFormSchema> = async (
+  const onSubmit = async (
     data: PresenceCreate,
+    coordinates?: { latitude: number; longitude: number }
   ) => {
     const eventIdFromForm = form.getValues("event_id");
 
     const presence = presencesRegistered.find(
-      (p) => p.event_id === eventIdFromForm,
+      (p) => p.event_id === eventIdFromForm
     );
 
     if (!presence) {
       console.error(
         "Nenhuma presença encontrada com o selectedEventId:",
-        eventIdFromForm,
+        eventIdFromForm
       );
       setError("Nenhuma presença encontrada para o evento selecionado.");
       return;
@@ -250,7 +244,7 @@ export function ViewEventsDataTable() {
 
     const presenceId = presence.id;
 
-    const result = await patchPresence(presenceId, data);
+    const result = await patchPresence(presenceId, data, coordinates);
 
     if (!result) {
       setError("Ocorreu um erro ao cadastrar a presença");
@@ -260,8 +254,9 @@ export function ViewEventsDataTable() {
     setSuccess("Presença Criada com sucesso!");
   };
 
-  const onSubmitUpdate: SubmitHandler<PresenceFormSchema> = async (
+  const onSubmitUpdate = async (
     data: PresenceCreate,
+    coordinates?: { latitude: number; longitude: number }
   ) => {
     const eventIdFromForm = form.getValues("event_id");
 
@@ -270,15 +265,15 @@ export function ViewEventsDataTable() {
     if (!presence) {
       console.error(
         "Nenhuma presença encontrada com o selectedEventId:",
-        eventIdFromForm,
+        eventIdFromForm
       );
       setError("Nenhuma presença encontrada para o evento selecionado.");
       return;
     }
 
     const presenceId = presence.id;
-    
-    const result = await patchPresence(presenceId, data);
+
+    const result = await patchPresence(presenceId, data, coordinates);
 
     if (!result) {
       setError("Ocorreu um erro ao cadastrar a presença");
@@ -335,11 +330,11 @@ export function ViewEventsDataTable() {
   };
 
   const registeredEvents = data.filter((event) =>
-    eventIdsFromPresencesRegistered.includes(event.id),
+    eventIdsFromPresencesRegistered.includes(event.id)
   );
 
   const presentEvents = data.filter((event) =>
-    eventIdsFromPresences.includes(event.id),
+    eventIdsFromPresences.includes(event.id)
   );
 
   return (

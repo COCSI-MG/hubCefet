@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { File } from '../entities/file.entity';
 import { CreateFileDto } from '../dto/create-file.dto';
 import { User } from 'src/users/entities/user.entity';
-import { Event } from 'src/events/entities/event.entity';
 
 @Injectable()
 export class FileRepositoryImpl implements FileRepository {
@@ -12,6 +11,19 @@ export class FileRepositoryImpl implements FileRepository {
     @InjectModel(File)
     private fileModel: typeof File,
   ) {}
+  findByUserNameAndType(
+    userId: string,
+    name: string,
+    type: string,
+  ): Promise<File[]> {
+    return this.fileModel.findAll({
+      where: {
+        name,
+        type,
+        user_id: userId,
+      },
+    });
+  }
 
   async create(createFileDto: CreateFileDto, userId: string): Promise<File> {
     return await this.fileModel.create({
@@ -19,7 +31,6 @@ export class FileRepositoryImpl implements FileRepository {
       url: createFileDto.url,
       type: createFileDto.type,
       user_id: userId,
-      event_id: createFileDto.eventId,
     });
   }
 
@@ -53,7 +64,7 @@ export class FileRepositoryImpl implements FileRepository {
     return await this.fileModel.findByPk(id);
   }
 
-  async findByUserId(
+  async findByUserIdPaginate(
     id: string,
     limit: number,
     offset: number,
@@ -67,45 +78,24 @@ export class FileRepositoryImpl implements FileRepository {
           model: User,
           attributes: ['id', 'full_name'],
         },
-        {
-          model: Event,
-          attributes: ['id', 'name'],
-        },
       ],
       limit,
       offset,
     });
   }
 
-  async findByEventId(id: string): Promise<File[]> {
+  async findByUserId(userId: string): Promise<File[]> {
     return await this.fileModel.findAll({
       where: {
-        event_id: id,
+        user_id: userId,
       },
     });
   }
 
-  async findByUserIdAndEventId(
-    userId: string,
-    eventId: string,
-  ): Promise<File[]> {
+  async findByUserIdAndType(userId: string, type: string): Promise<File[]> {
     return await this.fileModel.findAll({
       where: {
         user_id: userId,
-        event_id: eventId,
-      },
-    });
-  }
-
-  async findByUserIdAndEventIdAndType(
-    userId: string,
-    eventId: string,
-    type: string,
-  ): Promise<File[]> {
-    return await this.fileModel.findAll({
-      where: {
-        user_id: userId,
-        event_id: eventId,
         type,
       },
     });

@@ -16,19 +16,19 @@ module.exports = {
       'profiles',
       [
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: '514c5e8d-d430-40e2-b878-f263c3f9d796',
           name: 'admin',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: '718c2e4d-a241-4db9-9c55-e8b1f3d7c849',
           name: 'user',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: 'a92d5f6e-c342-4fb7-8e11-d6a9c7b4e582',
           name: 'professor',
         },
         {
-          id: Sequelize.fn('uuid_generate_v4'),
+          id: 'b84f7a2e-f153-4c8a-9b66-c2d8e9a7f341',
           name: 'student',
         },
       ],

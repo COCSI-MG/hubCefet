@@ -1,0 +1,139 @@
+# HubCEFET - Document Flow Management System
+
+A full-stack application for managing document flows at CEFET, built with NestJS backend and React frontend.
+
+## Architecture
+
+- **Frontend**: React + TypeScript + Vite (Port 80 via nginx)
+- **Backend**: NestJS + TypeScript (Port 3000, accessible via /api)
+- **Database**: PostgreSQL 16
+- **Cache**: Redis 6.2
+- **Reverse Proxy**: nginx
+- **Database Admin**: Adminer
+
+## Quick Start
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Node.js 18+ (for local development)
+
+### Production Setup
+
+1. **Clone and configure environment**:
+
+   ```bash
+   git clone <repository-url>
+   cd hubCefet
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+2. **Run the application**:
+
+   ```bash
+   # Linux/Mac
+   chmod +x setup.sh && ./setup.sh
+
+   # Windows
+   setup.bat
+   ```
+
+3. **Access the application**:
+   - Frontend: http://localhost
+   - API: http://localhost/api
+   - Database Admin: http://localhost:8080
+
+### Development Setup
+
+For local development, you can run services individually:
+
+```bash
+# Start database and cache services
+docker-compose up postgres redis -d
+
+# Run backend (from apps/doc-flow)
+cd apps/doc-flow
+npm install
+npm run start:dev
+
+# Run frontend (from apps/doc-flow-client)
+cd ../doc-flow-client
+npm install
+npm run dev
+```
+
+## API Configuration
+
+The frontend is configured to use different API URLs based on the environment:
+
+- **Production**: `/api` (same domain, proxied by nginx)
+- **Development**: `http://localhost:3000` (direct backend connection)
+
+This is handled automatically through environment files:
+
+- `.env.production` - Used in Docker builds
+- `.env.development` - Used in local development
+
+## Docker Services
+
+| Service  | Description                            | Port          | Dependencies  |
+| -------- | -------------------------------------- | ------------- | ------------- |
+| nginx    | Reverse proxy routing frontend and API | 80            | frontend, app |
+| frontend | React application built with nginx     | internal:80   | -             |
+| app      | NestJS backend API                     | internal:3000 | postgres      |
+| postgres | PostgreSQL database                    | internal:5432 | -             |
+| redis    | Redis cache                            | 6379          | -             |
+| adminer  | Database administration                | 8080          | postgres      |
+| migrate  | Database migration runner              | -             | postgres      |
+| seed     | Database seeder                        | -             | migrate       |
+
+## Routing
+
+nginx handles all routing:
+
+- `/*` → Frontend (React SPA)
+- `/api/*` → Backend (NestJS API)
+- Static assets are cached and gzipped
+
+## Commands
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Build and start
+docker-compose up --build -d
+
+# View logs
+docker-compose logs -f [service-name]
+
+# Stop services
+docker-compose down
+
+# Restart a service
+docker-compose restart [service-name]
+
+# Run migrations manually
+docker-compose run --rm migrate
+
+# Run seeds manually
+docker-compose run --rm seed
+
+# Access database
+docker-compose exec postgres psql -U $POSTGRES_USER -d $POSTGRES_DATABASE
+```
+
+## Troubleshooting
+
+1. **Frontend not loading**: Check nginx logs and ensure frontend container is running
+2. **API not responding**: Check backend logs and database connectivity
+3. **Database connection issues**: Ensure postgres is running and environment variables are correct
+4. **Port conflicts**: Make sure ports 80, 6379, and 8080 are available
+
+## Development Notes
+
+- The frontend uses environment-based configuration for API URLs
+- CORS is handled by nginx for production
+- Database migrations run automatically during setup
+- Hot reload is available in development mode

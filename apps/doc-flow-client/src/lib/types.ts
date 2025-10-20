@@ -78,7 +78,8 @@ export const authFormSchema = z.object({
       message: "Insira um email válido.",
     })
     .regex(/(@cefet-rj\.br|@aluno\.cefet-rj\.br)$/, {
-      message: "Insira um email institucional (@cefet-rj.br ou @aluno.cefet-rj.br).",
+      message:
+        "Insira um email institucional (@cefet-rj.br ou @aluno.cefet-rj.br).",
     }),
   password: z.string().min(2, {
     message: "A senha deve ter no mínimo 8 caracteres.",
@@ -93,8 +94,7 @@ export const singupFormSchema = authFormSchema.merge(
     fullName: z.string().max(255, {
       message: "Nome muito longo.",
     }),
-    profileId: z.string().min(1, { message: "O perfil é obrigatório." }),
-  }),
+  })
 );
 
 export const presenceSchema = z.object({
@@ -124,6 +124,7 @@ export const createEventSchema = z
         message: "Nome é obrigatório",
       })
       .max(255),
+    description: z.string().max(500).optional(),
     eventStartDate: z
       .string({
         message: "Data de início é obrigatória",
@@ -145,7 +146,7 @@ export const createEventSchema = z
           required_error: "Latitude é obrigatória",
         })
         .min(-90, { message: "Latitude deve ser no mínimo -90" })
-        .max(90, { message: "Latitude deve ser no máximo 90" }),
+        .max(90, { message: "Latitude deve ser no máximo 90" })
     ),
 
     longitude: z.preprocess(
@@ -155,8 +156,19 @@ export const createEventSchema = z
           required_error: "Longitude é obrigatória",
         })
         .min(-180, { message: "Longitude deve ser no mínimo -180" })
-        .max(180, { message: "Longitude deve ser no máximo 180" }),
+        .max(180, { message: "Longitude deve ser no máximo 180" })
     ),
+
+    radius: z.preprocess(
+      (a) => Number(a),
+      z
+        .number({
+          required_error: "O raio é obrigatório",
+        })
+        .min(1, { message: "O raio deve ser pelo menos 1" })
+        .max(10000, { message: "O raio deve ser no máximo 10000" })
+    ),
+
     vacancies: z.preprocess(
       (a) => Number(a),
       z
@@ -164,7 +176,7 @@ export const createEventSchema = z
           required_error: "O número de vagas é obrigatório",
         })
         .int({ message: "O número de vagas deve ser um inteiro" })
-        .min(1, { message: "O número de vagas deve ser pelo menos 1" }),
+        .min(1, { message: "O número de vagas deve ser pelo menos 1" })
     ),
   })
   .superRefine((val, ctx) => {
@@ -177,7 +189,7 @@ export const createEventSchema = z
       month - 1,
       day,
       hour,
-      minute,
+      minute
     ).toISOString();
     if (val.status === "upcoming") {
       if (zodEventStartDate < now) {
@@ -201,7 +213,7 @@ export const createEventSchema = z
       endMonth - 1,
       endDay,
       endHour,
-      endMinute,
+      endMinute
     ).toISOString();
     if (val.status === "ended") {
       if (zodEventEndDate < zodEventStartDate) {
@@ -238,6 +250,8 @@ export const createEventSchema = z
       eventEndDate,
       eventStartTime,
       eventEndTime,
+      description,
+      radius,
       latitude,
       longitude,
       vacancies,
@@ -253,7 +267,7 @@ export const createEventSchema = z
         startMonth - 1,
         startDay,
         startHour,
-        startMinute,
+        startMinute
       );
       const end = new Date(endYear, endMonth - 1, endDay, endHour, endMinute);
       return {
@@ -266,8 +280,10 @@ export const createEventSchema = z
         latitude,
         longitude,
         vacancies,
+        description,
+        radius,
       };
-    },
+    }
   );
 
 export type EventCreateSchema = z.infer<typeof createEventSchema>;

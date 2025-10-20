@@ -62,7 +62,7 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
         underscored: false,
         timestamps: true,
         createdAt: 'createdAt',
-        updatedAt: 'updatedAt'
+        updatedAt: 'updatedAt',
       },
     }),
     JwtModule.register({

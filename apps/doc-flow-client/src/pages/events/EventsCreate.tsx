@@ -16,16 +16,18 @@ export default function EventsCreate() {
     resolver: zodResolver(createEventSchema),
     defaultValues: {
       name: "",
+      description: "",
       status: "upcoming",
       eventStartDate: "",
       eventEndDate: "",
       latitude: 0,
       longitude: 0,
+      radius: 10,
     },
   });
 
   const onSubmit: SubmitHandler<EventCreateSchema> = async (
-    data: EventCreate,
+    data: EventCreate
   ) => {
     const result = await createEvent({ ...data });
     if (!result) {
@@ -57,16 +59,7 @@ export default function EventsCreate() {
         title="Voce está criando um evento"
         description="Clique em confirmar no final da criação para que as informações sejam salvas. Logo após, você poderá visualizar o evento na lista de eventos."
       />
-      <div className="w-1/2 p-6 space-y-4 max-sm:w-full">
-        <h1 className="text-2xl text-sky-900 font-bold mb-2">Nome do Evento</h1>
-        <span className="text-sky-800">
-          <strong>Descricao do evento:</strong> Lorem ipsum, dolor sit amet
-          consectetur adipisicing elit. Doloribus temporibus consequatur nostrum
-          fuga ipsum vel, modi nesciunt hic provident quod praesentium eveniet
-          sed earum doloremque quam error asperiores unde blanditiis.
-        </span>
-      </div>
-      <div className="ml-6 mr-6 max-w-full p-6 border rounded-xl mb-4">
+      <div className="ml-6 mr-6 max-w-full p-6 border rounded-xl mb-4 mt-5">
         {error && (
           <Alert variant="destructive" className="w-1/2">
             <AlertCircle className="h-4 w-4" />

@@ -7,7 +7,7 @@ import {
 } from "@/lib/types";
 
 export const getAllPresences = async (
-  data: GetAllPresences,
+  data: GetAllPresences
 ): Promise<Presence[] | undefined> => {
   try {
     const presenceService = new PresenceService();
@@ -25,10 +25,11 @@ export const getAllPresences = async (
 
 export const createPresence = async (
   data: PresenceCreate,
+  coordinates?: { latitude: number; longitude: number }
 ): Promise<Presence | boolean> => {
   try {
     const presenceService = new PresenceService();
-    const response = await presenceService.create(data);
+    const response = await presenceService.create(data, coordinates);
     return response.data as Presence;
   } catch (error) {
     if (import.meta.env.DEV) {
@@ -60,10 +61,11 @@ export const getUserPresences = async (data: {
 export const patchPresence = async (
   id: string,
   data: PresenceUpdate,
+  coordinates?: { latitude: number; longitude: number }
 ): Promise<Presence | undefined> => {
   try {
     const presenceService = new PresenceService();
-    const response = await presenceService.patch(id, data);
+    const response = await presenceService.patch(id, data, coordinates);
     return response.data.presence;
   } catch (err) {
     if (import.meta.env.DEV) {

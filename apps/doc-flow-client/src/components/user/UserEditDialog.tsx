@@ -6,29 +6,29 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
-import { CreateUser, createUserSchema } from '@/lib/schemas/user.schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { CreateUser, createUserSchema } from "@/lib/schemas/user.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Select,
   SelectItem,
   SelectTrigger,
   SelectContent,
   SelectValue,
-} from '../ui/select';
-import { ProfileSchema } from '@/lib/schemas/profile.schema';
-import { getProfiles } from '@/api/data/profile.data';
-import { cn } from '@/lib/utils';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
-import useProfile from '@/hooks/useProfile';
-import { updateUserPatchVerb } from '@/api/data/users.data';
-import useUser from '@/hooks/useUser';
-import { LoaderCircle } from 'lucide-react';
+} from "../ui/select";
+import { ProfileSchema } from "@/lib/schemas/profile.schema";
+import { getProfiles } from "@/api/data/profile.data";
+import { cn } from "@/lib/utils";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
+import useProfile from "@/hooks/useProfile";
+import { updateUserPatchVerb } from "@/api/data/users.data";
+import useUser from "@/hooks/useUser";
+import { LoaderCircle } from "lucide-react";
 
 export default function UserEditDialog() {
   const [profiles, setProfiles] = useState<ProfileSchema[]>([]);
@@ -39,17 +39,17 @@ export default function UserEditDialog() {
   const form = useForm<CreateUser>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      fullName: user?.full_name || '',
-      email: user?.email || '',
-      enrollment: user?.enrollment || '',
-      profile_id: user?.profile_id || '',
+      full_name: user?.full_name || "",
+      email: user?.email || "",
+      enrollment: user?.enrollment || "",
+      profileId: user?.profile_id || "",
     },
   });
 
   const fetchProfiles = async () => {
     const profiles = await getProfiles();
     if (!profiles) return;
-    if (import.meta.env.DEV) toast.info('Perfis carregados com sucesso');
+    if (import.meta.env.DEV) toast.info("Perfis carregados com sucesso");
     setProfiles(profiles);
   };
 
@@ -59,10 +59,10 @@ export default function UserEditDialog() {
 
   useEffect(() => {
     form.reset({
-      fullName: user?.full_name || '',
-      email: user?.email || '',
-      enrollment: user?.enrollment || '',
-      profile_id: user?.profile_id || '',
+      full_name: user?.full_name || "",
+      email: user?.email || "",
+      enrollment: user?.enrollment || "",
+      profileId: user?.profile_id || "",
     });
   }, [form, user]);
 
@@ -71,12 +71,12 @@ export default function UserEditDialog() {
     if (!user) return;
     const updatedUser = await updateUserPatchVerb(user.id, data);
     if (updatedUser) {
-      toast.success('Usuário atualizado com sucesso');
+      toast.success("Usuário atualizado com sucesso");
       setIsSubmitting(false);
       return;
     }
     setIsSubmitting(false);
-    toast.error('Erro ao atualizar usuário');
+    toast.error("Erro ao atualizar usuário");
   };
 
   return (
@@ -101,23 +101,23 @@ export default function UserEditDialog() {
           <form
             id="user-edit"
             onSubmit={form.handleSubmit(handleSubmit)}
-            className={cn(isLoading && 'opacity-50')}
+            className={cn(isLoading && "opacity-50")}
           >
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
                 name="fullName"
-                defaultValue={user?.full_name || ''}
+                defaultValue={user?.full_name || ""}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
                     <FormLabel className="text-right">Nome completo</FormLabel>
                     <FormControl>
                       <Input
                         className={cn(
-                          'rounded-2xl bg-white bg-opacity-60',
-                          form.formState.errors?.fullName &&
-                            'border-destructive',
-                          'col-span-3'
+                          "rounded-2xl bg-white bg-opacity-60",
+                          form.formState.errors?.full_name &&
+                            "border-destructive",
+                          "col-span-3"
                         )}
                         type="text"
                         placeholder="Nome completo"
@@ -131,16 +131,16 @@ export default function UserEditDialog() {
               <FormField
                 control={form.control}
                 name="email"
-                defaultValue={user?.email || ''}
+                defaultValue={user?.email || ""}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
                     <FormLabel className="text-right">Email</FormLabel>
                     <FormControl>
                       <Input
                         className={cn(
-                          'rounded-2xl bg-white bg-opacity-60',
-                          form.formState.errors?.email && 'border-destructive',
-                          'col-span-3'
+                          "rounded-2xl bg-white bg-opacity-60",
+                          form.formState.errors?.email && "border-destructive",
+                          "col-span-3"
                         )}
                         type="email"
                         placeholder="Email"
@@ -159,17 +159,17 @@ export default function UserEditDialog() {
               <FormField
                 control={form.control}
                 name="enrollment"
-                defaultValue={user?.enrollment || ''}
+                defaultValue={user?.enrollment || ""}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
                     <FormLabel className="text-right">Matricula</FormLabel>
                     <FormControl>
                       <Input
                         className={cn(
-                          'rounded-2xl bg-white bg-opacity-60',
+                          "rounded-2xl bg-white bg-opacity-60",
                           form.formState.errors.enrollment?.message &&
-                            'border-destructive',
-                          'col-span-3'
+                            "border-destructive",
+                          "col-span-3"
                         )}
                         type="text"
                         placeholder="Matricula"
@@ -229,7 +229,7 @@ export default function UserEditDialog() {
                     Salvando...
                   </>
                 ) : (
-                  'Salvar alterações'
+                  "Salvar alterações"
                 )}
               </Button>
             </DialogFooter>

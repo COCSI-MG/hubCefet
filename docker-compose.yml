@@ -1,18 +1,45 @@
-name: 'doc-flow'
+name: "doc-flow"
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: doc-flow-nginx
+    restart: unless-stopped
+    ports:
+      - "4330:80" # port that is allowed in the CEFET network
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+      - frontend
+    networks:
+      - network-doc-flow
+
+  frontend:
+    container_name: doc-flow-frontend
+    build:
+      context: ./apps/doc-flow-client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - network-doc-flow
+
   app:
     container_name: doc-flow-backend
-    build: 
-      context: .
+    build:
+      context: ./apps/doc-flow
       dockerfile: Dockerfile
       target: app
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     networks:
       - network-doc-flow
     depends_on:
       - postgres
+    env_file:
+      - ./.env
 
   postgres:
     container_name: doc-flow-postgres
@@ -27,7 +54,7 @@ services:
       - ./.env
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./scripts:/docker-entrypoint-initdb.d
+      - ./apps/doc-flow/scripts:/docker-entrypoint-initdb.d
     networks:
       - network-doc-flow
 
@@ -35,30 +62,30 @@ services:
     container_name: doc-flow-adminer
     image: adminer
     ports:
-      - 8081:8080
+      - "8080"
     networks:
       - network-doc-flow
 
   migrate:
     container_name: doc-flow-migrate
-    build: 
-      context: .
+    build:
+      context: ./apps/doc-flow
       dockerfile: Dockerfile
       target: db-actions-build
     networks:
       - network-doc-flow
     depends_on:
       - postgres
-    command: [
-      "sh",
-      "-c",
-      "/var/www/app/database-actions.sh migrate"
-    ]
+    env_file:
+      - ./.env
+    command: ["bash", "/scripts/database-actions.sh", "migrate"]
+    volumes:
+      - ./apps/doc-flow/scripts:/scripts
 
   seed:
     container_name: doc-flow-seed
-    build: 
-      context: .
+    build:
+      context: ./apps/doc-flow
       dockerfile: Dockerfile
       target: db-actions-build
     networks:
@@ -66,11 +93,11 @@ services:
     depends_on:
       - migrate
       - postgres
-    command: [
-      "sh",
-      "-c",
-      "/var/www/app/database-actions.sh seed"
-    ]
+    env_file:
+      - ./.env
+    command: ["bash", "/scripts/database-actions.sh", "seed"]
+    volumes:
+      - ./apps/doc-flow/scripts:/scripts
 
   redis:
     container_name: doc-flow-redis

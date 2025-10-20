@@ -43,18 +43,16 @@ export class FileProcessor {
 
       filePath = path.join(uploadDir, filename);
       fs.writeFileSync(filePath, fileBuffer);
-
-      this.logger.debug(`File ${filename} saved on disk`);
       status = FileStatus.STATUS_DONE;
     } catch (error) {
       this.logger.error(`Error processing file ${filename}`);
       this.logger.error(error);
       status = FileStatus.STATUS_ERROR;
     } finally {
-      // Atualiza o status do arquivo
+      // Atualiza o status e URL do arquivo
       await this.filesService.update(job.data.fileId, {
         status,
-        path: filePath,
+        url: filePath,
       });
       this.logger.debug('File processed');
     }

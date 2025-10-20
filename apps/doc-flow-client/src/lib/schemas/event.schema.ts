@@ -8,6 +8,7 @@ export const createEventSchema = z
         message: "Nome é obrigatório",
       })
       .max(255),
+    description: z.string().max(500).optional(),
     eventStartDate: z
       .string({
         message: "Data de início é obrigatória",
@@ -23,6 +24,7 @@ export const createEventSchema = z
     eventEndTime: z.string().regex(/\d{1,2}:\d{1,2}/),
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
+    radius: z.number().min(1).max(10000),
     vacancies: z.number().min(1),
   })
   .superRefine((val, ctx) => {
@@ -35,7 +37,7 @@ export const createEventSchema = z
       month - 1,
       day,
       hour,
-      minute,
+      minute
     ).toISOString();
     if (val.status === "upcoming") {
       if (zodEventStartDate < now) {
@@ -59,7 +61,7 @@ export const createEventSchema = z
       endMonth - 1,
       endDay,
       endHour,
-      endMinute,
+      endMinute
     ).toISOString();
     if (val.status === "ended") {
       if (zodEventEndDate < zodEventStartDate) {
@@ -98,7 +100,9 @@ export const createEventSchema = z
       eventEndTime,
       latitude,
       longitude,
+      radius,
       vacancies,
+      description,
     }) => {
       const [startYear, startMonth, startDay] = eventStartDate
         .split("-")
@@ -111,7 +115,7 @@ export const createEventSchema = z
         startMonth - 1,
         startDay,
         startHour,
-        startMinute,
+        startMinute
       );
       const end = new Date(endYear, endMonth - 1, endDay, endHour, endMinute);
       return {
@@ -123,9 +127,11 @@ export const createEventSchema = z
         eventEndTime,
         latitude,
         longitude,
+        radius,
         vacancies,
+        description,
       };
-    },
+    }
   );
 
 export type EventCreateSchema = z.infer<typeof createEventSchema>;

@@ -11,6 +11,7 @@ export default function FileCreate() {
   const [canUpload, setCanUpload] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isFileModified, setIsFileModified] = useState<boolean>(false);
 
   const fileIsValid = (file: File) => {
     if (file.size > 1024 * 1024 * 10) {
@@ -51,6 +52,9 @@ export default function FileCreate() {
     const formData = new FormData();
     formData.append("file", file);
     const data = await upload(createdFileId, formData, onProgress);
+
+    console.log("Upload response data:", data);
+
     if (!data?.success) {
       if (data?.status === 409) {
         toast.error("Arquivo já existe");
@@ -70,11 +74,11 @@ export default function FileCreate() {
     <>
       <PageHeader
         title="Criando arquivos"
-        description="Crie um arquivo e associe a um evento, para que possa ser compartilhado com os participantes"
+        description="Crie um arquivo para que possa ser compartilhado com os participantes"
       />
       <div className="ml-6 mr-6 mt-6 max-w-full p-6 border rounded-xl">
         <div className="grid grid-cols-3 p-4 gap-x-2 gap-y-4  max-md:space-x-0 max-md:flex max-md:flex-col max-md:space-y-4">
-          <div className="p-4 flex flex-col space-y-3 border rounded-xl max-md:col-span-0 bg-neutral-50">
+          <div className="p-4 flex flex-col space-y-3 border rounded-xl justify-center max-md:col-span-0 bg-neutral-50">
             <div>
               <span className="font-bold">Informações</span>
             </div>
@@ -83,8 +87,13 @@ export default function FileCreate() {
                 onFileCreated={(fileId) => {
                   setCreatedFileId(fileId);
                   setCanUpload(true);
+                  setIsFileModified(false); // Reset modification flag when file is created
                 }}
-                disabled={canUpload}
+                onFileModified={() => {
+                  setIsFileModified(true);
+                  setCanUpload(false); // Block upload when file is modified
+                }}
+                disabled={canUpload && !isFileModified}
               />
             </div>
           </div>

@@ -15,6 +15,15 @@ export class CreateEventDto {
   })
   @IsString()
   name: string;
+
+  @ApiProperty({
+    example: 'This is a description of the event.',
+    description: 'Event description',
+  })
+  @IsString()
+  @IsOptional()
+  description: string;
+
   @ApiProperty({
     description: 'Event start date',
     example: '2024-12-14T10:00:00Z',
@@ -60,6 +69,14 @@ export class CreateEventDto {
   @IsNumber()
   @IsOptional()
   longitude: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Radius in kilometers',
+  })
+  @IsNumber()
+  @IsOptional()
+  radius: number;
 
   @ApiProperty({
     example: 10,

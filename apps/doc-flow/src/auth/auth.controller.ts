@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Res, Get, Req } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { Response } from 'express';
@@ -7,7 +7,6 @@ import { Public } from './decorators/public-auth.decorator';
 import { ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
-import { UserRequest } from 'src';
 import { MagicLoginRequestDto } from './dto/magic-login-request.dto';
 import { MagicLoginVerifyDto } from './dto/magic-login-verify.dto';
 
@@ -86,9 +85,13 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Link de acesso enviado para seu email. Verifique sua caixa de entrada.' }
-      }
-    }
+        message: {
+          type: 'string',
+          example:
+            'Link de acesso enviado para seu email. Verifique sua caixa de entrada.',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -113,10 +116,10 @@ export class AuthController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       const status = err.status || 500;
       const message = err.message || 'Internal server error';
-      
+
       return res
         .status(status)
         .json(new ApiResponseDto(status, false, null, message));
@@ -147,10 +150,10 @@ export class AuthController {
       if (process.env.APP_ENV === 'development') {
         console.error(err);
       }
-      
+
       const status = err.status || 500;
       const message = err.message || 'Internal server error';
-      
+
       return res
         .status(status)
         .json(new ApiResponseDto(status, false, null, message));

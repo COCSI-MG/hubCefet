@@ -14,15 +14,13 @@ export default class AuthService extends AbstractService {
     email: string,
     password: string,
     enrollment: string,
-    fullName: string,
-    profileId: string,
+    fullName: string
   ) {
     return await this.api.post(this.basePath + "/signup", {
       email,
       password,
       enrollment,
       fullName,
-      profileId,
     });
   }
 
@@ -34,10 +32,14 @@ export default class AuthService extends AbstractService {
   }
 
   async requestMagicLogin(email: string) {
-    return await this.api.post(this.basePath + "/magic-login/request", { email });
+    return await this.api.post(this.basePath + "/magic-login/request", {
+      email,
+    });
   }
 
   async verifyMagicLogin(token: string) {
-    return await this.api.post(this.basePath + "/magic-login/verify", { token });
+    return await this.api.post(this.basePath + "/magic-login/verify", {
+      token,
+    });
   }
 }

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilesService } from './files.service';
-import { FileRepository } from './repository/files.repository.interface';
+import FileRepository from './repository/files.repository.interface';
 import { FILE_REPOSITORY } from './repository/files-repository.token';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -85,11 +85,6 @@ describe('FilesService', () => {
             findByUserId: jest.fn((userId: string) => {
               Promise.resolve(
                 filesData.filter((file) => file.user_id === userId),
-              );
-            }),
-            findByEventId: jest.fn((eventId: string) => {
-              Promise.resolve(
-                filesData.filter((file) => file.event_id === eventId),
               );
             }),
             update: jest.fn(),

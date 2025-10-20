@@ -9,12 +9,14 @@ import { MagicLink } from './entities/magic-link.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import { Role } from 'src/roles/entities/role.entity';
+import { ProfileModule } from 'src/profile/profile.module';
 
 @Module({
   imports: [
     UsersModule,
     EmailModule,
     SequelizeModule.forFeature([MagicLink, User, Profile, Role]),
+    ProfileModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, MagicLoginService],

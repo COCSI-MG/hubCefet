@@ -15,14 +15,18 @@ import NavMenuItem from "./NavMenuItem";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
-import AppsIcon from '@mui/icons-material/Apps';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ViewListIcon from '@mui/icons-material/ViewList';
+import AppsIcon from "@mui/icons-material/Apps";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import PeopleIcon from "@mui/icons-material/People";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { Profile } from "@/lib/enum/profile.enum";
 
-export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function ScheduleSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, token } = useAuth();
@@ -36,22 +40,27 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
         if (token) {
           const decoded: any = jwtDecode(token);
 
-          let profileName = '';
-          if (typeof decoded.profile === 'string') {
+          let profileName = "";
+          if (typeof decoded.profile === "string") {
             profileName = decoded.profile;
           } else if (decoded.profile?.name) {
             profileName = decoded.profile.name;
-          } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
+          } else if (
+            decoded.profile?.roles &&
+            decoded.profile.roles.length > 0
+          ) {
             profileName = decoded.profile.roles[0];
           }
 
           const profileLower = profileName.toLowerCase();
 
-          setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
-          setIsProfessor(profileLower === 'professor');
+          setIsAdmin(
+            profileLower === Profile.Admin || profileLower === "coordinator"
+          );
+          setIsProfessor(profileLower === Profile.Professor);
         }
       } catch (err) {
-        console.error('Erro ao decodificar token:', err);
+        console.error("Erro ao decodificar token:", err);
       }
     };
 
@@ -101,6 +110,21 @@ export function ScheduleSidebar({ ...props }: React.ComponentProps<typeof Sideba
                 onClick={() => navigate("/horarios/gerenciar")}
                 activeNavItem={location.pathname === "/horarios/gerenciar"}
                 icon={<SettingsIcon />}
+              />
+            )}
+
+            {isAdmin && (
+              <NavMenuItem
+                text="Gerenciar Usuários"
+                onClick={() => navigate("/horarios/gerenciar/usuarios")}
+                activeNavItem={
+                  location.pathname === "/horarios/gerenciar/usuarios" ||
+                  location.pathname === "/horarios/gerenciar/usuarios/criar" ||
+                  location.pathname.startsWith(
+                    "/horarios/gerenciar/usuarios/editar"
+                  )
+                }
+                icon={<PeopleIcon />}
               />
             )}
           </SidebarMenu>
