@@ -19,12 +19,6 @@ import { BullModule } from '@nestjs/bull';
 import { TccModule } from './tcc/tcc.module';
 import { TccPresentationsModule } from './tcc-presentations/tcc-presentations.module';
 import { TccStudentsModule } from './tcc-students/tcc-students.module';
-import { BuildingsModule } from './buildings/buildings.module';
-import { RoomsModule } from './rooms/rooms.module';
-import { SubjectsModule } from './subjects/subjects.module';
-import { SemestersModule } from './semesters/semesters.module';
-import { SchedulesModule } from './schedules/schedules.module';
-import { ClassesModule } from './classes/classes.module';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
 import { ComplementaryActivitiesModule } from './complementary-activities/complementary-activities.module';
@@ -80,12 +74,6 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     TccModule,
     TccPresentationsModule,
     TccStudentsModule,
-    BuildingsModule,
-    RoomsModule,
-    SubjectsModule,
-    SemestersModule,
-    ClassesModule,
-    SchedulesModule,
     EmailModule,
     QueuesModule,
     ComplementaryActivitiesModule,
@@ -107,4 +95,4 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
