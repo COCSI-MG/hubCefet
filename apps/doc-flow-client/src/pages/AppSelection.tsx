@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
 import { Profile } from "@/lib/enum/profile.enum";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSelectionSidebar } from "@/components/AppSelectionSidebar";
 
 export function AppSelection() {
   const navigate = useNavigate();
@@ -61,117 +63,122 @@ export function AppSelection() {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          py: 4,
-        }}
-      >
-        <Typography variant="h3" component="h1" gutterBottom>
-          Selecione o Aplicativo
-        </Typography>
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: `repeat(${isAdmin ? 3 : 2}, 1fr)`,
-            },
-            gap: 4,
-            mt: 4,
-            width: "100%",
-          }}
-        >
-          <Card
+    <SidebarProvider>
+      <AppSelectionSidebar />
+      <SidebarInset>
+        <Container maxWidth="lg">
+          <Box
             sx={{
-              height: "100%",
-              "&:hover": {
-                transform: "scale(1.02)",
-                transition: "transform 0.2s ease-in-out",
-              },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "100vh",
+              py: 4,
             }}
           >
-            <CardActionArea
-              onClick={() => navigate("/docflow")}
-              sx={{ height: "100%" }}
-            >
-              <CardContent sx={{ textAlign: "center", p: 4 }}>
-                <DescriptionIcon
-                  sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
-                />
-                <Typography variant="h5" component="h2" gutterBottom>
-                  DocFlow
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Gerenciamento de documentos e arquivos
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+            <Typography variant="h3" component="h1" gutterBottom>
+              Selecione o Aplicativo
+            </Typography>
 
-          <Card
-            sx={{
-              height: "100%",
-              "&:hover": {
-                transform: "scale(1.02)",
-                transition: "transform 0.2s ease-in-out",
-              },
-            }}
-          >
-            <CardActionArea
-              onClick={() => navigate("/events")}
-              sx={{ height: "100%" }}
-            >
-              <CardContent sx={{ textAlign: "center", p: 4 }}>
-                <EventIcon
-                  sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
-                />
-                <Typography variant="h5" component="h2" gutterBottom>
-                  Eventos
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Gerenciamento de eventos acadêmicos
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-
-          {isAdmin && (
-            <Card
+            <Box
               sx={{
-                height: "100%",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                  transition: "transform 0.2s ease-in-out",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: `repeat(${isAdmin ? 3 : 2}, 1fr)`,
                 },
+                gap: 4,
+                mt: 4,
+                width: "100%",
               }}
             >
-              <CardActionArea
-                onClick={navigateToSchedule}
-                sx={{ height: "100%" }}
+              <Card
+                sx={{
+                  height: "100%",
+                  "&:hover": {
+                    transform: "scale(1.02)",
+                    transition: "transform 0.2s ease-in-out",
+                  },
+                }}
               >
-                <CardContent sx={{ textAlign: "center", p: 4 }}>
-                  <ScheduleIcon
-                    sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
-                  />
-                  <Typography variant="h5" component="h2" gutterBottom>
-                    Gestão do Sistema
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Administração de horários, disciplinas e salas"
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          )}
-        </Box>
-      </Box>
-    </Container>
+                <CardActionArea
+                  onClick={() => navigate("/docflow")}
+                  sx={{ height: "100%" }}
+                >
+                  <CardContent sx={{ textAlign: "center", p: 4 }}>
+                    <DescriptionIcon
+                      sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
+                    />
+                    <Typography variant="h5" component="h2" gutterBottom>
+                      DocFlow
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Gerenciamento de documentos e arquivos
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+
+              <Card
+                sx={{
+                  height: "100%",
+                  "&:hover": {
+                    transform: "scale(1.02)",
+                    transition: "transform 0.2s ease-in-out",
+                  },
+                }}
+              >
+                <CardActionArea
+                  onClick={() => navigate("/events")}
+                  sx={{ height: "100%" }}
+                >
+                  <CardContent sx={{ textAlign: "center", p: 4 }}>
+                    <EventIcon
+                      sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
+                    />
+                    <Typography variant="h5" component="h2" gutterBottom>
+                      Eventos
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Gerenciamento de eventos acadêmicos
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+
+              {isAdmin && (
+                <Card
+                  sx={{
+                    height: "100%",
+                    "&:hover": {
+                      transform: "scale(1.02)",
+                      transition: "transform 0.2s ease-in-out",
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={navigateToSchedule}
+                    sx={{ height: "100%" }}
+                  >
+                    <CardContent sx={{ textAlign: "center", p: 4 }}>
+                      <ScheduleIcon
+                        sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
+                      />
+                      <Typography variant="h5" component="h2" gutterBottom>
+                        Gestão do Sistema
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        Administração de horários, disciplinas e salas"
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              )}
+            </Box>
+          </Box>
+        </Container>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
