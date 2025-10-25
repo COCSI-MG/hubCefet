@@ -21,7 +21,7 @@ import { TccPresentationsModule } from './tcc-presentations/tcc-presentations.mo
 import { TccStudentsModule } from './tcc-students/tcc-students.module';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
-import { ComplementaryActivitiesModule } from './complementary-activities/complementary-activities.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
   imports: [
@@ -76,7 +76,7 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     TccStudentsModule,
     EmailModule,
     QueuesModule,
-    ComplementaryActivitiesModule,
+    ActivitiesModule,
   ],
   controllers: [],
   providers: [

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { User } from '../../users/entities/user.entity';
-import { ComplementaryActivity } from './complementary-activity.entity';
+import { Activity } from './activity.entity';
 
 @Table({
   tableName: 'activity_reviews',
@@ -24,7 +24,7 @@ export class ActivityReview extends Model {
     example: '550e8400-e29b-41d4-a716-446655440000',
     description: 'Activity ID',
   })
-  @ForeignKey(() => ComplementaryActivity)
+  @ForeignKey(() => Activity)
   @Column({
     type: DataType.UUID,
     allowNull: false,
@@ -74,11 +74,11 @@ export class ActivityReview extends Model {
   })
   reviewed_at: Date;
 
-  @BelongsTo(() => ComplementaryActivity, 'activity_id')
-  activity: ComplementaryActivity;
+  @BelongsTo(() => Activity)
+  activity: Activity;
 
-  @BelongsTo(() => User, 'reviewer_user_id')
+  @BelongsTo(() => User)
   reviewer: User;
-} 
- 
- 
+}
+
+

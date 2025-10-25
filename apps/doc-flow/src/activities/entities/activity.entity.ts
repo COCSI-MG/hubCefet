@@ -7,15 +7,15 @@ import { ActivityReviewer } from './activity-reviewer.entity';
 import { ActivityReview } from './activity-review.entity';
 
 @Table({
-  tableName: 'complementary_activities',
+  tableName: 'activities',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 })
-export class ComplementaryActivity extends Model {
+export class Activity extends Model {
   @ApiProperty({
     example: 1,
-    description: 'Complementary Activity ID',
+    description: 'Activity ID',
   })
   @Column({
     type: DataType.UUID,
@@ -108,6 +108,17 @@ export class ComplementaryActivity extends Model {
   })
   updated_at: Date;
 
+  @ApiProperty({
+    example: 1,
+    description: 'Activity Type ID',
+  })
+  @ForeignKey(() => ActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  complementary_activity_type_id: number;
+
   @BelongsTo(() => User, 'user_id')
   user: User;
 
@@ -122,6 +133,6 @@ export class ComplementaryActivity extends Model {
 
   @HasMany(() => ActivityReview, 'activity_id')
   reviews: ActivityReview[];
-} 
- 
- 
+}
+
+

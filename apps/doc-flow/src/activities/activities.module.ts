@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ComplementaryActivitiesService } from './complementary-activities.service';
-import { ComplementaryActivitiesController } from './complementary-activities.controller';
-import { ComplementaryActivityRepository } from './repositories/complementary-activity.repository';
 import { ActivityTypeRepository } from './repositories/activity-type.repository';
 import { ActivityReviewRepository } from './repositories/activity-review.repository';
 import { ActivityReviewerRepository } from './repositories/activity-reviewer.repository';
@@ -10,7 +7,7 @@ import { ReviewSettingRepository } from './repositories/review-setting.repositor
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
 import {
-  ComplementaryActivity,
+  Activity,
   ActivityType,
   ActivityStatus,
   ActivityReviewer,
@@ -18,11 +15,14 @@ import {
   ReviewSetting,
 } from './entities';
 import { UsersModule } from '../users/users.module';
+import { ActivityRepository } from './repositories/activity.repository';
+import { ActivitiesService } from './activities.service';
+import { ActivitiesController } from './activities.controller';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([
-      ComplementaryActivity,
+      Activity,
       ActivityType,
       ActivityStatus,
       ActivityReviewer,
@@ -31,10 +31,10 @@ import { UsersModule } from '../users/users.module';
     ]),
     UsersModule,
   ],
-  controllers: [ComplementaryActivitiesController],
+  controllers: [ActivitiesController],
   providers: [
-    ComplementaryActivitiesService,
-    ComplementaryActivityRepository,
+    ActivitiesService,
+    ActivityRepository,
     ActivityTypeRepository,
     ActivityReviewRepository,
     ActivityReviewerRepository,
@@ -43,8 +43,8 @@ import { UsersModule } from '../users/users.module';
     FileUploadService,
   ],
   exports: [
-    ComplementaryActivitiesService,
-    ComplementaryActivityRepository,
+    ActivitiesService,
+    ActivityRepository,
     ActivityTypeRepository,
     ActivityReviewRepository,
     ActivityReviewerRepository,
@@ -53,6 +53,6 @@ import { UsersModule } from '../users/users.module';
     FileUploadService,
   ],
 })
-export class ComplementaryActivitiesModule {} 
- 
- 
+export class ActivitiesModule { }
+
+
