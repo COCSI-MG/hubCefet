@@ -1,7 +1,7 @@
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
-odule.exports = {
+module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('complementary_activities_types', {
       id: {
