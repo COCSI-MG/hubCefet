@@ -1,12 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { Activity } from './complementary-activity.entity';
+import { Activity } from './activity.entity';
 
 @Table({
   tableName: 'activity_types',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
+  timestamps: false,
 })
 export class ActivityType extends Model {
   @ApiProperty({

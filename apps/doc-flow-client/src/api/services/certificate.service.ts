@@ -20,11 +20,15 @@ export class CertificateService {
       const formData = new FormData();
       formData.append('course_name', data.courseName);
       formData.append('hours', data.hours.toString());
-      formData.append('activity_type_id', data.complementaryHourType);
+      formData.append('activity_type_id', data.activityType.toString());
       formData.append('certificate', data.certificateFile);
 
+      if (data.complementaryHoursType) {
+        formData.append('complementary_activity_type_id', data.complementaryHoursType)
+      }
+
       const response = await this.apiService.post(
-        '/complementary-activities/upload',
+        '/activities/upload',
         formData,
         {
           headers: {
@@ -36,7 +40,7 @@ export class CertificateService {
       return response;
     } catch (error: any) {
       console.error('Erro ao fazer upload do certificado:', error);
-      
+
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       } else if (error.response?.status === 404) {
@@ -56,7 +60,7 @@ export class CertificateService {
    */
   async getMyActivities(): Promise<any> {
     try {
-      return await this.apiService.get('/complementary-activities/my-activities');
+      return await this.apiService.get('/activities/my-activities');
     } catch (error) {
       console.error('Erro ao buscar minhas atividades:', error);
       throw new Error('Erro ao carregar suas atividades');
@@ -68,7 +72,7 @@ export class CertificateService {
    */
   async getMyStats(): Promise<any> {
     try {
-      return await this.apiService.get('/complementary-activities/my-stats');
+      return await this.apiService.get('/activities/my-stats');
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
       throw new Error('Erro ao carregar estatísticas');
@@ -80,7 +84,7 @@ export class CertificateService {
    */
   async getActivity(id: number): Promise<any> {
     try {
-      return await this.apiService.get(`/complementary-activities/${id}`);
+      return await this.apiService.get(`/activities/${id}`);
     } catch (error) {
       console.error('Erro ao buscar atividade:', error);
       throw new Error('Erro ao carregar atividade');
@@ -95,10 +99,10 @@ export class CertificateService {
       const updateData = {
         course_name: data.courseName,
         hours: data.hours,
-        activity_type_id: data.complementaryHourType,
+        activity_type_id: data.activityType,
       };
 
-      return await this.apiService.patch(`/complementary-activities/${id}`, updateData);
+      return await this.apiService.patch(`/activities/${id}`, updateData);
     } catch (error) {
       console.error('Erro ao atualizar atividade:', error);
       throw new Error('Erro ao atualizar atividade');
@@ -106,11 +110,11 @@ export class CertificateService {
   }
 
   /**
-   * Busca tipos de atividades complementares
+   * Busca tipos de atividades
    */
   async getActivityTypes(): Promise<any> {
     try {
-      return await this.apiService.get('/complementary-activities/types');
+      return await this.apiService.get('/activities/types');
     } catch (error) {
       console.error('Erro ao buscar tipos de atividade:', error);
       throw new Error('Erro ao carregar tipos de atividade');
@@ -122,7 +126,7 @@ export class CertificateService {
    */
   async getActivitiesForReview(): Promise<any> {
     try {
-      return await this.apiService.get('/complementary-activities/for-review');
+      return await this.apiService.get('/activities/for-review');
     } catch (error) {
       console.error('Erro ao buscar atividades para revisar:', error);
       throw new Error('Erro ao carregar atividades para revisar');
@@ -138,7 +142,7 @@ export class CertificateService {
         decision,
         comments: comments || ''
       };
-      return await this.apiService.post(`/complementary-activities/${id}/review`, data);
+      return await this.apiService.post(`/activities/${id}/review`, data);
     } catch (error) {
       console.error('Erro ao avaliar atividade:', error);
       throw new Error('Erro ao avaliar atividade');
@@ -152,7 +156,7 @@ export class CertificateService {
     try {
       const token = localStorage.getItem('accessToken');
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      const response = await fetch(`${API_URL}/complementary-activities/${id}/download-certificate`, {
+      const response = await fetch(`${API_URL}/activities/${id}/download-certificate`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
@@ -163,7 +167,7 @@ export class CertificateService {
       }
 
       const blob = await response.blob();
-      
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -183,7 +187,7 @@ export class CertificateService {
    */
   async deleteActivity(id: number): Promise<any> {
     try {
-      return await this.apiService.delete(`/complementary-activities/${id}`);
+      return await this.apiService.delete(`/activities/${id}`);
     } catch (error) {
       console.error('Erro ao deletar atividade:', error);
       throw new Error('Erro ao deletar atividade');
@@ -191,6 +195,6 @@ export class CertificateService {
   }
 }
 
-export const certificateService = new CertificateService(); 
- 
- 
+export const certificateService = new CertificateService();
+
+

@@ -8,8 +8,8 @@ module.exports = {
     await queryInterface.removeColumn('activity_types', 'updated_at')
 
     await queryInterface.bulkInsert('activity_types', [
-      { name: 'Atividades Complementares' },
-      { name: 'Atividades de Extensão' },
+      { name: 'Atividade Complementar' },
+      { name: 'Atividade de Extensão' },
     ])
   },
 

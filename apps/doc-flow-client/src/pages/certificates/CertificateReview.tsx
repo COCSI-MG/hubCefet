@@ -119,8 +119,8 @@ export default function CertificateReview() {
       );
 
       toast.success(
-        reviewDialog.decision === 'APPROVED' 
-          ? 'Certificado aprovado com sucesso!' 
+        reviewDialog.decision === 'APPROVED'
+          ? 'Certificado aprovado com sucesso!'
           : 'Certificado rejeitado!'
       );
 
@@ -174,7 +174,7 @@ export default function CertificateReview() {
     <>
       <PageHeader
         title="Avaliação de Certificados"
-        description="Analise e aprove/rejeite os certificados de horas complementares"
+        description="Analise e aprove/rejeite os certificados de atividades"
       />
 
       <Box className="ml-6 mr-6 mt-6 max-w-full">
@@ -184,10 +184,10 @@ export default function CertificateReview() {
               <Typography variant="h6" className="font-semibold">
                 Certificados Pendentes de Avaliação
               </Typography>
-              <Chip 
-                label={`${activities.length} certificados`} 
-                color="primary" 
-                variant="outlined" 
+              <Chip
+                label={`${activities.length} certificados`}
+                color="primary"
+                variant="outlined"
               />
             </Box>
 
@@ -253,7 +253,7 @@ export default function CertificateReview() {
                                   <DownloadIcon />
                                 </IconButton>
                               </Tooltip>
-                              
+
                               <Tooltip title="Aprovar">
                                 <IconButton
                                   size="small"
@@ -263,7 +263,7 @@ export default function CertificateReview() {
                                   <ApproveIcon />
                                 </IconButton>
                               </Tooltip>
-                              
+
                               <Tooltip title="Rejeitar">
                                 <IconButton
                                   size="small"
@@ -324,7 +324,7 @@ export default function CertificateReview() {
               </Typography>
             </Box>
           )}
-          
+
           <TextField
             autoFocus
             margin="dense"
@@ -353,13 +353,13 @@ export default function CertificateReview() {
             disabled={submitting}
             startIcon={submitting ? <CircularProgress size={20} /> : null}
           >
-            {submitting ? 'Processando...' : 
-             reviewDialog.decision === 'APPROVED' ? 'Aprovar' : 'Rejeitar'}
+            {submitting ? 'Processando...' :
+              reviewDialog.decision === 'APPROVED' ? 'Aprovar' : 'Rejeitar'}
           </Button>
         </DialogActions>
       </Dialog>
     </>
   );
-} 
- 
- 
+}
+
+

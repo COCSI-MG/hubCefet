@@ -115,7 +115,7 @@ export class Activity extends Model {
   @ForeignKey(() => ActivityType)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
   })
   complementary_activity_type_id: number;
 
