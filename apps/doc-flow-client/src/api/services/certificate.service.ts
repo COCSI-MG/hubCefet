@@ -20,7 +20,7 @@ export class CertificateService {
       const formData = new FormData();
       formData.append('course_name', data.courseName);
       formData.append('hours', data.hours.toString());
-      formData.append('activity_type_id', data.activityType.toString());
+      formData.append('activity_type_id', data.activityType);
       formData.append('certificate', data.certificateFile);
 
       if (data.complementaryHoursType) {
