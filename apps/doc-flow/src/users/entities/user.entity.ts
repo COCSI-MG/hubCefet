@@ -12,6 +12,8 @@ import {
 import { File } from 'src/files/entities/file.entity';
 import { Presence } from 'src/presences/entities/presence.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
+import { TccStudents } from 'src/tcc-students/entities/tcc-students.entity';
+import { Tcc } from 'src/tcc/entities/tcc.entity';
 @Scopes(() => ({
   excludePassword: {
     attributes: { exclude: ['password'] },
@@ -107,4 +109,10 @@ export class User extends Model {
 
   @HasMany(() => File, 'user_id')
   files: File[];
+
+  @HasMany(() => Tcc, 'advisor_id')
+  tccs: Tcc[];
+
+  @BelongsToMany(() => TccStudents, 'tcc_students', 'student_id', 'tcc_id')
+  tcc: Tcc[];
 }
