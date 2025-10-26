@@ -16,6 +16,9 @@ import { ProfileGuard } from './profile/profile.guard';
 import { RolesGuard } from './roles/roles.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
+import { TccModule } from './tcc/tcc.module';
+import { TccPresentationsModule } from './tcc-presentations/tcc-presentations.module';
+import { TccStudentsModule } from './tcc-students/tcc-students.module';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
 import { ComplementaryActivitiesModule } from './complementary-activities/complementary-activities.module';
@@ -68,6 +71,9 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     EventsModule,
     FilesModule,
     PresencesModule,
+    TccModule,
+    TccPresentationsModule,
+    TccStudentsModule,
     EmailModule,
     QueuesModule,
     ComplementaryActivitiesModule,
