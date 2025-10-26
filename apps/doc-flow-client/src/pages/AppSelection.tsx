@@ -8,6 +8,7 @@ import {
   CardActionArea,
 } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import EventIcon from "@mui/icons-material/Event";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -52,6 +53,14 @@ export function AppSelection() {
 
     getUserProfile();
   }, [token]);
+
+  const navigateToSchedule = () => {
+    if (isAdmin) {
+      navigate("/horarios/gerenciar");
+    } else {
+      navigate("/horarios");
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -138,6 +147,34 @@ export function AppSelection() {
                 </CardActionArea>
               </Card>
 
+              {isAdmin && (
+                <Card
+                  sx={{
+                    height: "100%",
+                    "&:hover": {
+                      transform: "scale(1.02)",
+                      transition: "transform 0.2s ease-in-out",
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={navigateToSchedule}
+                    sx={{ height: "100%" }}
+                  >
+                    <CardContent sx={{ textAlign: "center", p: 4 }}>
+                      <ScheduleIcon
+                        sx={{ fontSize: 60, color: "primary.main", mb: 2 }}
+                      />
+                      <Typography variant="h5" component="h2" gutterBottom>
+                        Gestão do Sistema
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        Administração de horários, disciplinas e salas"
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              )}
             </Box>
           </Box>
         </Container>
