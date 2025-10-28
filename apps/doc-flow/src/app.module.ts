@@ -18,7 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
-import { ComplementaryActivitiesModule } from './complementary-activities/complementary-activities.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
   imports: [
@@ -70,7 +70,7 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     PresencesModule,
     EmailModule,
     QueuesModule,
-    ComplementaryActivitiesModule,
+    ActivitiesModule,
   ],
   controllers: [],
   providers: [

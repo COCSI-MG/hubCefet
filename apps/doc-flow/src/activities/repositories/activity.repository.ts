@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindOptions, WhereOptions, Op, literal, QueryTypes } from 'sequelize';
-import { ComplementaryActivity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview } from '../entities';
-import { CreateComplementaryActivityDto } from '../dto/create-complementary-activity.dto';
-import { UpdateComplementaryActivityDto } from '../dto/update-complementary-activity.dto';
+import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview } from '../entities';
 import { User } from '../../users/entities/user.entity';
+import { CreateActivityDto } from '../dto/create-activity.dto';
+import { UpdateActivityDto } from '../dto/update-activity.dto';
 
 @Injectable()
-export class ComplementaryActivityRepository {
+export class ActivityRepository {
   constructor(
-    @InjectModel(ComplementaryActivity)
-    private readonly complementaryActivityModel: typeof ComplementaryActivity,
-  ) {}
+    @InjectModel(Activity)
+    private readonly activityModel: typeof Activity,
+  ) { }
 
   async create(
-    createDto: CreateComplementaryActivityDto,
+    createDto: CreateActivityDto,
     userId: string,
-  ): Promise<ComplementaryActivity> {
-    return this.complementaryActivityModel.create({
+  ): Promise<Activity> {
+    return this.activityModel.create({
       ...createDto,
       user_id: userId,
       status_id: 1,
@@ -25,19 +25,19 @@ export class ComplementaryActivityRepository {
   }
 
   async createWithTransaction(
-    createDto: CreateComplementaryActivityDto,
+    createDto: CreateActivityDto,
     userId: string,
     transaction: any,
-  ): Promise<ComplementaryActivity> {
-    return this.complementaryActivityModel.create({
+  ): Promise<Activity> {
+    return this.activityModel.create({
       ...createDto,
       user_id: userId,
       status_id: 1,
     }, { transaction });
   }
 
-  async findAll(options?: FindOptions): Promise<ComplementaryActivity[]> {
-    return this.complementaryActivityModel.findAll({
+  async findAll(options?: FindOptions): Promise<Activity[]> {
+    return this.activityModel.findAll({
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
@@ -57,15 +57,15 @@ export class ComplementaryActivityRepository {
     });
   }
 
-  async findByUserId(userId: string): Promise<ComplementaryActivity[]> {
+  async findByUserId(userId: string): Promise<Activity[]> {
     return this.findAll({
       where: { user_id: userId },
       order: [['created_at', 'DESC']],
     });
   }
 
-  async findByReviewer(reviewerId: string): Promise<ComplementaryActivity[]> {
-    const reviewedActivityIds = await this.complementaryActivityModel.sequelize.query(
+  async findByReviewer(reviewerId: string): Promise<Activity[]> {
+    const reviewedActivityIds = await this.activityModel.sequelize.query(
       `SELECT DISTINCT activity_id FROM activity_reviews WHERE reviewer_user_id = :reviewerId`,
       {
         replacements: { reviewerId },
@@ -80,14 +80,14 @@ export class ComplementaryActivityRepository {
         [Op.ne]: 3
       }
     };
-    
+
     if (reviewedIds.length > 0) {
       whereClause.id = {
         [Op.notIn]: reviewedIds
       };
     }
 
-    return this.complementaryActivityModel.findAll({
+    return this.activityModel.findAll({
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
@@ -109,8 +109,8 @@ export class ComplementaryActivityRepository {
     });
   }
 
-  async findOne(id: string): Promise<ComplementaryActivity | null> {
-    return this.complementaryActivityModel.findByPk(id, {
+  async findOne(id: string): Promise<Activity | null> {
+    return this.activityModel.findByPk(id, {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
@@ -131,28 +131,28 @@ export class ComplementaryActivityRepository {
 
   async update(
     id: string,
-    updateDto: UpdateComplementaryActivityDto,
-  ): Promise<[number, ComplementaryActivity[]]> {
-    return this.complementaryActivityModel.update(updateDto, {
+    updateDto: UpdateActivityDto,
+  ): Promise<[number, Activity[]]> {
+    return this.activityModel.update(updateDto, {
       where: { id },
       returning: true,
     });
   }
 
   async updateStatus(id: string, statusId: number): Promise<void> {
-    await this.complementaryActivityModel.update(
+    await this.activityModel.update(
       { status_id: statusId },
       { where: { id } },
     );
   }
 
   async remove(id: string): Promise<number> {
-    return this.complementaryActivityModel.destroy({
+    return this.activityModel.destroy({
       where: { id },
     });
   }
 
-  async findByStatus(statusId: number): Promise<ComplementaryActivity[]> {
+  async findByStatus(statusId: number): Promise<Activity[]> {
     return this.findAll({
       where: { status_id: statusId },
       order: [['created_at', 'DESC']],
@@ -160,12 +160,12 @@ export class ComplementaryActivityRepository {
   }
 
   async countByUser(userId: string): Promise<number> {
-    return this.complementaryActivityModel.count({
+    return this.activityModel.count({
       where: { user_id: userId },
     });
   }
 
-  async findPendingReview(): Promise<ComplementaryActivity[]> {
+  async findPendingReview(): Promise<Activity[]> {
     return this.findAll({
       where: { status_id: 1 },
       order: [['created_at', 'ASC']],
@@ -173,6 +173,6 @@ export class ComplementaryActivityRepository {
   }
 
   getSequelize() {
-    return this.complementaryActivityModel.sequelize;
+    return this.activityModel.sequelize;
   }
 } 
