@@ -1,5 +1,41 @@
 import { Injectable } from "@nestjs/common";
+import { ComplementaryActivityType } from "./entities/complementary-activity-type.entity";
+import { CreateComplementaryActivityTypeDto } from "./dto/create-complementary-activity-type.dto";
+import { UpdateComplementaryActivityTypeDto } from "./dto/update-complementary-activity-type.dto";
 
 @Injectable()
 export class ComplementaryActivityTypeRepository {
+  async create(createComplementaryActivityTypeDto: CreateComplementaryActivityTypeDto) {
+    return await ComplementaryActivityType.create(createComplementaryActivityTypeDto)
+  }
+
+  async findAll() {
+    return await ComplementaryActivityType.findAll()
+  }
+
+  async findOne(id: number) {
+    return await ComplementaryActivityType.findOne({
+      where: { id }
+    })
+  }
+
+  async findOneByName(name: string) {
+    return await ComplementaryActivityType.findOne({
+      where: { name }
+    })
+  }
+
+  async update(id: number, updateComplementaryActivityTypeDto: UpdateComplementaryActivityTypeDto) {
+    return await ComplementaryActivityType.update(updateComplementaryActivityTypeDto, {
+      where: {
+        id
+      }
+    })
+  }
+
+  async remove(id: number) {
+    return await ComplementaryActivityType.destroy({
+      where: { id }
+    })
+  }
 }

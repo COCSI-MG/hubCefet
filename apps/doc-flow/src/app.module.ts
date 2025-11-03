@@ -19,7 +19,6 @@ import { BullModule } from '@nestjs/bull';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
 import { ActivitiesModule } from './activities/activities.module';
-import { ComplementaryHourTypeModule } from './complementary-hour-type/complementary-hour-type.module';
 import { ComplementaryActivityTypeModule } from './complementary-activity-type/complementary-activity-type.module';
 
 @Module({
@@ -73,7 +72,6 @@ import { ComplementaryActivityTypeModule } from './complementary-activity-type/c
     EmailModule,
     QueuesModule,
     ActivitiesModule,
-    ComplementaryHourTypeModule,
     ComplementaryActivityTypeModule,
   ],
   controllers: [],

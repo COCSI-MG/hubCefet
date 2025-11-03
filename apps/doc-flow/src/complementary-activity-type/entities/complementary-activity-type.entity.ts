@@ -1,4 +1,14 @@
+import { Optional } from 'sequelize';
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+
+
+interface ComplementaryActivityTypeAttributes {
+  id: number
+  name: string
+  description: string
+}
+
+type ComplementaryActivityTypeCreationAttributes = Optional<ComplementaryActivityTypeAttributes, 'id' | 'description'>
 
 @Table({
   tableName: 'complementary_activities_types',
@@ -6,7 +16,7 @@ import { Table, Column, Model, DataType } from 'sequelize-typescript';
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 })
-export class ComplementaryActivityType extends Model {
+export class ComplementaryActivityType extends Model<ComplementaryActivityTypeAttributes, ComplementaryActivityTypeCreationAttributes> {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -25,5 +35,5 @@ export class ComplementaryActivityType extends Model {
     type: DataType.TEXT,
     allowNull: true,
   })
-  description?: string;
+  description: string;
 }
