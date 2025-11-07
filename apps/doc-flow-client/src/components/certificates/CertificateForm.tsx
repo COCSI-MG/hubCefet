@@ -37,6 +37,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<ComplementaryActivityType[]>()
+  const [loaded, setLoaded] = useState(false)
 
   const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
 
@@ -82,18 +83,23 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
     form.setValue("hours", value, { shouldValidate: true });
   };
 
-  async function fetchComplementaryActivityTypes() {
-    const response = await complementaryActivityTypeService.findAll()
-
-    setComplementaryActivityTypes(response)
-  }
 
   const isFormDisabled = disabled || isSubmitting || typesLoading;
 
   const activityTypeValue = form.watch('activityType')
 
   useEffect(() => {
-    fetchComplementaryActivityTypes()
+    async function fetchComplementaryActivityTypes() {
+      const response = await complementaryActivityTypeService.findAll()
+
+      setComplementaryActivityTypes(response)
+    }
+
+    if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && !loaded) {
+      fetchComplementaryActivityTypes().then(() => setLoaded(true))
+    } else {
+      setComplementaryActivityTypes(undefined)
+    }
   }, [activityTypeValue])
 
 
@@ -149,7 +155,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
             )}
           />
 
-          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && (
+          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && complementaryActivityTypes && (
             <FormField
               control={form.control}
               name="complementaryHoursType"
@@ -158,8 +164,8 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
                   <FormLabel>Tipo de Atividade Complementar</FormLabel>
                   <FormControl>
                     <SearchableSelect
-                      options={activityTypes.map(type => ({
-                        value: type.id,
+                      options={complementaryActivityTypes.map(type => ({
+                        value: type.id.toString(),
                         label: type.name,
                       }))}
                       value={field.value}
