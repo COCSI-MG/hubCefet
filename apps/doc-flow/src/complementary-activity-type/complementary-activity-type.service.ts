@@ -36,7 +36,7 @@ export class ComplementaryActivityTypeService {
       throw new NotFoundException('complementary acitivity type not found')
     }
 
-    await this.complementaryActivityTypeRepository.findOne(id)
+    return await this.complementaryActivityTypeRepository.findOne(id)
   }
 
 

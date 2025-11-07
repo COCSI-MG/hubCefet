@@ -6,7 +6,6 @@ import { Profiles } from 'src/profile/decorators/profile.decorator';
 import { Profile } from 'src/profile/enum/profile.enum';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
-import { ComplementaryActivityType } from './entities/complementary-activity-type.entity';
 import { ComplementaryActivityTypeDto } from './dto/complementary-activity-type.dto';
 
 @Controller('complementary-activity-type')

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import { ActivityTypeEnum, CertificateFormData } from "@/lib/types/certificate.t
 import CertificateFileUpload from "./CertificateFileUpload";
 import HoursInput from "./HoursInput";
 import { useActivityTypes } from "@/hooks/useActivityTypes";
+import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service";
 
 const certificateFormSchema = z.object({
   activityType: z.string().min(1, "Selecione o tipo de atividade"),
@@ -35,8 +36,10 @@ interface CertificateFormProps {
 export default function CertificateForm({ onSubmit, disabled = false }: CertificateFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<ComplementaryActivityType[]>()
 
   const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
+
 
   const form = useForm<CertificateFormSchema>({
     resolver: zodResolver(certificateFormSchema),
@@ -79,9 +82,20 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
     form.setValue("hours", value, { shouldValidate: true });
   };
 
+  async function fetchComplementaryActivityTypes() {
+    const response = await complementaryActivityTypeService.findAll()
+
+    setComplementaryActivityTypes(response)
+  }
+
   const isFormDisabled = disabled || isSubmitting || typesLoading;
 
   const activityTypeValue = form.watch('activityType')
+
+  useEffect(() => {
+    fetchComplementaryActivityTypes()
+  }, [activityTypeValue])
+
 
   if (typesError) {
     return (
