@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
-import { toast } from "sonner";
 
 export default function Signup() {
   const navigate = useNavigate();
