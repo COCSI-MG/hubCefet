@@ -79,29 +79,30 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
     }
   };
 
+  async function fetchComplementaryActivityTypes() {
+    try {
+      const response = await complementaryActivityTypeService.findAll()
+      setComplementaryActivityTypes(response)
+    } catch (error) {
+      toast.error('Nao foi possivel carregas os tipos de atividades complementares')
+    }
+  }
+
   const handleHoursChange = (value: number) => {
     form.setValue("hours", value, { shouldValidate: true });
   };
-
 
   const isFormDisabled = disabled || isSubmitting || typesLoading;
 
   const activityTypeValue = form.watch('activityType')
 
   useEffect(() => {
-    async function fetchComplementaryActivityTypes() {
-      const response = await complementaryActivityTypeService.findAll()
-
-      setComplementaryActivityTypes(response)
-    }
-
     if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && !loaded) {
       fetchComplementaryActivityTypes().then(() => setLoaded(true))
     } else {
       setComplementaryActivityTypes(undefined)
     }
   }, [activityTypeValue])
-
 
   if (typesError) {
     return (
