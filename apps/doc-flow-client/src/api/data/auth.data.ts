@@ -14,15 +14,11 @@ export const getAccessToken = async ({
   email,
   password,
 }: AuthSigninBody): Promise<AuthSigninResponse | undefined> => {
-  try {
-    const data: AuthSigninResponse = await authServiceInstance.signin(
-      email,
-      password
-    );
-    return data;
-  } catch (error) {
-    return undefined;
-  }
+  const data: AuthSigninResponse = await authServiceInstance.signin(
+    email,
+    password
+  );
+  return data;
 };
 
 export const signup = async ({
@@ -48,15 +44,8 @@ export const changePassword = async ({
   oldPassword,
   newPassword,
 }: ChangePasswordDto): Promise<void | string> => {
-  try {
-    return await authServiceInstance.changePassword({
-      oldPassword,
-      newPassword,
-    });
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.error(error);
-    }
-    return "Ocorreu um erro ao tentar alterar a senha";
-  }
+  return await authServiceInstance.changePassword({
+    oldPassword,
+    newPassword,
+  });
 };
