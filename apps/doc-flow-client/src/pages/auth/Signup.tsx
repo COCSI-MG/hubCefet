@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
+import { toast } from "sonner";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -22,17 +23,29 @@ export default function Signup() {
 
   const handleSubmit = async (data: SignupFormSchema) => {
     localStorage.removeItem("accessToken");
-    const accessToken = await signup({ ...data });
-    if (!accessToken) {
-      setError(
-        "Não foi possível realizar o cadastro. Tente novamente mais tarde.",
-      );
-      return;
+    try {
+      const response = await signup({ ...data });
+
+      if (!response) {
+        setError("nao foi possivel criar a conta no momento tente novamente mais tarde")
+        return
+      }
+
+      localStorage.setItem("accessToken", response.access_token);
+      setToken(response.access_token);
+      setIsAuthenticated(true);
+      navigate("/events");
+      return
+    } catch (error: any) {
+      console.log('teste', error)
+
+      const errMsg = error.response?.data?.message
+      const message = Array.isArray(errMsg)
+        ? errMsg[0]
+        : errMsg || error.message || "Erro inesperado ao criar conta, tente novamente mais tarde."
+
+      setError(message)
     }
-    localStorage.setItem("accessToken", accessToken);
-    setToken(accessToken);
-    setIsAuthenticated(true);
-    navigate("/events");
   };
 
   return (

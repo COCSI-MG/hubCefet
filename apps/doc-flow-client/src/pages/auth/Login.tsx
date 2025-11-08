@@ -34,14 +34,27 @@ export default function Login() {
   });
 
   const handleSubmit = async (data: AuthFormSchema) => {
-    const accessToken = await getAccessToken({ ...data });
-    if (!accessToken) {
-      setError("Não foi possível fazer login. Tente novamente.");
-      return;
+    try {
+      const response = await getAccessToken({ ...data });
+
+      if (!response) {
+        setError("nao foi possivel fazer login no momento tente novamente mais tarde")
+        return
+      }
+
+      localStorage.setItem("accessToken", response.access_token);
+      await checkAuthentication();
+      navigate("/events");
+    } catch (error: any) {
+      console.log('teste', error)
+
+      const errMsg = error.response?.data?.message
+      const message = Array.isArray(errMsg)
+        ? errMsg[0]
+        : errMsg || error.message || "Erro inesperado ao fazer o login, tente novamente mais tarde."
+
+      setError(message)
     }
-    localStorage.setItem("accessToken", accessToken);
-    await checkAuthentication();
-    navigate("/events");
   };
 
   const handleMagicLogin = async () => {
