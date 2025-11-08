@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import logo from "@/assets/cefet-logo.png";
 import { useState, useEffect, createContext } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 interface AuthErrorContextProps {
@@ -61,7 +61,6 @@ export default function AuthLayout() {
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Ah, não</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
