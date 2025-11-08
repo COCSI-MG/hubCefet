@@ -5,6 +5,7 @@ import {
   AuthSignupResponse,
   AuthSigninBody,
   AuthSignupBody,
+
 } from "@/lib/schemas/auth/index.schema";
 
 const authServiceInstance = new AuthService();
@@ -12,13 +13,13 @@ const authServiceInstance = new AuthService();
 export const getAccessToken = async ({
   email,
   password,
-}: AuthSigninBody): Promise<string | undefined> => {
+}: AuthSigninBody): Promise<AuthSigninResponse | undefined> => {
   try {
     const data: AuthSigninResponse = await authServiceInstance.signin(
       email,
       password
     );
-    return data.access_token;
+    return data;
   } catch (error) {
     return undefined;
   }
@@ -29,22 +30,18 @@ export const signup = async ({
   password,
   enrollment,
   fullName,
-}: AuthSignupBody): Promise<string | undefined> => {
-  try {
-    if (!enrollment || !fullName) {
-      throw new Error("Campos vazios não são permitidos");
-    }
-    const authServiceInstance = new AuthService();
-    const data: AuthSignupResponse = await authServiceInstance.signup(
-      email,
-      password,
-      enrollment,
-      fullName
-    );
-    return data.access_token;
-  } catch (err) {
-    console.error(err);
+}: AuthSignupBody): Promise<AuthSignupResponse | undefined> => {
+  if (!enrollment || !fullName) {
+    throw new Error("Campos vazios não são permitidos");
   }
+  const authServiceInstance = new AuthService();
+  const data: AuthSignupResponse = await authServiceInstance.signup(
+    email,
+    password,
+    enrollment,
+    fullName
+  );
+  return data;
 };
 
 export const changePassword = async ({
