@@ -9,8 +9,13 @@ export class ComplementaryActivityTypeRepository {
     return await ComplementaryActivityType.create(createComplementaryActivityTypeDto)
   }
 
-  async findAll() {
-    return await ComplementaryActivityType.findAll()
+  async findAll(limit: number, offset: number) {
+    const options: { limit?: number, offset?: number } = {}
+
+    if (limit) options.limit = limit;
+    if (offset) options.offset = offset;
+
+    return await ComplementaryActivityType.findAll(options)
   }
 
   async findOne(id: number) {

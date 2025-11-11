@@ -12,8 +12,12 @@ class ComplementaryActivityTypeService extends AbstractService {
     super("/complementary-activity-type", true);
   }
 
-  async findAll(): Promise<ComplementaryActivityType[]> {
-    return await this.api.get(this.basePath);
+  async findAll(args?: {
+    limit: number,
+    offset: number
+  }): Promise<ComplementaryActivityType[]> {
+    const params = args ? `limit = ${args.limit} & offset=${args.offset}` : ''
+    return await this.api.get(this.basePath + params);
   }
 
   async findOne(id: string): Promise<ComplementaryActivityType> {

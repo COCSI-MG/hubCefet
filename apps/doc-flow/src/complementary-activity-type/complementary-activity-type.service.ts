@@ -26,8 +26,8 @@ export class ComplementaryActivityTypeService {
     }
   }
 
-  async findAll() {
-    return await this.complementaryActivityTypeRepository.findAll()
+  async findAll(limit: number, offset: number) {
+    return await this.complementaryActivityTypeRepository.findAll(limit, offset)
   }
 
   async findOne(id: number) {

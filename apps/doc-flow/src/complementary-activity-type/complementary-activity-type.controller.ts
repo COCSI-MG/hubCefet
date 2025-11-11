@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ComplementaryActivityTypeService } from './complementary-activity-type.service';
 import { CreateComplementaryActivityTypeDto } from './dto/create-complementary-activity-type.dto';
 import { UpdateComplementaryActivityTypeDto } from './dto/update-complementary-activity-type.dto';
@@ -31,8 +31,12 @@ export class ComplementaryActivityTypeController {
     type: [ComplementaryActivityTypeDto],
   })
   @Get()
-  findAll() {
-    return this.complementaryActivityTypeService.findAll();
+  findAll(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+
+  ) {
+    return this.complementaryActivityTypeService.findAll(limit, offset);
   }
 
   @ApiOperation({ summary: 'Visualizar um tipo de atividade complementar por id' })
