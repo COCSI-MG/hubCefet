@@ -101,6 +101,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
       fetchComplementaryActivityTypes().then(() => setLoaded(true))
     } else {
       setComplementaryActivityTypes(undefined)
+      setLoaded(false)
     }
   }, [activityTypeValue])
 

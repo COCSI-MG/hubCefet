@@ -19,7 +19,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import FolderIcon from '@mui/icons-material/Folder';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { Award } from 'lucide-react';
-import { Dashboard, RateReview } from '@mui/icons-material';
+import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -124,6 +124,16 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
                 icon={<RateReview />}
               />
             )}
+
+            {(isAdmin || isProfessor) && (
+              <NavMenuItem
+                text="Horas Complementares"
+                onClick={() => navigate("/docflow/complementary")}
+                activeNavItem={location.pathname === "/docflow/complementary"}
+                icon={<AccessAlarm />}
+              />
+            )}
+
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
