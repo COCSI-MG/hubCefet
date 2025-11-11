@@ -105,7 +105,7 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
           </button>
         </div>
 
-        <ConfirmPassword onchange={handleConfirmPassword} />
+        <ConfirmPassword onchange={handleConfirmPassword} showPassword={showPassword} setShowPassword={() => setShowPassword} />
         <Button
           className="w-full bg-sky-900 text-white hover:bg-sky-700 rounded-2xl"
           type="submit"

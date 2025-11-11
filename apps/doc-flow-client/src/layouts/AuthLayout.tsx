@@ -19,9 +19,8 @@ export default function AuthLayout() {
 
   useEffect(() => {
     const texts = [
-      "Acesse seu evento",
+      "Acesse seus eventos",
       "Crie e adicione eventos",
-      "Acesse, crie e adicione eventos",
     ];
     let index = 0;
     const interval = setInterval(() => {
