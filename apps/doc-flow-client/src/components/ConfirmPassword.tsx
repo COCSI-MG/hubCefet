@@ -8,7 +8,7 @@ interface ConfirmPasswordProps {
 
 export default function ConfirmPassword({ ...props }: ConfirmPasswordProps) {
   return (
-    <>
+    <div>
       <Label className="text-sm" htmlFor="confirmPassword">
         Confirmar senha
       </Label>
@@ -19,6 +19,6 @@ export default function ConfirmPassword({ ...props }: ConfirmPasswordProps) {
         name="confirmPassword"
         onChange={props.onchange}
       />
-    </>
+    </div>
   );
 }
