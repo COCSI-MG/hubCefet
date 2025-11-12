@@ -22,7 +22,7 @@ import { AppSelection } from "@/pages/AppSelection";
 import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
 import { CertificateReview } from "@/pages/certificates";
-import { ComplementaryHoursType } from "@/pages/ComplementaryHoursType/ComplementaryHoursType";
+import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
 
 export default function Router() {
   return (
@@ -51,7 +51,7 @@ export default function Router() {
               path="complementary"
               element={<ProfileRoute profile={["Admin", "Professor"]} />}
             >
-              <Route path="" element={<ComplementaryHoursType />} />
+              <Route path="" element={<ComplementaryActivityTypeManagement />} />
             </Route>
 
             <Route path="certificates">

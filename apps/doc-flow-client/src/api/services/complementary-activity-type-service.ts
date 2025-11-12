@@ -16,7 +16,7 @@ class ComplementaryActivityTypeService extends AbstractService {
     limit: number,
     offset: number
   }): Promise<ComplementaryActivityType[]> {
-    const params = args ? `limit = ${args.limit} & offset=${args.offset}` : ''
+    const params = args ? `?limit=${args.limit}&offset=${args.offset}` : ''
     return await this.api.get(this.basePath + params);
   }
 
