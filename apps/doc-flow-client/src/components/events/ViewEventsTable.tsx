@@ -124,8 +124,7 @@ export function ViewEventsDataTable() {
                 vacancies: row.original.vacancies - 1,
               });
             toast.success(
-              `Número de vacancies no evento ${row.original.name}: ${
-                row.original.vacancies - 1
+              `Número de vacancies no evento ${row.original.name}: ${row.original.vacancies - 1
               }`
             );
           }
@@ -348,9 +347,8 @@ export function ViewEventsDataTable() {
           <Button
             variant="outline"
             size="sm"
-            className={`border rounded-xl ${
-              activeFilter === "" && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${activeFilter === "" && "bg-neutral-300"
+              }`}
             onClick={() => handleFilterClick("")}
           >
             Todos
@@ -359,9 +357,8 @@ export function ViewEventsDataTable() {
             variant="outline"
             size="sm"
             onClick={() => handleFilterClick("upcoming")}
-            className={`border rounded-xl ${
-              activeFilter === "upcoming" && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${activeFilter === "upcoming" && "bg-neutral-300"
+              }`}
           >
             Próximo
           </Button>
@@ -369,9 +366,8 @@ export function ViewEventsDataTable() {
             variant="outline"
             size="sm"
             onClick={() => handleFilterClick("started")}
-            className={`border rounded-xl ${
-              activeFilter === "started" && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${activeFilter === "started" && "bg-neutral-300"
+              }`}
           >
             Em andamento
           </Button>
@@ -379,9 +375,8 @@ export function ViewEventsDataTable() {
             variant="outline"
             size="sm"
             onClick={() => handleFilterClick("ended")}
-            className={`border rounded-xl ${
-              activeFilter === "ended" && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${activeFilter === "ended" && "bg-neutral-300"
+              }`}
           >
             Encerrado
           </Button>

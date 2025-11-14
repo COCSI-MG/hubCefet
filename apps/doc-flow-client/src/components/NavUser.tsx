@@ -19,7 +19,7 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton size="lg" asChild>
+        <SidebarMenuButton size="lg" className="py-7 rounded-xl" asChild>
           <a href="/profile" className="flex items-center">
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage src={user.avatar} alt={user.name} />
@@ -31,8 +31,8 @@ export function NavUser({
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col ml-2">
-              <span className="ml-2 truncate font-semibold">{user.name}</span>
-              <span className="ml-2 truncate text-sm text-muted">
+              <span className="truncate font-semibold">{user.name}</span>
+              <span className="truncate text-sm text-muted">
                 {user.email}
               </span>
             </div>
