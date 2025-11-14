@@ -82,7 +82,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
   async function fetchComplementaryActivityTypes() {
     try {
       const response = await complementaryActivityTypeService.findAll()
-      setComplementaryActivityTypes(response)
+      setComplementaryActivityTypes(response.rows)
     } catch (error) {
       toast.error('Nao foi possivel carregas os tipos de atividades complementares')
     }

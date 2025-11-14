@@ -19,7 +19,7 @@ export class ComplementaryActivityTypeController {
     type: ApiResponseDto,
   })
   @Post()
-  @Profiles(Profile.Admin, Profile.Professor)
+  @Profiles(Profile.Admin)
   create(@Body() createComplementaryActivityTypeDto: CreateComplementaryActivityTypeDto) {
     return this.complementaryActivityTypeService.create(createComplementaryActivityTypeDto);
   }
@@ -46,7 +46,7 @@ export class ComplementaryActivityTypeController {
     type: ComplementaryActivityTypeDto,
   })
   @Get(':id')
-  @Profiles(Profile.Admin, Profile.Professor)
+  @Profiles(Profile.Admin)
   findOne(@Param('id') id: number) {
     return this.complementaryActivityTypeService.findOne(id);
   }
@@ -58,7 +58,7 @@ export class ComplementaryActivityTypeController {
     type: ApiResponseDto,
   })
   @Patch(':id')
-  @Profiles(Profile.Admin, Profile.Professor)
+  @Profiles(Profile.Admin)
   update(@Param('id') id: string, @Body() updateComplementaryActivityTypeDto: UpdateComplementaryActivityTypeDto) {
     return this.complementaryActivityTypeService.update(+id, updateComplementaryActivityTypeDto);
   }
@@ -70,7 +70,7 @@ export class ComplementaryActivityTypeController {
     type: ApiResponseDto,
   })
   @Delete(':id')
-  @Profiles(Profile.Admin, Profile.Professor)
+  @Profiles(Profile.Admin)
   remove(@Param('id') id: string) {
     return this.complementaryActivityTypeService.remove(+id);
   }

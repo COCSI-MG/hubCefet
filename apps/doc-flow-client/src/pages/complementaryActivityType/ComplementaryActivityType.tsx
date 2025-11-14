@@ -97,7 +97,7 @@ export function ComplementaryActivityTypeManagement() {
     state: {
       pagination,
     },
-    rowCount: complementaryActivity.count,
+    pageCount: Math.ceil(complementaryActivity.count / pagination.pageSize)
   })
 
   return (

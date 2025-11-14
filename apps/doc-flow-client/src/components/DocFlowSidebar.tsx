@@ -125,7 +125,7 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
               />
             )}
 
-            {(isAdmin || isProfessor) && (
+            {(isAdmin) && (
               <NavMenuItem
                 text="Horas Complementares"
                 onClick={() => navigate("/docflow/complementary")}

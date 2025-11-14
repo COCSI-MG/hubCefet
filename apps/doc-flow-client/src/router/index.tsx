@@ -49,7 +49,7 @@ export default function Router() {
 
             <Route
               path="complementary"
-              element={<ProfileRoute profile={["Admin", "Professor"]} />}
+              element={<ProfileRoute profile={["Admin"]} />}
             >
               <Route path="" element={<ComplementaryActivityTypeManagement />} />
             </Route>
