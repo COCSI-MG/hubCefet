@@ -104,7 +104,7 @@ export function ComplementaryActivityTypeManagement() {
     <>
       <PageHeader
         title="Gerenciamento dos tipos de atividades complementares"
-        description="Cadastre, atualize, remova e visualize os tipos de atividades complementares"
+        description="Cadastre, visualize, atualize e remova os tipos de atividades complementares"
       />
 
       <div className="container max-w-full flex flex-col gap-6 p-6 h-fit ">
