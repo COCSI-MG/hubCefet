@@ -15,7 +15,7 @@ export class ComplementaryActivityTypeRepository {
     if (limit) options.limit = limit;
     if (offset) options.offset = offset;
 
-    return await ComplementaryActivityType.findAll(options)
+    return await ComplementaryActivityType.findAndCountAll(options)
   }
 
   async findOne(id: number) {

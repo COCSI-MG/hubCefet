@@ -7,6 +7,22 @@ export interface ComplementaryActivityType {
   description?: string
 }
 
+export interface ComplementaryActivityTypeWithTotal {
+  rows: {
+    id: number
+    name: string
+    description?: string
+  }[],
+  count: number
+}
+
+
+export interface UpsertComplementaryActivityType {
+  name: string
+  description?: string
+}
+
+
 class ComplementaryActivityTypeService extends AbstractService {
   constructor() {
     super("/complementary-activity-type", true);
@@ -15,7 +31,7 @@ class ComplementaryActivityTypeService extends AbstractService {
   async findAll(args?: {
     limit: number,
     offset: number
-  }): Promise<ComplementaryActivityType[]> {
+  }): Promise<ComplementaryActivityTypeWithTotal> {
     const params = args ? `?limit=${args.limit}&offset=${args.offset}` : ''
     return await this.api.get(this.basePath + params);
   }
@@ -24,11 +40,11 @@ class ComplementaryActivityTypeService extends AbstractService {
     return await this.api.get(this.basePath + `/${id}`);
   }
 
-  async create(createComplementaryActivityType: ComplementaryActivityType): Promise<ApiResponse<string>> {
+  async create(createComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
     return await this.api.post(this.basePath, createComplementaryActivityType)
   }
 
-  async update(id: string, updateComplementaryActivityType: ComplementaryActivityType): Promise<ApiResponse<string>> {
+  async update(id: string, updateComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
     return await this.api.patch(this.basePath + `/${id}`, updateComplementaryActivityType)
   }
 
