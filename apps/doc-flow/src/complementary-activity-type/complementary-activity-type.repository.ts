@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ComplementaryActivityType } from "./entities/complementary-activity-type.entity";
 import { CreateComplementaryActivityTypeDto } from "./dto/create-complementary-activity-type.dto";
 import { UpdateComplementaryActivityTypeDto } from "./dto/update-complementary-activity-type.dto";
+import sequelize from "sequelize";
 
 @Injectable()
 export class ComplementaryActivityTypeRepository {
@@ -15,7 +16,10 @@ export class ComplementaryActivityTypeRepository {
     if (limit) options.limit = limit;
     if (offset) options.offset = offset;
 
-    return await ComplementaryActivityType.findAndCountAll(options)
+    return await ComplementaryActivityType.findAndCountAll({
+      order: sequelize.col('id'),
+      ...options
+    })
   }
 
   async findOne(id: number) {
