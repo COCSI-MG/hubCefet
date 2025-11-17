@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import useAuth from "@/hooks/useAuth";
 import AuthService from "@/api/services/auth.service";
+import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
 const authService = new AuthService();
 
@@ -11,12 +12,12 @@ export default function MagicLogin() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { checkAuthentication } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [countdown, setCountdown] = useState(3);
-  
+
   const token = searchParams.get("token");
 
   useEffect(() => {
@@ -30,12 +31,12 @@ export default function MagicLogin() {
       try {
         setLoading(true);
         const response = await authService.verifyMagicLogin(token);
-        
+
         if (response.access_token) {
           localStorage.setItem("accessToken", response.access_token);
           await checkAuthentication();
           setSuccess(true);
-          
+
           const timer = setInterval(() => {
             setCountdown((prev) => {
               if (prev <= 1) {
@@ -46,15 +47,15 @@ export default function MagicLogin() {
               return prev - 1;
             });
           }, 1000);
-          
+
           return () => clearInterval(timer);
         } else {
           setError("Resposta inválida do servidor");
         }
-      } catch (error: any) {
-        const errorMessage = error.response?.data?.message || "Token inválido ou expirado";
-        setError(errorMessage);
-        console.error("Erro no Magic Login:", error);
+      } catch (err: any) {
+        const processedError = ErrorProcessor.processError(err)
+
+        setError(processedError.message)
       } finally {
         setLoading(false);
       }
@@ -79,7 +80,7 @@ export default function MagicLogin() {
                 Autenticação Segura CEFET-RJ
               </p>
             </div>
-            
+
             {loading && (
               <div className="space-y-6">
                 <div className="flex justify-center">
@@ -95,7 +96,7 @@ export default function MagicLogin() {
                     Verificando seu token de acesso...
                   </p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-sky-500 to-indigo-500 h-2 rounded-full animate-pulse" style={{width: "75%"}}></div>
+                    <div className="bg-gradient-to-r from-sky-500 to-indigo-500 h-2 rounded-full animate-pulse" style={{ width: "75%" }}></div>
                   </div>
                 </div>
               </div>
@@ -107,7 +108,7 @@ export default function MagicLogin() {
                   <div className="text-6xl mb-4 animate-bounce">✅</div>
                   <div className="absolute -top-2 -right-2 text-2xl animate-ping">✨</div>
                 </div>
-                
+
                 <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
                   <AlertDescription className="text-green-800">
                     <div className="space-y-2">
@@ -134,7 +135,7 @@ export default function MagicLogin() {
                   <div className="text-6xl mb-4">❌</div>
                   <div className="absolute -top-1 -right-1 text-lg animate-pulse">⚠️</div>
                 </div>
-                
+
                 <Alert className="border-red-200 bg-gradient-to-r from-red-50 to-pink-50 text-left">
                   <AlertDescription className="text-red-800">
                     <div className="space-y-3">
@@ -142,7 +143,7 @@ export default function MagicLogin() {
                         <p className="font-semibold">❌ Erro no Magic Login</p>
                         <p className="text-sm mt-1">{error}</p>
                       </div>
-                      
+
                       <div className="border-t border-red-200 pt-3">
                         <p className="font-medium text-sm mb-2">🔍 Possíveis causas:</p>
                         <ul className="text-sm space-y-1 list-disc list-inside">
@@ -159,7 +160,7 @@ export default function MagicLogin() {
             )}
           </div>
         </div>
-        
+
         <div className="text-center mt-6 space-y-2">
           <p className="text-sm text-gray-500 font-medium">
             DocFlow - Sistema Acadêmico CEFET-RJ
@@ -175,6 +176,6 @@ export default function MagicLogin() {
       </div>
     </div>
   );
-} 
- 
- 
+}
+
+

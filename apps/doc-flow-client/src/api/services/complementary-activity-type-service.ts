@@ -36,7 +36,7 @@ class ComplementaryActivityTypeService extends AbstractService {
     return await this.api.get(this.basePath + params);
   }
 
-  async findOne(id: string): Promise<ComplementaryActivityType> {
+  async findOne(id: number): Promise<ComplementaryActivityType> {
     return await this.api.get(this.basePath + `/${id}`);
   }
 
@@ -44,11 +44,11 @@ class ComplementaryActivityTypeService extends AbstractService {
     return await this.api.post(this.basePath, createComplementaryActivityType)
   }
 
-  async update(id: string, updateComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
+  async update(id: number, updateComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
     return await this.api.patch(this.basePath + `/${id}`, updateComplementaryActivityType)
   }
 
-  async remove(id: string): Promise<ApiResponse<string>> {
+  async remove(id: number): Promise<ApiResponse<string>> {
     return await this.api.delete(this.basePath + `/${id}`)
   }
 }

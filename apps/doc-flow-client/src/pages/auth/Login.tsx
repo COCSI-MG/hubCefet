@@ -12,6 +12,7 @@ import { authFormSchema, type AuthFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import AuthService from "@/api/services/auth.service";
 import { Separator } from "@/components/ui/separator";
+import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
 const authService = new AuthService();
 
@@ -45,15 +46,10 @@ export default function Login() {
       localStorage.setItem("accessToken", response.access_token);
       await checkAuthentication();
       navigate("/events");
-    } catch (error: any) {
-      console.log('teste', error)
+    } catch (err: any) {
+      const processedError = ErrorProcessor.processError(err)
 
-      const errMsg = error.response?.data?.message
-      const message = Array.isArray(errMsg)
-        ? errMsg[0]
-        : errMsg || error.message || "Erro inesperado ao fazer o login, tente novamente mais tarde."
-
-      setError(message)
+      setError(processedError.message)
     }
   };
 

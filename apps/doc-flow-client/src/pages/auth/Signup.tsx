@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
+import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -35,15 +36,10 @@ export default function Signup() {
       setIsAuthenticated(true);
       navigate("/events");
       return
-    } catch (error: any) {
-      console.log('teste', error)
+    } catch (err: any) {
+      const processedError = ErrorProcessor.processError(err)
 
-      const errMsg = error.response?.data?.message
-      const message = Array.isArray(errMsg)
-        ? errMsg[0]
-        : errMsg || error.message || "Erro inesperado ao criar conta, tente novamente mais tarde."
-
-      setError(message)
+      setError(processedError.message)
     }
   };
 
