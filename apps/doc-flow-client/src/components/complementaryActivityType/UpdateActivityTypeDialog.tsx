@@ -8,6 +8,7 @@ import { z } from "zod"
 import * as Dialog from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 interface UpdateActivityTypeDialogProps {
   pagination: Pagination;
@@ -35,6 +36,15 @@ export function UpdateActivityTypeDialog({ pagination, fetchComplementaryActivit
       description: ""
     }
   })
+
+  useEffect(() => {
+    if (item) {
+      reset({
+        name: item.name,
+        description: item.description
+      })
+    }
+  }, [item])
 
   const handleUpdate = async (formData: UpsertComplementaryActivityType) => {
     if (!item) return

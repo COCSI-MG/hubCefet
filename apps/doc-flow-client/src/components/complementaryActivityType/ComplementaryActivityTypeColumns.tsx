@@ -11,11 +11,21 @@ export function GetComplementaryActivityTypeColumns(
   return [
 
     columnHelper.accessor('name', {
-      header: 'Nome'
+      header: 'Nome',
+      cell: (cell) => (
+        <span className="block w-96 truncate">
+          {cell.getValue()}
+        </span>
+      )
     }),
 
     columnHelper.accessor('description', {
-      header: 'Descrição'
+      header: 'Descrição',
+      cell: (cell) => (
+        <span className="block w-96 truncate">
+          {cell.getValue()}
+        </span>
+      )
     }),
 
     columnHelper.display({
@@ -25,7 +35,7 @@ export function GetComplementaryActivityTypeColumns(
         const item = row.original
 
         return (
-          <div className="flex items-center space-x-2">
+          <div className="flex justify-start items-center gap-2">
             <Button
               className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
               variant="secondary"
