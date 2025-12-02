@@ -57,10 +57,15 @@ export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagi
           </p>
 
           <div className="flex justify-end gap-3 mt-6">
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+            <Button
+              className="self-end rounded-2xl text-white hover:bg-neutral-700 text-lg [&_svg]:size-5"
+              variant="secondary"
+              onClick={() => setIsModalOpen(false)}
+            >
               Cancelar
             </Button>
             <Button
+              className="self-end rounded-2xl hover:bg-red-500/70 text-white text-lg [&_svg]:size-5"
               variant="destructive"
               onClick={handleDelete}
             >
@@ -69,7 +74,7 @@ export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagi
           </div>
 
           <Dialog.Close asChild>
-            <button className="absolute top-2 right-2 text-gray-600">
+            <button className="absolute top-2 right-2 text-gray-600 rounded-lg p-1 hover:bg-sky-900">
               <X />
             </button>
           </Dialog.Close>

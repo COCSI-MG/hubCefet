@@ -338,144 +338,146 @@ export function ViewEventsDataTable() {
 
   return (
     <div>
-      <SearchBar
-        placeholder="Pesquisar eventos"
-        onChange={(e) => table.setGlobalFilter(e.target.value)}
-      />
-      <div className="flex flex-row justify-between items-center w-full space-y-4">
-        <div className="space-x-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className={`border rounded-xl ${activeFilter === "" && "bg-neutral-300"
-              }`}
-            onClick={() => handleFilterClick("")}
-          >
-            Todos
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleFilterClick("upcoming")}
-            className={`border rounded-xl ${activeFilter === "upcoming" && "bg-neutral-300"
-              }`}
-          >
-            Próximo
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleFilterClick("started")}
-            className={`border rounded-xl ${activeFilter === "started" && "bg-neutral-300"
-              }`}
-          >
-            Em andamento
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleFilterClick("ended")}
-            className={`border rounded-xl ${activeFilter === "ended" && "bg-neutral-300"
-              }`}
-          >
-            Encerrado
-          </Button>
-        </div>
+      <div className="flex flex-col gap-4">
+        <SearchBar
+          placeholder="Pesquisar eventos"
+          onChange={(e) => table.setGlobalFilter(e.target.value)}
+        />
+        <div className="flex flex-col xl:flex-row justify-between xl:items-center w-full space-y-4">
+          <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className={`border rounded-xl ${activeFilter === "" && "bg-neutral-300"
+                }`}
+              onClick={() => handleFilterClick("")}
+            >
+              Todos
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFilterClick("upcoming")}
+              className={`border rounded-xl ${activeFilter === "upcoming" && "bg-neutral-300"
+                }`}
+            >
+              Próximo
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFilterClick("started")}
+              className={`border rounded-xl ${activeFilter === "started" && "bg-neutral-300"
+                }`}
+            >
+              Em andamento
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFilterClick("ended")}
+              className={`border rounded-xl ${activeFilter === "ended" && "bg-neutral-300"
+                }`}
+            >
+              Encerrado
+            </Button>
+          </div>
 
-        <div className="flex space-x-4">
-          <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
-            <Dialog.Trigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-xl bg-red-600 text-white"
-              >
-                Faça o seu Check-Out
-              </Button>
-            </Dialog.Trigger>
+          <div className="flex flex-col gap-1 md:flex-row ">
+            <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
+              <Dialog.Trigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl bg-red-600 text-white"
+                >
+                  Faça o seu Check-Out
+                </Button>
+              </Dialog.Trigger>
 
-            <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-              <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                <Dialog.Title className="text-xl font-bold">
-                  Check-Out
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-600">
-                  Insira seus dados para confirmar o check-out.
-                </Dialog.Description>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                  <Dialog.Title className="text-xl font-bold">
+                    Check-Out
+                  </Dialog.Title>
+                  <Dialog.Description className="text-gray-600">
+                    Insira seus dados para confirmar o check-out.
+                  </Dialog.Description>
 
-                {success && (
-                  <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                    {success}
-                  </div>
-                )}
+                  {success && (
+                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                      {success}
+                    </div>
+                  )}
 
-                <CheckOutForm
-                  form={form}
-                  onSubmit={onSubmitUpdate}
-                  events={presentEvents}
-                  presences={presences}
-                />
+                  <CheckOutForm
+                    form={form}
+                    onSubmit={onSubmitUpdate}
+                    events={presentEvents}
+                    presences={presences}
+                  />
 
-                <Dialog.Close asChild>
-                  <button className="absolute top-2 right-2 text-gray-600">
-                    ✖
-                  </button>
-                </Dialog.Close>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
+                  <Dialog.Close asChild>
+                    <button className="absolute top-2 right-2 text-gray-600">
+                      ✖
+                    </button>
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
 
-          <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
-            <Dialog.Trigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-xl bg-sky-800 text-white"
-              >
-                Faça o seu Check-In
-              </Button>
-            </Dialog.Trigger>
+            <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
+              <Dialog.Trigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl bg-sky-800 text-white"
+                >
+                  Faça o seu Check-In
+                </Button>
+              </Dialog.Trigger>
 
-            <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-              <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                <Dialog.Title className="text-xl font-bold">
-                  Check-In
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-600">
-                  Insira seus dados para confirmar o check-in.
-                </Dialog.Description>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                  <Dialog.Title className="text-xl font-bold">
+                    Check-In
+                  </Dialog.Title>
+                  <Dialog.Description className="text-gray-600">
+                    Insira seus dados para confirmar o check-in.
+                  </Dialog.Description>
 
-                {success && (
-                  <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                    {success}
-                  </div>
-                )}
+                  {success && (
+                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                      {success}
+                    </div>
+                  )}
 
-                <CheckInForm
-                  form={form}
-                  onSubmit={onSubmit}
-                  events={registeredEvents}
-                />
+                  <CheckInForm
+                    form={form}
+                    onSubmit={onSubmit}
+                    events={registeredEvents}
+                  />
 
-                <Dialog.Close asChild>
-                  <button className="absolute top-2 right-2 text-gray-600">
-                    ✖
-                  </button>
-                </Dialog.Close>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
+                  <Dialog.Close asChild>
+                    <button className="absolute top-2 right-2 text-gray-600">
+                      ✖
+                    </button>
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl bg-sky-800 text-white"
-            onClick={handleSubscribe}
-          >
-            Inscreva-se
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl bg-sky-800 text-white"
+              onClick={handleSubscribe}
+            >
+              Inscreva-se
+            </Button>
+          </div>
         </div>
       </div>
       <div className="w-full mb-3 mt-2 bg-sky-50 border rounded-xl h-fit-content flex items-center space-x-1 px-2">

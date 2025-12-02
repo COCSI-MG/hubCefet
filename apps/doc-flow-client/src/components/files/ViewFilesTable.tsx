@@ -110,14 +110,13 @@ export function ViewFilesTable() {
         placeholder="Pesquisar arquivos"
         onChange={(e) => table.setGlobalFilter(e.target.value)}
       />
-      <div className="flex flex-row justify-between items-center w-full space-y-4">
-        <div className="space-x-1">
+      <div className="flex flex-col md:flex-row justify-between xl:items-center w-full space-y-4">
+        <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
           <Button
             variant="outline"
             size="sm"
-            className={`border rounded-xl ${
-              sorting.length === 0 && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${sorting.length === 0 && "bg-neutral-300"
+              }`}
             onClick={() => handleSorting("")}
           >
             Todos
@@ -126,9 +125,8 @@ export function ViewFilesTable() {
             variant="outline"
             size="sm"
             onClick={() => handleSorting("creator")}
-            className={`border rounded-xl ${
-              table.getColumn("user")?.getIsSorted() && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${table.getColumn("user")?.getIsSorted() && "bg-neutral-300"
+              }`}
           >
             Responsável
           </Button>
@@ -136,21 +134,20 @@ export function ViewFilesTable() {
             variant="outline"
             size="sm"
             onClick={() => handleSorting("time")}
-            className={`border rounded-xl ${
-              table.getColumn("created_at")?.getIsSorted() && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${table.getColumn("created_at")?.getIsSorted() && "bg-neutral-300"
+              }`}
           >
             Por tempo de criação
           </Button>
         </div>
 
-        <div>
+        <div className="max-md:w-full">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant={"outline"}
                 size={"lg"}
-                className="rounded-2xl bg-neutral-100 text-sky-700"
+                className="rounded-2xl bg-neutral-100 text-sky-700 max-md:w-full"
               >
                 <Filter />
                 Filtrar

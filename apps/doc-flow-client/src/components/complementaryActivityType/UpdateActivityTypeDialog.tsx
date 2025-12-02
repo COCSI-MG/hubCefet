@@ -128,7 +128,7 @@ export function UpdateActivityTypeDialog({ pagination, fetchComplementaryActivit
           </form>
 
           <Dialog.Close asChild>
-            <button className="absolute top-2 right-2 text-gray-600">
+            <button className="absolute top-2 right-2 text-gray-600 rounded-lg p-1 hover:bg-sky-900">
               <X />
             </button>
           </Dialog.Close>
