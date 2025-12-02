@@ -110,7 +110,7 @@ export function ViewFilesTable() {
         placeholder="Pesquisar arquivos"
         onChange={(e) => table.setGlobalFilter(e.target.value)}
       />
-      <div className="flex flex-col md:flex-row justify-between xl:items-center w-full space-y-4">
+      <div className="flex flex-col md:flex-row justify-between md:items-center w-full space-y-4">
         <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
           <Button
             variant="outline"

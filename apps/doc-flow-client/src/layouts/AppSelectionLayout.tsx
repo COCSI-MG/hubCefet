@@ -1,5 +1,5 @@
 import { AppSelectionMobileMenu } from "@/components/AppSelectionMobileMenu";
-import { DocFlowSidebar } from "@/components/DocFlowSidebar";
+import { AppSelectionSidebar } from "@/components/AppSelectionSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Outlet } from "react-router";
@@ -26,7 +26,7 @@ export default function AppSelecionLayout() {
   return (
     <div className="h-screen flex">
       <SidebarProvider>
-        <DocFlowSidebar />
+        <AppSelectionSidebar />
         <SidebarInset className="flex-1 overflow-auto">
           <main className="p-4">
             <Outlet />
