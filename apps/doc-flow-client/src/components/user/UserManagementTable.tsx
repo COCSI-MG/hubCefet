@@ -20,6 +20,7 @@ import { Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { profileService } from "@/api/services/profile.service";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
+import { ApiError } from "@/api/errors/ApiError";
 
 type User = components["schemas"]["User"];
 
@@ -33,29 +34,56 @@ export function UserManagementDataTable() {
 
   const fetchUsers = async () => {
     try {
-      const users = await userService.getAll({ limit: 1000, offset: 0 });
-      if (!users.data.users) {
+      const response = await userService.getAll({ limit: 10, offset: 0 });
+
+      const { users } = response.data;
+      if (!users) {
         toast.error("Erro ao carregar usuários");
         return;
       }
 
-      setData(users.data.users);
+      setData(users);
     } catch (err) {
-      console.error("Error fetching users:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao carregar usuários");
     }
   };
 
   const fetchProfiles = async () => {
-    const profiles = await profileService.getAll({ limit: 1000, offset: 0 });
-    if (!profiles.data.profiles) return;
-    setProfiles(profiles.data.profiles);
+    try {
+      const response = await profileService.getAll({ limit: 100, offset: 0 });
+
+      const { profiles } = response.data;
+      if (!profiles) return;
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao carregar perfis");
+    }
   };
 
   const deleteUsers = async (ids: string[]): Promise<boolean> => {
-    const deletePromises = ids.map((id) => userService.delete(id));
-    const results = await Promise.all(deletePromises);
-    return results.every((result) => result.success);
+    try {
+      const results = await Promise.all(ids.map((id) => userService.delete(id)));
+      return results.every((result) => result.success);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return false;
+      }
+
+      toast.error("Erro ao excluir usuários");
+      return false;
+    }
   };
 
   const handleDeleteSelected = async () => {
@@ -66,22 +94,27 @@ export function UserManagementDataTable() {
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${selectedRows.length} usuário(s)? Esta ação não pode ser desfeita.`
-    );
+    const confirmed = window.confirm(`Tem certeza que deseja excluir ${selectedRows.length} usuário(s)? Esta ação não pode ser desfeita.`);
 
-    if (!confirmDelete) return;
+    if (!confirmed) return;
 
     try {
-      await deleteUsers(selectedRows.map((row) => row.id));
+      const success = await deleteUsers(selectedRows.map((row) => row.id));
 
-      toast.success(
-        `${selectedRows.length} usuário(s) excluído(s) com sucesso`
-      );
+      if (!success) {
+        return;
+      }
+
+      toast.success(`${selectedRows.length} usuário(s) excluído(s) com sucesso.`);
+
       setRowSelection({});
       fetchUsers();
     } catch (err) {
-      console.error("Error deleting users:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao excluir usuários");
     }
   };

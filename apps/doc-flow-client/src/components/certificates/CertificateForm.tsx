@@ -16,7 +16,8 @@ import { ActivityTypeEnum, CertificateFormData } from "@/lib/types/certificate.t
 import CertificateFileUpload from "./CertificateFileUpload";
 import HoursInput from "./HoursInput";
 import { useActivityTypes } from "@/hooks/useActivityTypes";
-import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service";
+import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 const certificateFormSchema = z.object({
   activityType: z.string().min(1, "Selecione o tipo de atividade"),
@@ -72,8 +73,13 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
       setSelectedFile(null);
 
       toast.success("Certificado enviado com sucesso!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao enviar certificado");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Não foi possível enviar o certificado");
     } finally {
       setIsSubmitting(false);
     }
@@ -83,8 +89,13 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
     try {
       const response = await complementaryActivityTypeService.findAll()
       setComplementaryActivityTypes(response.rows)
-    } catch (error) {
-      toast.error('Nao foi possivel carregas os tipos de atividades complementares')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro interno no servidor, tente novamente depois");
     }
   }
 

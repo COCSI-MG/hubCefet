@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import EventsForm from "@/components/events/EventsForm";
 import PageHeader from "@/components/PageHeader";
 import { eventService } from "@/api/services/event.service";
+import { toast } from "sonner";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function EventsEdit() {
   const [event, setEvent] = useState<Event | null>(null);
@@ -13,9 +15,16 @@ export default function EventsEdit() {
   const navigate = useNavigate();
 
   const fetchEvent = async (id: string) => {
-    const event = await eventService.getOne(id);
-    if (event.data.event) {
+    try {
+      const event = await eventService.getOne(id);
       setEvent(event.data.event);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro inesperado ao procurar eventos")
     }
   };
 

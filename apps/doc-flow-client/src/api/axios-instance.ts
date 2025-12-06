@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ApiError } from "./errors/ApiError";
 import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -11,29 +12,6 @@ export const publicAxiosInstance = axios.create({
   },
 });
 
-// Add error handling interceptor to public instance too
-publicAxiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const originalRequest = error.config;
-
-    // Auto error handling with opt-out capability
-    const skipErrorToast =
-      originalRequest.skipErrorToast ||
-      originalRequest.headers?.["X-Skip-Error-Toast"] === "true";
-
-    if (!skipErrorToast) {
-      ErrorProcessor.showErrorToast(error, {
-        component: "AxiosInterceptor",
-        action: `${originalRequest.method?.toUpperCase()} ${originalRequest.url}`,
-        timestamp: new Date(),
-      });
-    }
-
-    return Promise.reject(error);
-  }
-);
-
 export const privateAxiosInstance = axios.create({
   baseURL: API_URL,
   timeout: 10000,
@@ -42,54 +20,42 @@ export const privateAxiosInstance = axios.create({
   },
 });
 
-privateAxiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+publicAxiosInstance.interceptors.response.use(
+  (res) => res,
   (error) => {
-    console.error("Erro na requisição:", error);
-    return Promise.reject(error);
+    const status = error.response?.status ?? 500;
+    const message = error.response?.data?.message ?? "Erro inesperado";
+    const data = error.response?.data;
+
+    throw new ApiError(message, status, data);
   }
 );
 
+privateAxiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 privateAxiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  (res) => res,
+  (error) => {
+    const status = error.response?.status ?? 500;
 
-    // Handle 401 (authentication) errors first
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        localStorage.removeItem("accessToken");
-        window.location.href = "/login";
-        return Promise.reject(error);
-      } catch (refreshError) {
-        console.error("Falha ao renovar autenticação:", refreshError);
-        return Promise.reject(refreshError);
-      }
+    if (status === 401) {
+      localStorage.removeItem("accessToken");
+      window.location.href = "/login";
+      return;
     }
 
-    // Auto error handling with opt-out capability
-    // Check if the request has opted out of automatic error handling
-    const skipErrorToast =
-      originalRequest.skipErrorToast ||
-      originalRequest.headers?.["X-Skip-Error-Toast"] === "true";
+    const processedError = ErrorProcessor.processError(error);
 
-    if (!skipErrorToast) {
-      // Automatically show error toast using ErrorProcessor
-      ErrorProcessor.showErrorToast(error, {
-        component: "AxiosInterceptor",
-        action: `${originalRequest.method?.toUpperCase()} ${originalRequest.url}`,
-        timestamp: new Date(),
-      });
-    }
+    const message = processedError.message ?? "Erro interno no servidor, tente novamente depois";
+    const data = error.response?.data;
 
-    return Promise.reject(error);
+    throw new ApiError(message, status, data);
   }
 );

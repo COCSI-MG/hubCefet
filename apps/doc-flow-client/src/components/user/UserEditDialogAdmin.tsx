@@ -32,6 +32,7 @@ import {
 } from "../ui/select";
 import { LoaderCircle } from "lucide-react";
 import { components } from "@/lib/schema";
+import { ApiError } from "@/api/errors/ApiError";
 
 type User = components["schemas"]["User"];
 
@@ -61,9 +62,21 @@ export default function UserEditDialogAdmin({
   });
 
   const fetchProfiles = async () => {
-    const profiles = await profileService.getAll({ limit: 100, offset: 0 });
-    if (!profiles.data.profiles) return;
-    setProfiles(profiles.data.profiles);
+    try {
+      const response = await profileService.getAll({ limit: 100, offset: 0 });
+
+      const { profiles } = response.data;
+      if (!profiles) return;
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Não foi possível carregar os perfis");
+    }
   };
 
   useEffect(() => {

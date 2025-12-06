@@ -7,6 +7,7 @@ import { Event } from "@/lib/types";
 import { toast } from "sonner";
 import { getCurrentPosition } from "@/lib/utils/geolocation";
 import { eventService } from "@/api/services/event.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface PresenceFormCheckouProps {
   form: UseFormReturn<PresenceFormSchema>;
@@ -71,12 +72,11 @@ export default function PresencesForm({
     }
 
     try {
-      const coordinates = await getCurrentPosition({
+      const { latitude, longitude } = await getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 60000, // 1 minute cache
+        maximumAge: 60000,
       });
-      const { latitude, longitude } = coordinates;
 
       console.log("🌍 LOCALIZAÇÃO DO USUÁRIO (CHECK-OUT):");
       console.log(`📍 Latitude: ${latitude}`);
@@ -85,16 +85,29 @@ export default function PresencesForm({
         `🎯 Localização do evento - Lat: ${event.latitude}, Lng: ${event.longitude}`
       );
 
-      if (isWithinRange(latitude, longitude, event.latitude, event.longitude)) {
-        onSubmit(data, { latitude, longitude });
-      } else {
+      const isInside = isWithinRange(
+        latitude,
+        longitude,
+        event.latitude,
+        event.longitude
+      );
+
+      if (!isInside) {
         toast.error(
           "Você não está dentro da área do evento para realizar o check-out.",
           { duration: 5000 }
         );
+        return;
       }
-    } catch (error) {
-      console.error(error);
+
+      onSubmit(data, { latitude, longitude });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      console.error(err);
       toast.error(
         "Erro ao obter sua localização. Verifique se a geolocalização está habilitada.",
         { duration: 5000 }
@@ -106,18 +119,30 @@ export default function PresencesForm({
     if (!eventId) return;
 
     setLoading(true);
-    try {
-      const event = await eventService.getOne(eventId);
 
-      if (event.data.event) {
-        setEvent(event.data.event);
-        setEventExists(true);
-      } else {
+    try {
+      const response = await eventService.getOne(eventId);
+      const foundEvent = response.data.event;
+
+      if (!foundEvent) {
         setEvent(null);
         setEventExists(false);
+        return;
       }
+
+      setEvent(foundEvent);
+      setEventExists(true);
     } catch (error) {
-      if (error) setEvent(null);
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        setEvent(null);
+        setEventExists(false);
+        return;
+      }
+
+      console.error(error);
+      toast.error("Erro ao buscar informações do evento.");
+      setEvent(null);
       setEventExists(false);
     } finally {
       setLoading(false);

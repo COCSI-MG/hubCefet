@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { LoaderCircle } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface UserCreateDialogProps {
   children: React.ReactNode;
@@ -56,9 +57,20 @@ export default function UserCreateDialog({
   });
 
   const fetchProfiles = async () => {
-    const profiles = await profileService.getAll({ limit: 100, offset: 0 });
-    if (!profiles.data.profiles) return;
-    setProfiles(profiles.data.profiles);
+    try {
+      const response = await profileService.getAll({ limit: 100, offset: 0 });
+
+      if (response.data.profiles) {
+        setProfiles(response.data.profiles);
+      }
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao procurar pelos perfis");
+    }
   };
 
   useEffect(() => {
@@ -68,7 +80,6 @@ export default function UserCreateDialog({
   const handleSubmit = async (data: CreateUser) => {
     setIsSubmitting(true);
     try {
-      // Here you would call your create user API
       // const newUser = await createUser(data);
       console.log("Creating user:", data);
 

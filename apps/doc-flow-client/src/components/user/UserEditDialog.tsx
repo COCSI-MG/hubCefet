@@ -29,6 +29,7 @@ import useProfile from "@/hooks/useProfile";
 import { userService } from "@/api/services/users.service";
 import useUser from "@/hooks/useUser";
 import { LoaderCircle } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function UserEditDialog() {
   const [profiles, setProfiles] = useState<ProfileSchema[]>([]);
@@ -47,13 +48,27 @@ export default function UserEditDialog() {
   });
 
   const fetchProfiles = async () => {
-    const profiles = await profileService.getAll({ limit: 100, offset: 0 });
-    if (!profiles.data.profiles) return;
+    try {
+      const response = await profileService.getAll({ limit: 10, offset: 0 });
+      const { profiles } = response.data;
 
-    if (import.meta.env.DEV) {
-      toast.info("Perfis carregados com sucesso");
+      if (!profiles) {
+        return;
+      }
+
+      if (import.meta.env.DEV) {
+        toast.info("Perfis carregados com sucesso");
+      }
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Não foi possível carregar os perfis");
     }
-    setProfiles(profiles.data.profiles);
   };
 
   useEffect(() => {
@@ -67,20 +82,33 @@ export default function UserEditDialog() {
       enrollment: user?.enrollment || "",
       profileId: user?.profile_id || "",
     });
-  }, [form, user]);
+  }, [user]);
 
   const handleSubmit = async (data: CreateUser) => {
-    setIsSubmitting(true);
     if (!user) return;
-    const updatedUser = await userService.patch(user.id, data);
 
-    if (!updatedUser.data.user) {
+    try {
+      setIsSubmitting(true);
+
+      const response = await userService.patch(user.id, data);
+      const { user: updatedUser } = response.data;
+
+      if (!updatedUser) {
+        toast.error("Erro ao atualizar usuário");
+        return;
+      }
+
+      toast.success("Usuário atualizado com sucesso");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return; // early-return para erros da API
+      }
+
+      toast.error("Não foi possível atualizar o usuário");
+    } finally {
       setIsSubmitting(false);
-      toast.error("Erro ao atualizar usuário");
     }
-
-    toast.success("Usuário atualizado com sucesso");
-    setIsSubmitting(false);
   };
 
   return (

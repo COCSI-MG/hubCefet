@@ -36,6 +36,7 @@ import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { eventService } from "@/api/services/event.service";
 import { presenceService } from "@/api/services/presence.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface Pagination {
   pageIndex: number;
@@ -68,16 +69,22 @@ export function ViewEventsDataTable() {
   });
 
   const fetchEvents = async (data: Pagination) => {
-    const events = await eventService.getAll({
-      limit: data.pageSize,
-      offset: data.pageIndex * data.pageSize,
-    });
+    try {
+      const response = await eventService.getAll({
+        limit: data.pageSize,
+        offset: data.pageIndex * data.pageSize,
+      });
 
-    if (!events.data.events) {
-      return;
+      if (!response?.data?.events) return;
+
+      setData(response.data.events);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+      toast.error("Não foi possível carregar os eventos.");
     }
-
-    setData(events.data.events);
   };
 
   const handleSubscribe = async () => {
@@ -87,6 +94,7 @@ export function ViewEventsDataTable() {
       toast.error("Nenhum evento selecionado para inscrição.");
       return;
     }
+
     const newEvents = selectedRows.filter(
       (row) => !eventIdsFromPresences.includes(row.original.id)
     );
@@ -97,43 +105,49 @@ export function ViewEventsDataTable() {
     }
 
     for (const row of newEvents) {
-      const eventId = row.original.id;
-      const valVacancies = row.original.vacancies;
+      const event = row.original;
+
+      if (event.vacancies <= 0) {
+        toast.error(`Vagas encerradas no evento ${event.name}`);
+        continue;
+      }
 
       const payload: PresenceCreate = {
-        event_id: eventId,
+        event_id: event.id,
         status: "registered",
         check_out_date: "",
         check_in_date: "",
       };
 
       try {
-        if (valVacancies > 0) {
-          const result = await createPresence(payload);
-          if (result) {
-            toast.success(
-              `Inscrições realizadas com sucesso! Agora você pode realizar check-ins no evento  ${row.original.name}.`
-            );
-            if (valVacancies > 0)
-              eventService.patch(eventId, {
-                name: row.original.name,
-                eventStartDate: row.original.start_at,
-                eventEndDate: row.original.end_at,
-                status: row.original.status,
-                latitude: row.original.latitude,
-                longitude: row.original.longitude,
-                vacancies: row.original.vacancies - 1,
-              });
-            toast.success(
-              `Número de vacancies no evento ${row.original.name}: ${row.original.vacancies - 1
-              }`
-            );
-          }
-        } else {
-          toast.error(`vacancies encerradas no evento ${row.original.name}`);
+        const result = await createPresence(payload);
+
+        if (result) {
+          toast.success(
+            `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
+          );
+
+          await eventService.patch(event.id, {
+            name: event.name,
+            eventStartDate: event.start_at,
+            eventEndDate: event.end_at,
+            status: event.status,
+            latitude: event.latitude,
+            longitude: event.longitude,
+            vacancies: event.vacancies - 1,
+          });
+
+          toast.success(
+            `Número de vagas restantes no evento ${event.name}: ${event.vacancies - 1}`
+          );
         }
-      } catch (error) {
-        console.error("Error while subscribing to event:", error);
+      } catch (err) {
+        if (err instanceof ApiError) {
+          toast.error(err.message);
+          return
+        }
+
+        toast.error("Erro inesperado ao realizar inscrição.");
       }
     }
   };
@@ -142,25 +156,32 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await presenceService.getAllByUser({
+      const { data } = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
-      if (response.data.presences && response.data.presences.length > 0) {
-        setPresences(response.data.presences);
 
-        const filteredEventIds = response.data.presences
+      const { presences } = data;
+
+      if (presences) {
+
+        setPresences(presences);
+
+        const filteredEventIds = presences
           .filter((presence) => presence.status === "present")
           .map((presence) => presence.event_id);
 
         setEventIdsFromPresences(filteredEventIds);
-      } else {
-        setPresences([]);
-        setEventIdsFromPresences([]);
       }
-    } catch (error) {
-      console.error("Erro ao buscar presenças:", error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel visualizar eventos")
+
       setPresences([]);
       setEventIdsFromPresences([]);
     }
@@ -170,26 +191,31 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await presenceService.getAllByUser({
+      const { data } = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
 
-      if (response.data.presences && response.data.presences.length > 0) {
-        setPresencesRegistered(response.data.presences);
+      const { presences } = data;
 
-        const filteredEventIds = response.data.presences
+      if (presences) {
+        setPresencesRegistered(presences);
+
+        const filteredEventIds = presences
           .filter((presence) => presence.status === "registered")
           .map((presence) => presence.event_id);
 
         setEventIdsFromPresencesRegistered(filteredEventIds);
-      } else {
-        setPresencesRegistered([]);
-        setEventIdsFromPresencesRegistered([]);
       }
-    } catch (error) {
-      console.error("Erro ao buscar presenças:", error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel visualizar eventos")
+
       setPresencesRegistered([]);
       setEventIdsFromPresencesRegistered([]);
     }
@@ -227,31 +253,34 @@ export function ViewEventsDataTable() {
     data: PresenceCreate,
     coordinates?: { latitude: number; longitude: number }
   ) => {
-    const eventIdFromForm = form.getValues("event_id");
+    try {
 
-    const presence = presencesRegistered.find(
-      (p) => p.event_id === eventIdFromForm
-    );
+      const eventIdFromForm = form.getValues("event_id");
 
-    if (!presence) {
-      console.error(
-        "Nenhuma presença encontrada com o selectedEventId:",
-        eventIdFromForm
+      const presence = presencesRegistered.find(
+        (p) => p.event_id === eventIdFromForm
       );
-      setError("Nenhuma presença encontrada para o evento selecionado.");
-      return;
+
+      if (!presence) {
+        setError("Nenhuma presença encontrada para o evento selecionado.");
+        return;
+      }
+
+      const presenceId = presence.id;
+
+      await patchPresence(presenceId, data, coordinates);
+
+      setSuccess("Presença Criada com sucesso!");
+
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
+
+      console.error("Erro inesperado ao criar presença:", err);
+      setError("Erro interno no servidor, tente novamente.");
     }
-
-    const presenceId = presence.id;
-
-    const result = await patchPresence(presenceId, data, coordinates);
-
-    if (!result) {
-      setError("Ocorreu um erro ao cadastrar a presença");
-      return;
-    }
-
-    setSuccess("Presença Criada com sucesso!");
   };
 
   const onSubmitUpdate = async (

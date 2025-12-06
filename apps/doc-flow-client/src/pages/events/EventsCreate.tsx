@@ -7,6 +7,7 @@ import { AlertCircle } from "lucide-react";
 import EventsForm from "@/components/events/EventsForm";
 import { EventCreate, EventCreateSchema, createEventSchema } from "@/lib/types";
 import { eventService } from "@/api/services/event.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function EventsCreate() {
   const [error, setError] = useState<string | null>(null);
@@ -26,15 +27,19 @@ export default function EventsCreate() {
     },
   });
 
-  const onSubmit: SubmitHandler<EventCreateSchema> = async (
-    data: EventCreate
-  ) => {
-    const result = await eventService.create({ ...data });
-    if (!result) {
-      setError("Ocorre um erro ao criar um evento, tente novamente");
-      return;
+  const onSubmit: SubmitHandler<EventCreateSchema> = async (data: EventCreate) => {
+    try {
+      await eventService.create({ ...data });
+
+      setSuccess("Evento criado com sucesso");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setError(error.message);
+        return;
+      }
+
+      setError("Erro inesperado ao criar evento.");
     }
-    setSuccess("Evento criado com sucesso");
   };
 
   useEffect(() => {

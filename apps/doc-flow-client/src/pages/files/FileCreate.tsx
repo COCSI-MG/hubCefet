@@ -1,3 +1,4 @@
+import { ApiError } from "@/api/errors/ApiError";
 import { fileService } from "@/api/services/files.service";
 import FileForm from "@/components/files/FileForm";
 import FileUploader from "@/components/files/FileUploader";
@@ -42,32 +43,45 @@ export default function FileCreate() {
       toast.error("Nenhum arquivo selecionado");
       return;
     }
+
     if (!fileIsValid(file)) {
       return;
     }
+
     if (!createdFileId) {
       toast.error("Arquivo não criado, por favor preencha as informações");
       return;
     }
+
     const formData = new FormData();
     formData.append("file", file);
-    const data = await fileService.upload(createdFileId, formData, onProgress);
 
-    if (!data?.success) {
-      if (data?.status === 409) {
-        toast.error("Arquivo já existe");
+    try {
+      const data = await fileService.upload(createdFileId, formData, onProgress);
+
+      if (!data?.success) {
+        if (data?.status === 409) {
+          toast.error("Arquivo já existe");
+          return;
+        }
+
+        toast.error(data?.error || "Ocorreu um erro ao realizar upload", {
+          duration: 5000,
+        });
         return;
       }
 
-      toast.error(data?.error || "Ocorreu um erro ao realizar upload", {
-        duration: 5000,
-      });
-      return;
-    }
-    setCanUpload(false);
-    toast.success("Upload feito com sucesso");
-  };
+      setCanUpload(false);
+      toast.success("Upload feito com sucesso");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
 
+      toast.error("Erro inesperado ao realizar upload");
+    }
+  };
   return (
     <>
       <PageHeader

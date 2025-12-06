@@ -12,6 +12,7 @@ import { authService } from "@/api/services/auth.service";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function ChangePasswordForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -39,18 +40,19 @@ export default function ChangePasswordForm() {
   const handleFormSubmit: SubmitHandler<ChangePasswordType> = async (
     data: ChangePasswordType,
   ) => {
-    const result = await authService.changePassword({ ...data });
-    // TODO:
-    if (result) {
-      toast.error(
-        "Ocorreu um erro ao alterar a senha, por favor tente novamente",
-      );
-      form.reset();
-      return;
-    }
+    try {
+      await authService.changePassword({ ...data });
 
-    toast.success("Senha alterada com sucesso");
-    navigate("/profile");
+      toast.success("Senha alterada com sucesso");
+      navigate("/profile");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Ocorreu um erro ao alterar a senha, por favor tente novamente");
+    }
   };
 
   return (

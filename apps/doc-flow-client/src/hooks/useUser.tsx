@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { User } from '@/lib/schemas/user.schema';
 import { userService } from '@/api/services/users.service';
+import { ApiError } from '@/api/errors/ApiError';
 
 interface UseUser {
   user: User | null;
@@ -19,21 +20,33 @@ const useUser = (): UseUser => {
   }
 
   const fetchUser = useCallback(async () => {
-    toast.info('Carregando usuário...');
+    toast.info("Carregando usuário...");
     setIsLoading(true);
-    const currentUser = await userService.getOne(user.sub);
 
-    if (currentUser.data.user) {
-      if (import.meta.env.DEV) {
-        toast.info('Usuário carregado com sucesso');
+    try {
+      const response = await userService.getOne(user.sub);
+      const { user: fetchedUser } = response.data;
+
+      if (!fetchedUser) {
+        toast.error("Erro ao carregar usuário");
+        return;
       }
 
-      setLoadedUser(currentUser.data.user);
+      if (import.meta.env.DEV) {
+        toast.info("Usuário carregado com sucesso");
+      }
+
+      setLoadedUser(fetchedUser);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro inesperado ao carregar usuário");
+    } finally {
       setIsLoading(false);
-      return;
     }
-    toast.error('Erro ao carregar usuário');
-    setIsLoading(false);
   }, [user.sub]);
 
   useEffect(() => {

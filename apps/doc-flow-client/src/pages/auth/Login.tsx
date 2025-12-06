@@ -11,7 +11,7 @@ import { authFormSchema, type AuthFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import AuthService from "@/api/services/auth.service";
 import { Separator } from "@/components/ui/separator";
-import { ErrorProcessor } from "@/lib/utils/errorProcessor";
+import { ApiError } from "@/api/errors/ApiError";
 
 const authService = new AuthService();
 
@@ -38,17 +38,23 @@ export default function Login() {
       const response = await authService.signin(data.email, data.password);
 
       if (!response) {
-        setError("nao foi possivel fazer login no momento tente novamente mais tarde")
-        return
+        setError(
+          "Não foi possível fazer login no momento. Tente novamente mais tarde."
+        );
+        return;
       }
 
       localStorage.setItem("accessToken", response.access_token);
+
       await checkAuthentication();
       navigate("/events");
-    } catch (err: any) {
-      const processedError = ErrorProcessor.processError(err)
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
 
-      setError(processedError.message)
+      setError("Erro inesperado ao fazer o login");
     }
   };
 

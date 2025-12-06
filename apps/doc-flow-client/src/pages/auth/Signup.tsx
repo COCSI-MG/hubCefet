@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
-import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 import { authService } from "@/api/services/auth.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -23,23 +23,34 @@ export default function Signup() {
 
   const handleSubmit = async (data: SignupFormSchema) => {
     localStorage.removeItem("accessToken");
+
     try {
-      const response = await authService.signup(data.email, data.password, data.enrollment, data.fullName);
+      const response = await authService.signup(
+        data.email,
+        data.password,
+        data.enrollment,
+        data.fullName
+      );
 
       if (!response) {
-        setError("nao foi possivel criar a conta no momento tente novamente mais tarde")
-        return
+        setError(
+          "Não foi possível criar a conta no momento. Tente novamente mais tarde."
+        );
+        return;
       }
 
       localStorage.setItem("accessToken", response.access_token);
       setToken(response.access_token);
       setIsAuthenticated(true);
       navigate("/events");
-      return
-    } catch (err: any) {
-      const processedError = ErrorProcessor.processError(err)
+      return;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
 
-      setError(processedError.message)
+      setError("Erro inesperado ao fazer o cadastro");
     }
   };
 

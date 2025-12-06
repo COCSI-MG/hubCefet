@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import { fileService } from "@/api/services/files.service";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface FileFormProps {
   onFileCreated: (fileId: string) => void;
@@ -37,16 +38,23 @@ export default function FileForm({ ...props }: FileFormProps) {
   });
 
   const handleSubmit = async (data: CreateFile) => {
-    setIsCreating(true);
-    const file = await fileService.create(data);
-    if (file) {
+    try {
+      setIsCreating(true);
+
+      const file = await fileService.create(data);
+
       props.onFileCreated(file.data.file.id);
       toast.success("Arquivo criado com sucesso");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao criar arquivo");
+    } finally {
       setIsCreating(false);
-      return;
     }
-    toast.error("Erro ao criar arquivo");
-    setIsCreating(false);
   };
 
   return (
