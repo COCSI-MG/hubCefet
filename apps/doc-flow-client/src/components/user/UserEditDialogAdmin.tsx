@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import {
   Form,
   FormControl,
@@ -61,9 +61,9 @@ export default function UserEditDialogAdmin({
   });
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    setProfiles(profiles);
+    const profiles = await profileService.getAll({ limit: 100, offset: 0 });
+    if (!profiles.data.profiles) return;
+    setProfiles(profiles.data.profiles);
   };
 
   useEffect(() => {

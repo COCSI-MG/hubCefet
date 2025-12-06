@@ -19,7 +19,7 @@ import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { create } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 
@@ -38,9 +38,9 @@ export default function FileForm({ ...props }: FileFormProps) {
 
   const handleSubmit = async (data: CreateFile) => {
     setIsCreating(true);
-    const file = await create(data);
+    const file = await fileService.create(data);
     if (file) {
-      props.onFileCreated(file.id);
+      props.onFileCreated(file.data.file.id);
       toast.success("Arquivo criado com sucesso");
       setIsCreating(false);
       return;

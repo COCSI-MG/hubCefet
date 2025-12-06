@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signup } from "@/api/data/auth.data";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
 import { ErrorProcessor } from "@/lib/utils/errorProcessor";
+import { authService } from "@/api/services/auth.service";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Signup() {
   const handleSubmit = async (data: SignupFormSchema) => {
     localStorage.removeItem("accessToken");
     try {
-      const response = await signup({ ...data });
+      const response = await authService.signup(data.email, data.password, data.enrollment, data.fullName);
 
       if (!response) {
         setError("nao foi possivel criar a conta no momento tente novamente mais tarde")

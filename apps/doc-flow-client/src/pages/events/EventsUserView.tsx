@@ -1,7 +1,6 @@
 import PageHeader from "@/components/PageHeader";
 import { components } from "@/lib/schema";
 import { useCallback, useEffect, useState } from "react";
-import { getUserEvents } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import ViewUserEventsBox from "@/components/events/ViewUserEventsBox";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { eventService } from "@/api/services/event.service";
 
 type Event = components["schemas"]["Event"];
 
@@ -27,15 +27,16 @@ export default function EventsUserView() {
     if (!userId) {
       return;
     }
-    const data = await getUserEvents({
+    const data = await eventService.getUserEvents({
       id: userId,
       offset: 0,
       limit: 10,
     });
-    if (!data) {
+    if (!data.data.events) {
       return;
     }
-    setEvents(data);
+
+    setEvents(data.data.events);
   }, [user]);
 
   const handleEventsOnGoing = useCallback(async () => {
@@ -63,13 +64,13 @@ export default function EventsUserView() {
     if (!userId) {
       return;
     }
-    const data = await getUserEvents({
+    const data = await eventService.getUserEvents({
       id: userId,
       offset: offset,
       limit: 10,
     });
-    if (!data) return;
-    setEvents(data);
+    if (!data.data.events) return;
+    setEvents(data.data.events);
     setPagination({ offset, limit: 10 });
   };
 

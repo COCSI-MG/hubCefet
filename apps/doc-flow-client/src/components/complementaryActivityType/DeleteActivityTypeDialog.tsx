@@ -1,4 +1,4 @@
-import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service"
+import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service"
 import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType"
 import { Pagination as PaginationArgs } from "@/lib/types";
 import * as Dialog from "@radix-ui/react-dialog";

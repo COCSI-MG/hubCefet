@@ -2,11 +2,11 @@ import { Form, FormField } from "@/components/ui/form";
 import { PresenceFormSchema, Presence } from "@/lib/types";
 import FormItemField from "./FormItemField";
 import { UseFormReturn } from "react-hook-form";
-import { getEvent } from "@/api/data/events.data";
 import { useState, useEffect } from "react";
 import { Event } from "@/lib/types";
 import { toast } from "sonner";
 import { getCurrentPosition } from "@/lib/utils/geolocation";
+import { eventService } from "@/api/services/event.service";
 
 interface PresenceFormCheckouProps {
   form: UseFormReturn<PresenceFormSchema>;
@@ -107,10 +107,10 @@ export default function PresencesForm({
 
     setLoading(true);
     try {
-      const event = await getEvent(eventId);
+      const event = await eventService.getOne(eventId);
 
-      if (event != null) {
-        setEvent(event);
+      if (event.data.event) {
+        setEvent(event.data.event);
         setEventExists(true);
       } else {
         setEvent(null);

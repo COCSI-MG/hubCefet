@@ -1,10 +1,7 @@
 import { toast } from "sonner";
-import {
-  createPresence as createPresenceOriginal,
-  patchPresence as patchPresenceOriginal,
-} from "@/api/data/presence.data";
 import { checkGeolocationPermission } from "@/lib/utils/geolocation";
 import type { PresenceCreate, Presence } from "@/lib/types";
+import { presenceService } from "@/api/services/presence.service";
 
 /**
  * Enhanced presence creation with geolocation feedback
@@ -14,15 +11,15 @@ export const createPresenceWithGeolocation = async (
   coordinates?: { latitude: number; longitude: number }
 ): Promise<Presence | boolean> => {
   // Proceed with creating presence with coordinates if provided
-  const result = await createPresenceOriginal(data, coordinates);
+  const result = await presenceService.create(data, coordinates);
 
-  if (result && typeof result === "object") {
+  if (result.data && typeof result.data === "object") {
     toast.success("Presença criada com sucesso!");
-  } else if (result === false) {
+  } else if (result.data === false) {
     toast.error("Erro ao criar presença. Tente novamente.");
   }
 
-  return result;
+  return result.data;
 };
 
 /**
@@ -34,15 +31,14 @@ export const patchPresenceWithGeolocation = async (
   coordinates?: { latitude: number; longitude: number }
 ): Promise<Presence | undefined> => {
   // Proceed with updating presence with coordinates if provided
-  const result = await patchPresenceOriginal(id, data, coordinates);
+  const result = await presenceService.patch(id, data, coordinates);
 
-  if (result) {
-    toast.success("Presença atualizada com sucesso!");
-  } else {
+  if (!result.data.presence) {
     toast.error("Erro ao atualizar presença. Tente novamente.");
   }
 
-  return result;
+  toast.success("Presença atualizada com sucesso!");
+  return result.data.presence;
 };
 
 /**

@@ -1,8 +1,8 @@
 import useAuth from './useAuth';
 import { useCallback, useEffect, useState } from 'react';
-import { getUser } from '@/api/data/users.data';
 import { toast } from 'sonner';
 import { User } from '@/lib/schemas/user.schema';
+import { userService } from '@/api/services/users.service';
 
 interface UseUser {
   user: User | null;
@@ -21,10 +21,14 @@ const useUser = (): UseUser => {
   const fetchUser = useCallback(async () => {
     toast.info('Carregando usuário...');
     setIsLoading(true);
-    const currentUser = await getUser(user.sub);
-    if (currentUser) {
-      if (import.meta.env.DEV) toast.info('Usuário carregado com sucesso');
-      setLoadedUser(currentUser);
+    const currentUser = await userService.getOne(user.sub);
+
+    if (currentUser.data.user) {
+      if (import.meta.env.DEV) {
+        toast.info('Usuário carregado com sucesso');
+      }
+
+      setLoadedUser(currentUser.data.user);
       setIsLoading(false);
       return;
     }

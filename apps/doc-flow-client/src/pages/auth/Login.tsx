@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccessToken } from "@/api/data/auth.data";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import AuthForm from "@/components/AuthForm";
@@ -36,7 +35,7 @@ export default function Login() {
 
   const handleSubmit = async (data: AuthFormSchema) => {
     try {
-      const response = await getAccessToken({ ...data });
+      const response = await authService.signin(data.email, data.password);
 
       if (!response) {
         setError("nao foi possivel fazer login no momento tente novamente mais tarde")

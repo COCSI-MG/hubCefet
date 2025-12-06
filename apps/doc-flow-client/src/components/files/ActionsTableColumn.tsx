@@ -1,4 +1,4 @@
-import { download, remove } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
@@ -17,7 +17,7 @@ export default function ActionsTableColumn({
 
   const handlePrimaryClick = async () => {
     setisDownloading(true);
-    const result = await download(props.fileId);
+    const result = await fileService.download(props.fileId);
     if (result !== undefined) {
       toast.error("Erro ao baixar arquivo");
     }
@@ -26,7 +26,7 @@ export default function ActionsTableColumn({
 
   const handleDestructiveClick = async () => {
     setIsDeleting(true);
-    const data = await remove(props.fileId);
+    const data = await fileService.remove(props.fileId);
     if (data?.error) {
       toast.error("Erro ao excluir arquivo");
       setIsDeleting(false);

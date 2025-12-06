@@ -12,13 +12,13 @@ import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
-import { deleteUsers, getAllUsers } from "@/api/data/users.data";
+import { userService } from "@/api/services/users.service";
 import { components } from "@/lib/schema";
 import { getUserColumns } from "./UserManagementTableColumns";
 import { toast } from "sonner";
 import { Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
 
 type User = components["schemas"]["User"];
@@ -33,12 +33,13 @@ export function UserManagementDataTable() {
 
   const fetchUsers = async () => {
     try {
-      const users = await getAllUsers();
-      if (!users) {
+      const users = await userService.getAll({ limit: 1000, offset: 0 });
+      if (!users.data.users) {
         toast.error("Erro ao carregar usuários");
         return;
       }
-      setData(users);
+
+      setData(users.data.users);
     } catch (err) {
       console.error("Error fetching users:", err);
       toast.error("Erro ao carregar usuários");
@@ -46,9 +47,15 @@ export function UserManagementDataTable() {
   };
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    setProfiles(profiles);
+    const profiles = await profileService.getAll({ limit: 1000, offset: 0 });
+    if (!profiles.data.profiles) return;
+    setProfiles(profiles.data.profiles);
+  };
+
+  const deleteUsers = async (ids: string[]): Promise<boolean> => {
+    const deletePromises = ids.map((id) => userService.delete(id));
+    const results = await Promise.all(deletePromises);
+    return results.every((result) => result.success);
   };
 
   const handleDeleteSelected = async () => {

@@ -1,4 +1,4 @@
-import { ComplementaryActivityType } from "@/api/services/complementary-activity-type-service";
+import { ComplementaryActivityType } from "@/api/services/complementary-activity-type.service";
 import { Button } from "../ui/button";
 import { createColumnHelper } from "@tanstack/react-table";
 

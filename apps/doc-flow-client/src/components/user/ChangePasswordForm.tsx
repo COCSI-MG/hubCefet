@@ -8,7 +8,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ConfirmPassword from "@/components/ConfirmPassword";
-import { changePassword } from "@/api/data/auth.data";
+import { authService } from "@/api/services/auth.service";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -39,7 +39,8 @@ export default function ChangePasswordForm() {
   const handleFormSubmit: SubmitHandler<ChangePasswordType> = async (
     data: ChangePasswordType,
   ) => {
-    const result = await changePassword({ ...data });
+    const result = await authService.changePassword({ ...data });
+    // TODO:
     if (result) {
       toast.error(
         "Ocorreu um erro ao alterar a senha, por favor tente novamente",

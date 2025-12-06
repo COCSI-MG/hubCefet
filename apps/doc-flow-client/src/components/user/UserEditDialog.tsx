@@ -22,11 +22,11 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import useProfile from "@/hooks/useProfile";
-import { updateUserPatchVerb } from "@/api/data/users.data";
+import { userService } from "@/api/services/users.service";
 import useUser from "@/hooks/useUser";
 import { LoaderCircle } from "lucide-react";
 
@@ -47,10 +47,13 @@ export default function UserEditDialog() {
   });
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    if (import.meta.env.DEV) toast.info("Perfis carregados com sucesso");
-    setProfiles(profiles);
+    const profiles = await profileService.getAll({ limit: 100, offset: 0 });
+    if (!profiles.data.profiles) return;
+
+    if (import.meta.env.DEV) {
+      toast.info("Perfis carregados com sucesso");
+    }
+    setProfiles(profiles.data.profiles);
   };
 
   useEffect(() => {
@@ -69,14 +72,15 @@ export default function UserEditDialog() {
   const handleSubmit = async (data: CreateUser) => {
     setIsSubmitting(true);
     if (!user) return;
-    const updatedUser = await updateUserPatchVerb(user.id, data);
-    if (updatedUser) {
-      toast.success("Usuário atualizado com sucesso");
+    const updatedUser = await userService.patch(user.id, data);
+
+    if (!updatedUser.data.user) {
       setIsSubmitting(false);
-      return;
+      toast.error("Erro ao atualizar usuário");
     }
+
+    toast.success("Usuário atualizado com sucesso");
     setIsSubmitting(false);
-    toast.error("Erro ao atualizar usuário");
   };
 
   return (
@@ -106,7 +110,7 @@ export default function UserEditDialog() {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="fullName"
+                name="full_name"
                 defaultValue={user?.full_name || ""}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
@@ -116,7 +120,7 @@ export default function UserEditDialog() {
                         className={cn(
                           "rounded-2xl bg-white bg-opacity-60",
                           form.formState.errors?.full_name &&
-                            "border-destructive",
+                          "border-destructive",
                           "col-span-3"
                         )}
                         type="text"
@@ -168,7 +172,7 @@ export default function UserEditDialog() {
                         className={cn(
                           "rounded-2xl bg-white bg-opacity-60",
                           form.formState.errors.enrollment?.message &&
-                            "border-destructive",
+                          "border-destructive",
                           "col-span-3"
                         )}
                         type="text"
@@ -189,7 +193,7 @@ export default function UserEditDialog() {
               />
               <FormField
                 control={form.control}
-                name="profile_id"
+                name="profileId"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
                     <FormLabel className="text-right">Perfil</FormLabel>

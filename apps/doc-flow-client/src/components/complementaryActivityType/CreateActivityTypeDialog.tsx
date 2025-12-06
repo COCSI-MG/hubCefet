@@ -1,4 +1,4 @@
-import { complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service";
+import { complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType";
 import { zodResolver } from "@hookform/resolvers/zod";

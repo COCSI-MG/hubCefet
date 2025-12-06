@@ -25,18 +25,17 @@ import { Button } from "../ui/button";
 import { useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
-import { getAllEvents } from "@/api/data/events.data";
 import { Event } from "@/lib/schemas/event.schema";
 import { Presence } from "@/lib/types";
 import { getColumns } from "./ViewEventsTableColumns";
-import { getUserPresences } from "@/api/data/presence.data";
 import {
   createPresenceWithGeolocation as createPresence,
   patchPresenceWithGeolocation as patchPresence,
 } from "@/lib/utils/presenceWithGeolocation";
-import { patch } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { eventService } from "@/api/services/event.service";
+import { presenceService } from "@/api/services/presence.service";
 
 interface Pagination {
   pageIndex: number;
@@ -69,14 +68,16 @@ export function ViewEventsDataTable() {
   });
 
   const fetchEvents = async (data: Pagination) => {
-    const events = await getAllEvents({
+    const events = await eventService.getAll({
       limit: data.pageSize,
       offset: data.pageIndex * data.pageSize,
     });
-    if (!events) {
+
+    if (!events.data.events) {
       return;
     }
-    setData(events);
+
+    setData(events.data.events);
   };
 
   const handleSubscribe = async () => {
@@ -114,7 +115,7 @@ export function ViewEventsDataTable() {
               `Inscrições realizadas com sucesso! Agora você pode realizar check-ins no evento  ${row.original.name}.`
             );
             if (valVacancies > 0)
-              patch(eventId, {
+              eventService.patch(eventId, {
                 name: row.original.name,
                 eventStartDate: row.original.start_at,
                 eventEndDate: row.original.end_at,
@@ -141,15 +142,15 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await getUserPresences({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
-      if (response && response.length > 0) {
-        setPresences(response);
+      if (response.data.presences && response.data.presences.length > 0) {
+        setPresences(response.data.presences);
 
-        const filteredEventIds = response
+        const filteredEventIds = response.data.presences
           .filter((presence) => presence.status === "present")
           .map((presence) => presence.event_id);
 
@@ -169,16 +170,16 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await getUserPresences({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
 
-      if (response && response.length > 0) {
-        setPresencesRegistered(response);
+      if (response.data.presences && response.data.presences.length > 0) {
+        setPresencesRegistered(response.data.presences);
 
-        const filteredEventIds = response
+        const filteredEventIds = response.data.presences
           .filter((presence) => presence.status === "registered")
           .map((presence) => presence.event_id);
 

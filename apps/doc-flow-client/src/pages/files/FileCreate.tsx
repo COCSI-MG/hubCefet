@@ -1,4 +1,4 @@
-import { upload } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import FileForm from "@/components/files/FileForm";
 import FileUploader from "@/components/files/FileUploader";
 import PageHeader from "@/components/PageHeader";
@@ -51,7 +51,7 @@ export default function FileCreate() {
     }
     const formData = new FormData();
     formData.append("file", file);
-    const data = await upload(createdFileId, formData, onProgress);
+    const data = await fileService.upload(createdFileId, formData, onProgress);
 
     if (!data?.success) {
       if (data?.status === 409) {
