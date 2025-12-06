@@ -47,3 +47,5 @@ export default class UserService extends AbstractService {
     return await this.api.post(this.basePath, { ...data });
   }
 }
+
+export const userService = new UserService()

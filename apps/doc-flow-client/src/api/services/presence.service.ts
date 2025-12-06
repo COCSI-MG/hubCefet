@@ -31,8 +31,8 @@ export default class PresenceService extends AbstractService {
   }): Promise<GetAllPresencesByUserResponseDto> {
     return await this.api.get(
       this.basePath +
-        `/user/${data.id}` +
-        `?offset=${data.offset}&limit=${data.limit}`
+      `/user/${data.id}` +
+      `?offset=${data.offset}&limit=${data.limit}`
     );
   }
 
@@ -79,3 +79,5 @@ export default class PresenceService extends AbstractService {
     return await this.api.patch(this.basePath + `/${id}`, data);
   }
 }
+
+export const presenceService = new PresenceService()
