@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import SearchBar from "@/components/SearchBar";
 import { GetComplementaryActivityTypeColumns } from "@/components/complementaryActivityType/ComplementaryActivityTypeColumns";
-import { ComplementaryActivityType, complementaryActivityTypeService, ComplementaryActivityTypeWithTotal } from "@/api/services/complementary-activity-type-service";
+import { ComplementaryActivityType, complementaryActivityTypeService, ComplementaryActivityTypeWithTotal } from "@/api/services/complementary-activity-type.service";
 import { CreateActivityTypeDialog } from "@/components/complementaryActivityType/CreateActivityTypeDialog";
 import { UpdateActivityTypeDialog } from "@/components/complementaryActivityType/UpdateActivityTypeDialog";
 import { DeleteActivityTypeDialog } from "@/components/complementaryActivityType/DeleteActivityTypeDialog";
