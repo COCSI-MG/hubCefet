@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { eventService } from "@/api/services/event.service";
 import { presenceService } from "@/api/services/presence.service";
 import { ApiError } from "@/api/errors/ApiError";
+import { jwtDecode } from "jwt-decode";
 
 interface Pagination {
   pageIndex: number;
@@ -62,11 +63,13 @@ export function ViewEventsDataTable() {
   );
   const [eventIdsFromPresencesRegistered, setEventIdsFromPresencesRegistered] =
     useState<string[]>([]);
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isProfessor, setIsProfessor] = useState(false);
 
   const fetchEvents = async (data: Pagination) => {
     try {
@@ -82,6 +85,32 @@ export function ViewEventsDataTable() {
         return;
       }
       toast.error("Não foi possível carregar os eventos.");
+    }
+  };
+
+  const getUserProfile = () => {
+    if (token) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decoded: any = jwtDecode(token);
+
+      let profileName = "";
+      if (typeof decoded.profile === "string") {
+        profileName = decoded.profile;
+      } else if (decoded.profile?.name) {
+        profileName = decoded.profile.name;
+      } else if (
+        decoded.profile?.roles &&
+        decoded.profile.roles.length > 0
+      ) {
+        profileName = decoded.profile.roles[0];
+      }
+
+      const profileLower = profileName.toLowerCase();
+
+      setIsAdmin(
+        profileLower === "admin" || profileLower === "coordinator"
+      );
+      setIsProfessor(profileLower === "professor");
     }
   };
 
@@ -230,6 +259,11 @@ export function ViewEventsDataTable() {
       form.reset();
     }
   }, [openCheckIn]);
+
+
+  useEffect(() => {
+    getUserProfile();
+  }, [token]);
 
   const form = useForm<PresenceFormSchema>({
     resolver: zodResolver(presenceSchema),
@@ -405,102 +439,105 @@ export function ViewEventsDataTable() {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-1 md:flex-row ">
-            <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
-              <Dialog.Trigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl bg-red-600 text-white"
-                >
-                  Faça o seu Check-Out
-                </Button>
-              </Dialog.Trigger>
+          {!isAdmin && !isProfessor &&
+            <div className="flex flex-col gap-1 md:flex-row ">
+              <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
+                <Dialog.Trigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl bg-red-600 text-white"
+                  >
+                    Faça o seu Check-Out
+                  </Button>
+                </Dialog.Trigger>
 
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                  <Dialog.Title className="text-xl font-bold">
-                    Check-Out
-                  </Dialog.Title>
-                  <Dialog.Description className="text-gray-600">
-                    Insira seus dados para confirmar o check-out.
-                  </Dialog.Description>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                  <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                    <Dialog.Title className="text-xl font-bold">
+                      Check-Out
+                    </Dialog.Title>
+                    <Dialog.Description className="text-gray-600">
+                      Insira seus dados para confirmar o check-out.
+                    </Dialog.Description>
 
-                  {success && (
-                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                      {success}
-                    </div>
-                  )}
+                    {success && (
+                      <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                        {success}
+                      </div>
+                    )}
 
-                  <CheckOutForm
-                    form={form}
-                    onSubmit={onSubmitUpdate}
-                    events={presentEvents}
-                    presences={presences}
-                  />
+                    <CheckOutForm
+                      form={form}
+                      onSubmit={onSubmitUpdate}
+                      events={presentEvents}
+                      presences={presences}
+                    />
 
-                  <Dialog.Close asChild>
-                    <button className="absolute top-2 right-2 text-gray-600">
-                      ✖
-                    </button>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                    <Dialog.Close asChild>
+                      <button className="absolute top-2 right-2 text-gray-600">
+                        ✖
+                      </button>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
 
-            <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
-              <Dialog.Trigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl bg-sky-800 text-white"
-                >
-                  Faça o seu Check-In
-                </Button>
-              </Dialog.Trigger>
+              <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
+                <Dialog.Trigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl bg-sky-800 text-white"
+                  >
+                    Faça o seu Check-In
+                  </Button>
+                </Dialog.Trigger>
 
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                  <Dialog.Title className="text-xl font-bold">
-                    Check-In
-                  </Dialog.Title>
-                  <Dialog.Description className="text-gray-600">
-                    Insira seus dados para confirmar o check-in.
-                  </Dialog.Description>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                  <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                    <Dialog.Title className="text-xl font-bold">
+                      Check-In
+                    </Dialog.Title>
+                    <Dialog.Description className="text-gray-600">
+                      Insira seus dados para confirmar o check-in.
+                    </Dialog.Description>
 
-                  {success && (
-                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                      {success}
-                    </div>
-                  )}
+                    {success && (
+                      <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                        {success}
+                      </div>
+                    )}
 
-                  <CheckInForm
-                    form={form}
-                    onSubmit={onSubmit}
-                    events={registeredEvents}
-                  />
+                    <CheckInForm
+                      form={form}
+                      onSubmit={onSubmit}
+                      events={registeredEvents}
+                    />
 
-                  <Dialog.Close asChild>
-                    <button className="absolute top-2 right-2 text-gray-600">
-                      ✖
-                    </button>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                    <Dialog.Close asChild>
+                      <button className="absolute top-2 right-2 text-gray-600">
+                        ✖
+                      </button>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl bg-sky-800 text-white"
-              onClick={handleSubscribe}
-            >
-              Inscreva-se
-            </Button>
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl bg-sky-800 text-white"
+                onClick={handleSubscribe}
+              >
+                Inscreva-se
+              </Button>
+            </div>
+          }
         </div>
+
       </div>
       <div className="w-full mb-3 mt-2 bg-sky-50 border rounded-xl h-fit-content flex items-center space-x-1 px-2">
         <BadgeMinus />
