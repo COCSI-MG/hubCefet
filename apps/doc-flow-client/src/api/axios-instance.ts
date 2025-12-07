@@ -24,7 +24,10 @@ publicAxiosInstance.interceptors.response.use(
   (res) => res,
   (error) => {
     const status = error.response?.status ?? 500;
-    const message = error.response?.data?.message ?? "Erro inesperado";
+
+    const processedError = ErrorProcessor.processError(error);
+
+    const message = processedError.message ?? "Erro interno no servidor, tente novamente depois";
     const data = error.response?.data;
 
     throw new ApiError(message, status, data);
