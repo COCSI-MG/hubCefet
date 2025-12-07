@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, ForbiddenException } from '@nestjs/common';
+import { Inject, Injectable, Logger, ForbiddenException, NotFoundException, UnprocessableEntityException, ConflictException } from '@nestjs/common';
 import { CreatePresenceDto } from './dto/create-presence.dto';
 import { UpdatePresenceDto } from './dto/update-presence.dto';
 import { PresenceRepository } from './repositories/presence.repository.interface';
@@ -24,7 +24,7 @@ export class PresencesService {
     private readonly userService: UsersService,
     @InjectQueue('pdf-generation')
     private pdfQueue: Queue<PdfGenerationJobData>,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -32,12 +32,12 @@ export class PresencesService {
   ): Promise<null | Presence> {
     const user = await this.userService.findOne(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('Usuario nao encontrado');
     }
 
     const [event] = await this.eventService.findOne(createPresenceDto.event_id);
     if (!event) {
-      throw new Error('Event not found');
+      throw new NotFoundException('Evento encontrado');
     }
 
     if (createPresenceDto.check_in_date) {
@@ -46,13 +46,13 @@ export class PresencesService {
       const eventEndDate = new Date(event.end_at);
 
       if (checkInDate < eventStartDate) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           'Check-in só pode ser feito a partir do horário de início do evento',
         );
       }
 
       if (checkInDate > eventEndDate) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           'Não é possível fazer check-in em um evento que já terminou',
         );
       }
@@ -62,29 +62,29 @@ export class PresencesService {
       const eventEndDate = new Date(event.end_at);
 
       if (currentDate < eventStartDate) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           'Check-in só pode ser feito a partir do horário de início do evento',
         );
       }
 
       if (currentDate > eventEndDate) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           'Não é possível fazer check-in em um evento que já terminou',
         );
       }
     }
 
-    const [presence, created] =
-      await this.presenceRepository.findOrCreatedPresence(
-        userId,
-        createPresenceDto.event_id,
-        createPresenceDto.status,
-        createPresenceDto.check_in_date || null,
-        createPresenceDto.check_out_date || null,
-      );
+    const [presence, created] = await this.presenceRepository.findOrCreatedPresence(
+      userId,
+      createPresenceDto.event_id,
+      createPresenceDto.status,
+      createPresenceDto.check_in_date || null,
+      createPresenceDto.check_out_date || null,
+    );
     if (!created) {
-      return null;
+      throw new ConflictException('Presenca ja feita neste evento')
     }
+
     return presence;
   }
 
@@ -93,7 +93,12 @@ export class PresencesService {
   }
 
   async findOne(id: string) {
-    return await this.presenceRepository.findOne(id);
+    const presence = await this.presenceRepository.findOne(id);
+    if (!presence) {
+      throw new NotFoundException('Presenca nao registrada para o evento')
+    }
+
+    return presence
   }
 
   async update(id: string, updatePresenceDto: UpdatePresenceDto) {
@@ -109,13 +114,13 @@ export class PresencesService {
         const eventEndDate = new Date(event.end_at);
 
         if (checkInDate < eventStartDate) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             'Check-in só pode ser feito a partir do horário de início do evento',
           );
         }
 
         if (checkInDate > eventEndDate) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             'Não é possível fazer check-in em um evento que já terminou',
           );
         }
@@ -130,13 +135,13 @@ export class PresencesService {
         const eventEndDate = new Date(event.end_at);
 
         if (currentDate < eventStartDate) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             'Check-in só pode ser feito a partir do horário de início do evento',
           );
         }
 
         if (currentDate > eventEndDate) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             'Não é possível fazer check-in em um evento que já terminou',
           );
         }
@@ -148,7 +153,7 @@ export class PresencesService {
       const checkOutDate = new Date(updatePresenceDto.check_out_date);
 
       if (checkInDate >= checkOutDate) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           'Data de check-in deve ser anterior à data de check-out',
         );
       }
@@ -171,7 +176,7 @@ export class PresencesService {
         );
 
         if (checkOutDate > maxCheckOutTime) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             'Check-out deve ser feito até 2 horas após o término do evento',
           );
         }
@@ -204,7 +209,7 @@ export class PresencesService {
           Math.round(
             ((checkOutDate.getTime() - checkInDate.getTime()) /
               (1000 * 60 * 60)) *
-              100,
+            100,
           ) / 100;
 
         const pdfJobData = {
@@ -246,7 +251,7 @@ export class PresencesService {
     return updatedPresence;
   }
 
-  private async scheduleePdfGeneration(
+  private async schedulePdfGeneration(
     presence: Presence,
     checkOutDate: string,
   ) {
@@ -257,7 +262,7 @@ export class PresencesService {
         Math.round(
           ((checkOutTime.getTime() - checkInTime.getTime()) /
             (1000 * 60 * 60)) *
-            100,
+          100,
         ) / 100;
 
       const jobData: PdfGenerationJobData = {

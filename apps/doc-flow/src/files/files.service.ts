@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileRepository } from './repository/files.repository.interface';
@@ -18,7 +18,7 @@ export class FilesService {
     @Inject(FILE_REPOSITORY)
     private readonly fileRepository: FileRepository,
     @InjectQueue('file') private readonly fileQueue: Queue,
-  ) {}
+  ) { }
 
   async create(createFileDto: CreateFileDto, userId: string) {
     const existingFiles = await this.fileRepository.findByUserNameAndType(
@@ -48,11 +48,21 @@ export class FilesService {
   }
 
   async findAll() {
-    return await this.fileRepository.findAll();
+    const files = await this.fileRepository.findAll();
+    if (!files || files.length === 0) {
+      throw new NotFoundException('Files not found');
+    }
+
+    return files
   }
 
   async findOne(id: string) {
-    return await this.fileRepository.findOne(id);
+    const file = await this.fileRepository.findOne(id);
+    if (!file) {
+      throw new NotFoundException('Arquivo nao encontrado')
+    }
+
+    return file
   }
 
   async findByPk(id: string) {
@@ -71,25 +81,27 @@ export class FilesService {
   async remove(id: string): Promise<void> {
     const fileData = await this.fileRepository.findOne(id);
     if (!fileData) {
-      throw new Error('File not found');
+      throw new NotFoundException('Arquivo nao encontrado');
     }
+
     if (fileData.status != FileStatus.STATUS_PROCESSING && fileData.url) {
       await unlink(fileData.url);
     }
+
     await this.fileRepository.remove(id);
   }
 
   async upload(file: Express.Multer.File, fileId: string): Promise<void> {
     const fileData = await this.fileRepository.findOne(fileId);
     if (!fileData) {
-      throw new Error('File not found');
+      throw new Error('Arquivo nao encontrado');
     }
     if (fileData.status !== FileStatus.STATUS_WAITING) {
       this.logger.error(
         `File status is ${fileData.status}, resource already exists or is being processed`,
       );
       throw new ConflictException(
-        'Resource already exists or is being processed',
+        'Recurso ja exiiste ou esta sendo processado',
       );
     }
     const fileToUploadData: FileToUpload = {
@@ -106,7 +118,7 @@ export class FilesService {
     const fileData = await this.fileRepository.findOne(fileId);
     if (!fileData) {
       this.logger.error(`File not found for id ${fileId}`);
-      throw new Error('File not found');
+      throw new NotFoundException('Arquivo nao encontrado');
     }
 
     const filePath = fileData.url;
@@ -115,7 +127,7 @@ export class FilesService {
       this.logger.error(
         `File not found on disk for id ${fileId} and path ${filePath}`,
       );
-      throw new Error('File not found on disk');
+      throw new BadRequestException('Arquivo nao encontrado no disco');
     }
     return filePath;
   }

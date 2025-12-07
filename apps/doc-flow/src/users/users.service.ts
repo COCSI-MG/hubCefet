@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository.interface';
@@ -13,7 +13,7 @@ export class UsersService {
     @Inject(USER_REPOSITORY)
     private userRepository: UserRepository,
     private readonly profileService: ProfileService,
-  ) {}
+  ) { }
 
   async create(
     createUserDto: CreateUserDto,
@@ -53,11 +53,20 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<ServiceLayerDto<{ user: User }>> {
-    const user = await this.userRepository.findByPk(id);
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
     return new ServiceLayerDto<{ user: User }>({ user }, user ? true : false);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const userExists = await this.userRepository.findOne(id);
+    if (!userExists) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
     if (updateUserDto.password) {
       updateUserDto.password = await hash(updateUserDto.password, 10);
     }
@@ -70,11 +79,21 @@ export class UsersService {
   }
 
   async remove(id: string) {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
     return await this.userRepository.remove(id);
   }
 
   async findByEmail(email: string) {
-    return await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
+    return user
   }
 
   async search(

@@ -10,20 +10,13 @@ export class ComplementaryActivityTypeService {
     private readonly complementaryActivityTypeRepository: ComplementaryActivityTypeRepository
   ) { }
 
-  async create(createComplementaryActivityTypeDto: CreateComplementaryActivityTypeDto): Promise<ApiResponseDto<string>> {
+  async create(createComplementaryActivityTypeDto: CreateComplementaryActivityTypeDto) {
     const alredyExistsWithName = await this.complementaryActivityTypeRepository.findOneByName(createComplementaryActivityTypeDto.name)
     if (alredyExistsWithName) {
-      throw new ConflictException('already exists one complemntary activity type with this name')
+      throw new ConflictException('Ja existe uma atividade complementar com este nome')
     }
 
-    await this.complementaryActivityTypeRepository.create(createComplementaryActivityTypeDto)
-
-    return {
-      data: 'complementary activity type created successfully',
-      error: null,
-      status: 201,
-      success: true
-    }
+    return await this.complementaryActivityTypeRepository.create(createComplementaryActivityTypeDto)
   }
 
   async findAll(limit: number, offset: number) {
@@ -33,42 +26,28 @@ export class ComplementaryActivityTypeService {
   async findOne(id: number) {
     const complementaryActivityType = await this.complementaryActivityTypeRepository.findOne(id)
     if (!complementaryActivityType) {
-      throw new NotFoundException('complementary acitivity type not found')
+      throw new NotFoundException('Ativiade complementar nao encontrada')
     }
 
     return await this.complementaryActivityTypeRepository.findOne(id)
   }
 
 
-  async update(id: number, updateComplementaryActivityTypeDto: UpdateComplementaryActivityTypeDto): Promise<ApiResponseDto<string>> {
+  async update(id: number, updateComplementaryActivityTypeDto: UpdateComplementaryActivityTypeDto) {
     const complementaryActivityType = await this.complementaryActivityTypeRepository.findOne(id)
     if (!complementaryActivityType) {
-      throw new NotFoundException('complementary acitivity type not found')
+      throw new NotFoundException('Ativiade complementar nao encontrada')
     }
 
     await this.complementaryActivityTypeRepository.update(id, updateComplementaryActivityTypeDto)
-
-    return {
-      data: 'complementary activity type updated successfully',
-      error: null,
-      status: 200,
-      success: true
-    }
   }
 
-  async remove(id: number): Promise<ApiResponseDto<string>> {
+  async remove(id: number) {
     const complementaryActivityType = await this.complementaryActivityTypeRepository.findOne(id)
     if (!complementaryActivityType) {
-      throw new NotFoundException('complementary acitivity type not found')
+      throw new NotFoundException('Ativiade complementar nao encontrada')
     }
 
     await this.complementaryActivityTypeRepository.remove(id)
-
-    return {
-      data: 'complementary activity type deleted successfully',
-      error: null,
-      status: 200,
-      success: true
-    }
   }
 }
