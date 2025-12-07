@@ -96,7 +96,7 @@ export class ErrorProcessor {
         title: errorTemplate.title,
         message: errorMessage,
         details: [apiError.error],
-        canRetry: status >= 500 || status === 429, // Server errors and rate limits
+        canRetry: status >= 500 || status === 429,
         context
       };
     }

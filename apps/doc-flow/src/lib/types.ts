@@ -4,3 +4,10 @@ export type ApiResponse<T> = {
   data: T;
   success: boolean;
 };
+
+
+export interface ExceptionResponseObject {
+  statusCode: Number;
+  error: string;
+  message: string | string[]
+}
