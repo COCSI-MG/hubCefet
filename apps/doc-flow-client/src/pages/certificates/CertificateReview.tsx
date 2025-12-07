@@ -81,7 +81,7 @@ export default function CertificateReview() {
     try {
       setLoading(true);
 
-      const data = await certificateService.getActivitiesForReview();
+      const { data } = await certificateService.getActivitiesForReview();
       setActivities(data || []);
     } catch (error) {
       if (error instanceof ApiError) {

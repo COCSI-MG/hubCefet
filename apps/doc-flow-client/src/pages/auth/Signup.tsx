@@ -32,16 +32,11 @@ export default function Signup() {
         data.fullName
       );
 
-      if (!response) {
-        setError(
-          "Não foi possível criar a conta no momento. Tente novamente mais tarde."
-        );
-        return;
-      }
-
       localStorage.setItem("accessToken", response.access_token);
       setToken(response.access_token);
+
       setIsAuthenticated(true);
+
       navigate("/events");
       return;
     } catch (err) {

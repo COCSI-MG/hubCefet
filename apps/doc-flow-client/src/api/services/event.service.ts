@@ -44,11 +44,7 @@ export default class EventService extends AbstractService {
   async patch(
     id: string,
     data: EventCreate,
-  ): Promise<
-    ApiResponse<{
-      event: Event;
-    }>
-  > {
+  ): Promise<Event> {
     return await this.api.patch(this.basePath + `/${id}`, data);
   }
 

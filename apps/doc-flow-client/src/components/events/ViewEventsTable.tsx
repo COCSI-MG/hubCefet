@@ -75,9 +75,7 @@ export function ViewEventsDataTable() {
         offset: data.pageIndex * data.pageSize,
       });
 
-      if (!response?.data?.events) return;
-
-      setData(response.data.events);
+      setData(response);
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);
@@ -120,27 +118,21 @@ export function ViewEventsDataTable() {
       };
 
       try {
-        const result = await createPresence(payload);
+        await eventService.patch(event.id, {
+          name: event.name,
+          eventStartDate: event.start_at,
+          eventEndDate: event.end_at,
+          status: event.status,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          vacancies: event.vacancies - 1,
+        });
 
-        if (result) {
-          toast.success(
-            `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
-          );
+        await createPresence(payload);
 
-          await eventService.patch(event.id, {
-            name: event.name,
-            eventStartDate: event.start_at,
-            eventEndDate: event.end_at,
-            status: event.status,
-            latitude: event.latitude,
-            longitude: event.longitude,
-            vacancies: event.vacancies - 1,
-          });
-
-          toast.success(
-            `Número de vagas restantes no evento ${event.name}: ${event.vacancies - 1}`
-          );
-        }
+        toast.success(
+          `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
+        );
       } catch (err) {
         if (err instanceof ApiError) {
           toast.error(err.message);
@@ -156,13 +148,13 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const { data } = await presenceService.getAllByUser({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
 
-      const { presences } = data;
+      const { presences } = response;
 
       if (presences) {
 
@@ -191,13 +183,13 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const { data } = await presenceService.getAllByUser({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
 
-      const { presences } = data;
+      const { presences } = response;
 
       if (presences) {
         setPresencesRegistered(presences);

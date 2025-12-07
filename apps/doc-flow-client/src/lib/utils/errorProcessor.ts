@@ -1,4 +1,3 @@
-import { toast } from 'sonner';
 import {
   ApiError,
   ErrorType,
@@ -65,19 +64,6 @@ const ERROR_MESSAGES: Record<number, { title: string; message: string; type: Err
   }
 };
 
-// Specific error messages for common scenarios
-const SPECIFIC_ERROR_MESSAGES: Record<string, string> = {
-  'Presence already exists': 'Você já está registrado neste evento',
-  'Event not found': 'Evento não encontrado',
-  'User not found': 'Usuário não encontrado',
-  'Invalid credentials': 'Email ou senha incorretos',
-  'Token expired': 'Sua sessão expirou. Faça login novamente',
-  'Insufficient permissions': 'Você não tem permissão para esta ação',
-  'Validation failed': 'Dados inválidos fornecidos',
-  'Duplicate entry': 'Registro já existe',
-  'Resource limit exceeded': 'Limite de recursos excedido'
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ErrorInput = any;
 
@@ -95,26 +81,24 @@ export class ErrorProcessor {
       };
     }
 
-    // Handle API error responses
-    if (error.response?.data) {
-      const apiError = error.response.data as ApiError;
+    const data = error.response.data
+
+    if (data) {
+      const apiError = data as ApiError;
       const status = apiError.status || error.response.status;
       const errorTemplate = ERROR_MESSAGES[status];
 
-      if (errorTemplate) {
-        const errorMessage = this.extractErrorMessage(apiError);
+      const errorMessage = apiError.error || errorTemplate.message || 'Erro desconhecido';
 
-        return {
-          type: errorTemplate.type,
-          severity: errorTemplate.severity,
-          title: errorTemplate.title,
-          message: errorMessage || errorTemplate.message,
-          details: Array.isArray(apiError.error) ? apiError.error : apiError.message ?
-            (Array.isArray(apiError.message) ? apiError.message : [apiError.message]) : undefined,
-          canRetry: status >= 500 || status === 429, // Server errors and rate limits
-          context
-        };
-      }
+      return {
+        type: errorTemplate.type,
+        severity: errorTemplate.severity,
+        title: errorTemplate.title,
+        message: errorMessage,
+        details: [apiError.error],
+        canRetry: status >= 500 || status === 429, // Server errors and rate limits
+        context
+      };
     }
 
     // Handle unknown errors
@@ -127,27 +111,6 @@ export class ErrorProcessor {
     };
   }
 
-  private static extractErrorMessage(apiError: ApiError): string | undefined {
-    // Check for specific known error messages
-    const errorText = typeof apiError.error === 'string' ? apiError.error :
-      Array.isArray(apiError.error) ? apiError.error[0] : '';
-
-    if (errorText && SPECIFIC_ERROR_MESSAGES[errorText]) {
-      return SPECIFIC_ERROR_MESSAGES[errorText];
-    }
-
-    // Check message field
-    if (apiError.message) {
-      const messageText = Array.isArray(apiError.message) ? apiError.message[0] : apiError.message;
-      if (SPECIFIC_ERROR_MESSAGES[messageText]) {
-        return SPECIFIC_ERROR_MESSAGES[messageText];
-      }
-    }
-
-    // Return original error if no specific mapping found
-    return errorText || (Array.isArray(apiError.message) ? apiError.message.join(', ') : apiError.message);
-  }
-
   static handleError(error: ErrorInput, context?: ErrorContext): ProcessedError {
     const processedError = this.processError(error, context);
 
@@ -158,33 +121,6 @@ export class ErrorProcessor {
       console.log('Processed Error:', processedError);
       console.log('Context:', context);
       console.groupEnd();
-    }
-
-    return processedError;
-  }
-
-  static showErrorToast(error: ErrorInput, context?: ErrorContext): ProcessedError {
-    const processedError = this.handleError(error, context);
-
-    // Show toast based on severity
-    switch (processedError.severity) {
-      case ErrorSeverity.INFO:
-        toast.info(processedError.message, {
-          description: processedError.details?.join(', ')
-        });
-        break;
-      case ErrorSeverity.WARNING:
-        toast.warning(processedError.message, {
-          description: processedError.details?.join(', ')
-        });
-        break;
-      case ErrorSeverity.ERROR:
-      case ErrorSeverity.CRITICAL:
-        toast.error(processedError.message, {
-          description: processedError.details?.join(', '),
-          duration: processedError.severity === ErrorSeverity.CRITICAL ? 10000 : 5000
-        });
-        break;
     }
 
     return processedError;

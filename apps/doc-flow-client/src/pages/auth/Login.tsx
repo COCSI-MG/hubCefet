@@ -37,17 +37,10 @@ export default function Login() {
     try {
       const response = await authService.signin(data.email, data.password);
 
-      if (!response) {
-        setError(
-          "Não foi possível fazer login no momento. Tente novamente mais tarde."
-        );
-        return;
-      }
-
       localStorage.setItem("accessToken", response.access_token);
 
       await checkAuthentication();
-      navigate("/events");
+      navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

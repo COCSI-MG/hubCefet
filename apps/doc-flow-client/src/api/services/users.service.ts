@@ -28,22 +28,22 @@ export default class UserService extends AbstractService {
     );
   }
 
-  async getOne(id: string): Promise<ApiResponse<{ user: User }>> {
+  async getOne(id: string): Promise<User> {
     return await this.api.get(this.basePath + `/${id}`);
   }
 
   async patch(
     id: string,
     data: CreateUser
-  ): Promise<ApiResponse<{ user: User }>> {
+  ): Promise<User> {
     return await this.api.patch(this.basePath + `/${id}`, { ...data });
   }
 
-  async delete(id: string): Promise<ApiResponse<null>> {
+  async delete(id: string): Promise<void> {
     return await this.api.delete(this.basePath + `/${id}`);
   }
 
-  async create(data: CreateUser): Promise<ApiResponse<{ user: User }>> {
+  async create(data: CreateUser): Promise<User> {
     return await this.api.post(this.basePath, { ...data });
   }
 }

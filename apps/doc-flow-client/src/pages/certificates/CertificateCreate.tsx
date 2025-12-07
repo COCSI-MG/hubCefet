@@ -13,7 +13,6 @@ export default function CertificateCreate() {
       await certificateService.uploadCertificate(data);
 
       toast.success("Certificado enviado com sucesso!");
-      return;
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

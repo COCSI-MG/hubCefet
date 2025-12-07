@@ -32,11 +32,11 @@ export default function EventsUserView() {
       offset: 0,
       limit: 10,
     });
-    if (!data.data.events) {
+    if (!data.events) {
       return;
     }
 
-    setEvents(data.data.events);
+    setEvents(data.events);
   }, [user]);
 
   const handleEventsOnGoing = useCallback(async () => {
@@ -69,8 +69,8 @@ export default function EventsUserView() {
       offset: offset,
       limit: 10,
     });
-    if (!data.data.events) return;
-    setEvents(data.data.events);
+    if (!data.events) return;
+    setEvents(data.events);
     setPagination({ offset, limit: 10 });
   };
 

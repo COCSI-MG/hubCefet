@@ -25,7 +25,7 @@ const useUser = (): UseUser => {
 
     try {
       const response = await userService.getOne(user.sub);
-      const { user: fetchedUser } = response.data;
+      const fetchedUser = response;
 
       if (!fetchedUser) {
         toast.error("Erro ao carregar usuário");

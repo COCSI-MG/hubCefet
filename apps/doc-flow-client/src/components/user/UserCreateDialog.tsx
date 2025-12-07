@@ -60,8 +60,8 @@ export default function UserCreateDialog({
     try {
       const response = await profileService.getAll({ limit: 100, offset: 0 });
 
-      if (response.data.profiles) {
-        setProfiles(response.data.profiles);
+      if (response.profiles) {
+        setProfiles(response.profiles);
       }
     } catch (err) {
       if (err instanceof ApiError) {

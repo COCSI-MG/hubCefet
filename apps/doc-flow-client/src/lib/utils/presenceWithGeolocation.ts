@@ -9,17 +9,9 @@ import { presenceService } from "@/api/services/presence.service";
 export const createPresenceWithGeolocation = async (
   data: PresenceCreate,
   coordinates?: { latitude: number; longitude: number }
-): Promise<Presence | boolean> => {
+): Promise<Presence> => {
   // Proceed with creating presence with coordinates if provided
-  const result = await presenceService.create(data, coordinates);
-
-  if (result.data && typeof result.data === "object") {
-    toast.success("Presença criada com sucesso!");
-  } else if (result.data === false) {
-    toast.error("Erro ao criar presença. Tente novamente.");
-  }
-
-  return result.data;
+  return await presenceService.create(data, coordinates);
 };
 
 /**
@@ -31,14 +23,7 @@ export const patchPresenceWithGeolocation = async (
   coordinates?: { latitude: number; longitude: number }
 ): Promise<Presence | undefined> => {
   // Proceed with updating presence with coordinates if provided
-  const result = await presenceService.patch(id, data, coordinates);
-
-  if (!result.data.presence) {
-    toast.error("Erro ao atualizar presença. Tente novamente.");
-  }
-
-  toast.success("Presença atualizada com sucesso!");
-  return result.data.presence;
+  return await presenceService.patch(id, data, coordinates);
 };
 
 /**

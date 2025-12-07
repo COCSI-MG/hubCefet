@@ -34,9 +34,8 @@ export function UserManagementDataTable() {
 
   const fetchUsers = async () => {
     try {
-      const response = await userService.getAll({ limit: 10, offset: 0 });
+      const { users } = await userService.getAll({ limit: 10, offset: 0 });
 
-      const { users } = response.data;
       if (!users) {
         toast.error("Erro ao carregar usuários");
         return;
@@ -55,9 +54,8 @@ export function UserManagementDataTable() {
 
   const fetchProfiles = async () => {
     try {
-      const response = await profileService.getAll({ limit: 100, offset: 0 });
+      const { profiles } = await profileService.getAll({ limit: 100, offset: 0 });
 
-      const { profiles } = response.data;
       if (!profiles) return;
 
       setProfiles(profiles);
@@ -71,18 +69,15 @@ export function UserManagementDataTable() {
     }
   };
 
-  const deleteUsers = async (ids: string[]): Promise<boolean> => {
+  const deleteUsers = async (ids: string[]): Promise<void> => {
     try {
-      const results = await Promise.all(ids.map((id) => userService.delete(id)));
-      return results.every((result) => result.success);
+      await Promise.all(ids.map((id) => userService.delete(id)));
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);
-        return false;
       }
 
       toast.error("Erro ao excluir usuários");
-      return false;
     }
   };
 
@@ -99,11 +94,7 @@ export function UserManagementDataTable() {
     if (!confirmed) return;
 
     try {
-      const success = await deleteUsers(selectedRows.map((row) => row.id));
-
-      if (!success) {
-        return;
-      }
+      await deleteUsers(selectedRows.map((row) => row.id));
 
       toast.success(`${selectedRows.length} usuário(s) excluído(s) com sucesso.`);
 

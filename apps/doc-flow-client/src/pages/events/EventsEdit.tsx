@@ -16,8 +16,8 @@ export default function EventsEdit() {
 
   const fetchEvent = async (id: string) => {
     try {
-      const event = await eventService.getOne(id);
-      setEvent(event.data.event);
+      const response = await eventService.getOne(id);
+      setEvent(response.event);
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

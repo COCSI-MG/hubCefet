@@ -41,12 +41,12 @@ export function ViewFilesTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const fetchEvents = async (data: PaginationArgs) => {
-    const files = await fileService.getAllByUser({ ...data });
-    if (!files.data.files) {
+    const response = await fileService.getAllByUser({ ...data });
+    if (!response.files) {
       return;
     }
 
-    setFiles(files.data.files);
+    setFiles(response.files);
   };
 
   const onDelete = useCallback(() => {

@@ -41,9 +41,9 @@ export default function FileForm({ ...props }: FileFormProps) {
     try {
       setIsCreating(true);
 
-      const file = await fileService.create(data);
+      const response = await fileService.create(data);
 
-      props.onFileCreated(file.data.file.id);
+      props.onFileCreated(response.file.id);
       toast.success("Arquivo criado com sucesso");
     } catch (err) {
       if (err instanceof ApiError) {

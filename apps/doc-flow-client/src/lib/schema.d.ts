@@ -561,37 +561,16 @@ export interface components {
       updated_at: string;
     };
     CreateUserResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: components["schemas"]["User"];
-    };
-    Api500ResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response data */
-      data: Record<string, never>;
-      /** @description Response success status */
-      success: boolean;
-      /**
-       * @description Error message
-       * @example Internal server error
-       */
-      error: string;
+      id: string;
+      full_name: string;
+      email: string;
+      enrollment: string;
+      profile_id: string;
+      created_at: string;
+      updated_at: string;
     };
     GetAllUsersResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        users?: components["schemas"]["User"][];
-      };
+      users: components["schemas"]["User"][];
     };
     UpdateUserDto: Record<string, never>;
     CreateProfileDto: {
@@ -622,15 +601,7 @@ export interface components {
       updated_at: string;
     };
     GetAllProfilesResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        profiles?: components["schemas"]["Profile"][];
-      };
+      profiles: components["schemas"]["Profile"][];
     };
     UpdateProfileDto: Record<string, never>;
     CreateEventDto: {
@@ -714,58 +685,46 @@ export interface components {
       };
     };
     GetAllEventsResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        events?: components["schemas"]["Event"][];
+      id: string;
+      name: string;
+      start_at: string;
+      end_at: string;
+      status: string;
+      created_at: string;
+      updated_at: string;
+
+      created_by_user_id: string;
+
+      latitude: number;
+
+      longitude: number;
+
+      vacancies: number;
+
+      user: {
+        id: string;
+        full_name: string;
       };
-    };
+    }[];
     GetEventResponseDataDto: {
       event: components["schemas"]["Event"];
       isStarted: boolean;
       isEnded: boolean;
     };
     GetEventResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: components["schemas"]["GetEventResponseDataDto"];
+      event: components["schemas"]["Event"];
+      isStarted: boolean;
+      isEnded: boolean;
     };
     UpdateEventDto: Record<string, never>;
     EndEventResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      /** @example {
-       *       "message": "Event ended"
-       *     } */
-      data: {
-        message?: string;
-      };
+      message?: string;
     };
     CreateRoleDto: {
       name: string;
     };
     GetAllRolesResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        roles?: components["schemas"]["Role"][];
-      };
+      roles?: components["schemas"]["Role"][];
     };
     UpdateRoleDto: Record<string, never>;
     CreateFileDto: {
@@ -774,89 +733,44 @@ export interface components {
       eventId: string;
     };
     CreateFileResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        file: {
-          id: string;
-          name: string;
-          user_id: string;
-          event_id: string;
-          /** @enum {unknown} */
-          type: "image" | "document" | "certificate";
-          /** @enum {unknown} */
-          status: "waiting" | "processing" | "done" | "error";
-          path: string | null;
-          created_at: string;
-        };
-        message?: string;
+      file: {
+        id: string;
+        name: string;
+        user_id: string;
+        event_id: string;
+        /** @enum {unknown} */
+        type: "image" | "document" | "certificate";
+        /** @enum {unknown} */
+        status: "waiting" | "processing" | "done" | "error";
+        path: string | null;
+        created_at: string;
       };
     };
     GetFileStatusResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      /** @example {
-       *       "id": "550e8400-e29b-41d4-a716-446655440000",
-       *       "status": "pending"
-       *     } */
-      data: {
-        id?: string;
-        status?: string;
-      };
+      id?: string;
+      status?: string;
     };
     UploadFileDto: {
       /** Format: binary */
       file: string;
     };
     DownloadFileResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        /** @example File downloaded successfully */
-        message?: string;
-      };
+      /** @example File downloaded successfully */
+      message: string;
     };
     GetAllFilesResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        files?: components["schemas"]["File"][];
-      };
+      files: components["schemas"]["File"][];
     };
     GetFileResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        file?: {
-          id?: string;
-          name?: string;
-          user_id?: string;
-          event_id?: string;
-          /** @enum {unknown} */
-          type?: "image" | "document" | "certificate";
-          /** @enum {unknown} */
-          status?: "waiting" | "processing" | "done" | "error";
-        };
+      file: {
+        id: string;
+        name: string;
+        user_id: string;
+        event_id: string;
+        /** @enum {unknown} */
+        type: "image" | "document" | "certificate";
+        /** @enum {unknown} */
+        status: "waiting" | "processing" | "done" | "error";
       };
     };
     UpdateFileDto: Record<string, never>;
@@ -901,32 +815,16 @@ export interface components {
       check_in_date: string;
     };
     GetAllPresencesResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        presences?: components["schemas"]["Presence"][];
-      };
+      presences?: components["schemas"]["Presence"][];
     };
     GetPresenceResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        presence?: {
-          id?: string;
-          userId?: string;
-          eventId?: string;
-          isPresent?: boolean;
-          createdAt?: string;
-          updatedAt?: string;
-        };
+      presence?: {
+        id?: string;
+        userId?: string;
+        eventId?: string;
+        isPresent?: boolean;
+        createdAt?: string;
+        updatedAt?: string;
       };
     };
     UpdatePresenceDto: {
@@ -936,26 +834,10 @@ export interface components {
       check_in_date: string;
     };
     GetAllPresencesByEventResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        presences?: components["schemas"]["Presence"][];
-      };
+      presences?: components["schemas"]["Presence"][];
     };
     GetAllPresencesByUserResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        presences?: components["schemas"]["Presence"][];
-      };
+      presences?: components["schemas"]["Presence"][];
     };
     SignInAuthDto: {
       email: string;
@@ -985,49 +867,6 @@ export interface components {
     ChangePasswordDto: {
       oldPassword: string;
       newPassword: string;
-    };
-    CreateTccDto: Record<string, never>;
-    GetAllTccResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        tccs?: components["schemas"]["Tcc"][];
-      };
-    };
-    UpdateTccDto: Record<string, never>;
-    CreateTccPresentationDto: Record<string, never>;
-    GetAllTccPresentationsResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: components["schemas"]["TccPresentation"][];
-    };
-    UpdateTccPresentationDto: Record<string, never>;
-    CreateTccStudentDto: {
-      students: string[];
-      tccId: string;
-    };
-    GetAllTccStudentsResponseDto: {
-      /** @description HTTP status code */
-      status: number;
-      /** @description Response success status */
-      success: boolean;
-      /** @description Error */
-      error: Record<string, never>;
-      data: {
-        tccStudents?: components["schemas"]["TccStudents"][];
-      };
-    };
-    UpdateTccStudentDto: {
-      students?: string[];
-      tccId?: string;
     };
     Role: {
       /**
@@ -1069,70 +908,6 @@ export interface components {
        * @example 550e8400-e29b-41d4-a716-446655440000
        */
       advisor_id: string;
-      /**
-       * Format: date-time
-       * @description Created at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Updated at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      updated_at: string;
-    };
-    TccPresentation: {
-      /**
-       * @description TCC Presentation ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      id: string;
-      /**
-       * @description TCC ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      tcc_id: string;
-      /**
-       * @description Presentation type
-       * @example first
-       */
-      type: string;
-      /**
-       * Format: date-time
-       * @description Presentation date
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      date: string;
-      /**
-       * Format: date-time
-       * @description Created at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Updated at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      updated_at: string;
-    };
-    TccStudents: {
-      /**
-       * @description TCC Student ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      id: string;
-      /**
-       * @description TCC ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      tcc_id: string;
-      /**
-       * @description Student ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      student_id: string;
       /**
        * Format: date-time
        * @description Created at

@@ -125,7 +125,7 @@ export default function PresencesForm({
 
     try {
       const response = await eventService.getOne(eventId);
-      const foundEvent = response.data.event;
+      const foundEvent = response.event;
 
       if (!foundEvent) {
         setEvent(null);
