@@ -43,13 +43,6 @@ import { ComplementaryActivityTypeModule } from './complementary-activity-type/c
       database: process.env.POSTGRES_DATABASE,
       autoLoadModels: true,
       logging: true,
-      models: [__dirname + '/**/*.entity{.ts, .js}'],
-      modelMatch: (filename, member) => {
-        return (
-          filename.substring(0, filename.indexOf('.entity')) ===
-          member.toLowerCase()
-        );
-      },
       define: {
         underscored: false,
         timestamps: true,

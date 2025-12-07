@@ -15,9 +15,9 @@ import { RoleRepositoryImpl } from './repositories/role.repository';
       useClass: RoleRepositoryImpl,
     },
   ],
-  exports: [RolesService],
+  exports: [RolesService, SequelizeModule],
 })
-export class RolesModule {}
+export class RolesModule { }
 
 
 
