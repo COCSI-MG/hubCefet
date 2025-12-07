@@ -20,7 +20,7 @@ export class UsersService {
   ): Promise<ServiceLayerDto<{ user: User }>> {
     const profile = await this.profileService.findOne(createUserDto.profileId);
     if (!profile) {
-      throw new Error('Profile not found');
+      throw new NotFoundException('Profile not found');
     }
 
     const user = await this.userRepository.create(createUserDto, profile.id);
@@ -73,7 +73,7 @@ export class UsersService {
 
     const [number, user] = await this.userRepository.update(id, updateUserDto);
     if (number === 0) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     return user[0];
   }
@@ -89,9 +89,6 @@ export class UsersService {
 
   async findByEmail(email: string) {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new NotFoundException('Usuario nao encontrado')
-    }
 
     return user
   }

@@ -339,7 +339,7 @@ export class PresencesService {
     // Get event details for geofencing
     const [event] = await this.eventService.findOne(presence.event_id);
     if (!event) {
-      throw new Error('Event not found');
+      throw new NotFoundException('Event not found');
     }
 
     // Check if event has geofencing enabled
