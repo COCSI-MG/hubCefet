@@ -81,15 +81,14 @@ export default function CertificateReview() {
     try {
       setLoading(true);
 
-      const { data } = await certificateService.getActivitiesForReview();
-      setActivities(data || []);
+      const data = await certificateService.getActivitiesForReview();
+      setActivities(data);
     } catch (error) {
       if (error instanceof ApiError) {
         toast.error(error.message);
         return;
       }
 
-      console.error("Erro ao carregar atividades:", error);
       toast.error("Erro ao carregar atividades para revisar");
     } finally {
       setLoading(false);
@@ -142,7 +141,6 @@ export default function CertificateReview() {
         return;
       }
 
-      console.error("Erro ao avaliar certificado:", error);
       toast.error("Erro ao avaliar certificado");
     } finally {
       setSubmitting(false);
@@ -159,7 +157,6 @@ export default function CertificateReview() {
         return;
       }
 
-      console.error("Erro ao baixar certificado:", error);
       toast.error("Erro ao baixar certificado");
     }
   };
