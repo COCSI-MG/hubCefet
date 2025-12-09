@@ -10,7 +10,7 @@ import { FilesModule } from './files/files.module';
 import { PresencesModule } from './presences/presences.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ProfileGuard } from './profile/profile.guard';
 import { RolesGuard } from './roles/roles.guard';
@@ -20,6 +20,8 @@ import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { ComplementaryActivityTypeModule } from './complementary-activity-type/complementary-activity-type.module';
+import { LoggerModule } from 'nestjs-pino';
+import { GeneralExceptionFilter } from './lib/filters/general-exception.filter';
 
 @Module({
   imports: [
@@ -55,6 +57,14 @@ import { ComplementaryActivityTypeModule } from './complementary-activity-type/c
       secret: process.env.JWT_KEY,
       signOptions: { expiresIn: '1d' },
     }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        transport: process.env.APP_ENV !== 'production'
+          ? { target: 'pino-pretty', options: { colorize: true } }
+          : undefined
+      }
+    }),
     UsersModule,
     ProfileModule,
     RolesModule,
@@ -82,6 +92,10 @@ import { ComplementaryActivityTypeModule } from './complementary-activity-type/c
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    {
+      provide: APP_FILTER,
+      useClass: GeneralExceptionFilter,
+    }
   ],
 })
 export class AppModule { }

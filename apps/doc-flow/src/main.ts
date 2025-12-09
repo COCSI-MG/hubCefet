@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { loadSwagger } from './lib/load-swagger';
 import { ResponseInterceptor } from './lib/interceptors/response.interceptor';
-import { HttpExceptionFilter } from './lib/filters/http-exception.filter';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,10 +15,10 @@ async function bootstrap() {
     whitelist: true
   }));
   app.useGlobalInterceptors(new ResponseInterceptor());
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
     exposedHeaders: ['Content-Disposition'],
   });
+  app.useLogger(app.get(Logger))
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
