@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import useAuth from "@/hooks/useAuth";
 import AuthService from "@/api/services/auth.service";
-import { ErrorProcessor } from "@/lib/utils/errorProcessor";
+import { ApiError } from "@/api/errors/ApiError";
 
 const authService = new AuthService();
 
@@ -32,30 +32,29 @@ export default function MagicLogin() {
         setLoading(true);
         const response = await authService.verifyMagicLogin(token);
 
-        if (response.access_token) {
-          localStorage.setItem("accessToken", response.access_token);
-          await checkAuthentication();
-          setSuccess(true);
+        localStorage.setItem("accessToken", response.access_token);
+        await checkAuthentication();
+        setSuccess(true);
 
-          const timer = setInterval(() => {
-            setCountdown((prev) => {
-              if (prev <= 1) {
-                clearInterval(timer);
-                navigate("/events");
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              navigate("/events");
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
 
-          return () => clearInterval(timer);
-        } else {
-          setError("Resposta inválida do servidor");
+        return () => clearInterval(timer);
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+          return;
         }
-      } catch (err: any) {
-        const processedError = ErrorProcessor.processError(err)
 
-        setError(processedError.message)
+        setError("Erro inesperado ao tentar verificar  magic login");
       } finally {
         setLoading(false);
       }

@@ -152,7 +152,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
                       value: type.id,
                       label: type.name,
                     }))}
-                    value={field.value}
+                    value={field.value ?? ""}
                     onValueChange={field.onChange}
                     placeholder="Selecione o tipo de atividade"
                     searchPlaceholder="Buscar tipos de atividade..."
@@ -181,7 +181,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
                         value: type.id.toString(),
                         label: type.name,
                       }))}
-                      value={field.value}
+                      value={field.value ?? ""}
                       onValueChange={field.onChange}
                       placeholder="Selecione o tipo de atividade complementar"
                       searchPlaceholder="Buscar tipos de atividades complementares..."
