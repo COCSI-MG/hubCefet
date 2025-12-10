@@ -51,6 +51,12 @@ export default class EventService extends AbstractService {
   async search(q: string): Promise<GetAllEventsResponseDto> {
     return await this.api.get(this.basePath + `/search?q=${q}`);
   }
+
+  async delete(
+    id: string,
+  ): Promise<void> {
+    return await this.api.delete(this.basePath + `/${id}`);
+  }
 }
 
 export const eventService = new EventService()

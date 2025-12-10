@@ -73,7 +73,6 @@ export default function Router() {
 
             <Route path="all" element={<EventsView />} />
 
-            {/* TODO: Remover essa pagina Events User View e Jogar a Opcao de Editar para dentro de Events View Alem de Poder Remover Evento*/}
             <Route element={<ProfileRoute profile={["Admin", "Professor"]} />}>
               <Route path="user" element={<EventsUserView />} />
               <Route path="create" element={<EventsCreate />} />

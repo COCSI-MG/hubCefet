@@ -2,9 +2,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Event } from "@/lib/schemas/event.schema";
 import { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { tableEventType } from "./EventsTable";
 
-export function getColumns(): ColumnDef<Event>[] {
-  return [
+export function getColumns(
+  { navigate }: { navigate: (path: string) => void },
+  openDeleteModal: (item: Event) => void,
+  tableType: tableEventType,
+  isAdmin: boolean,
+): ColumnDef<Event>[] {
+
+  const columns: ColumnDef<Event>[] = [
     {
       id: "select",
       header: ({ table }) => {
@@ -37,29 +45,37 @@ export function getColumns(): ColumnDef<Event>[] {
       accessorKey: "id",
       header: "ID",
     },
-    {
-      accessorKey: "user",
-      header: "Criado Por",
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <Avatar>
-              <AvatarImage
-                src={row.original.user?.full_name.charAt(0).toLowerCase() || ""}
-                alt={row.original.user?.full_name}
-              />
-              <AvatarFallback className="rounded-lg">
-                {row.original.user?.full_name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <span className="ml-2">{row.original.user?.full_name}</span>
-          </div>
-        );
+  ]
+
+  if (tableType === "all") {
+    columns.push(
+      {
+        accessorKey: "user",
+        header: "Criado Por",
+        cell: ({ row }) => {
+          return (
+            <div className="flex items-center">
+              <Avatar>
+                <AvatarImage
+                  src={row.original.user?.full_name.charAt(0).toLowerCase() || ""}
+                  alt={row.original.user?.full_name}
+                />
+                <AvatarFallback className="rounded-lg">
+                  {row.original.user?.full_name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <span className="ml-2">{row.original.user?.full_name}</span>
+            </div>
+          );
+        },
       },
-    },
+    )
+  }
+
+  columns.push(
     {
       accessorKey: "name",
       header: "Nome",
@@ -111,5 +127,52 @@ export function getColumns(): ColumnDef<Event>[] {
         return <span>{vacancies ?? "0"}</span>;
       },
     },
-  ];
+
+    {
+      accessorKey: 'actions',
+      header: 'Ações',
+      cell: ({ row }) => {
+        const item = row.original
+        console.log(isAdmin)
+        const canEditOrDelete = (tableType === 'user' || isAdmin)
+
+        return (
+          <div className="flex justify-start items-center gap-2">
+            <Button
+              className="rounded-2xl bg-blue-700 text-white hover:bg-blue-500"
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/events/${item.id}/edit`)}
+            >
+              Visualizar
+            </Button>
+
+            {
+              canEditOrDelete &&
+              <>
+                <Button
+                  className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate(`/events/${item.id}/edit`)}
+                >
+                  Editar
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="rounded-2xl"
+                  size="sm"
+                  onClick={() => openDeleteModal(item)}
+                >
+                  Excluir
+                </Button>
+              </>
+            }
+
+          </div>
+        )
+      },
+    }
+  )
+  return columns;
 }

@@ -16,15 +16,15 @@ export default function EventsEdit() {
 
   const fetchEvent = async (id: string) => {
     try {
-      const response = await eventService.getOne(id);
-      setEvent(response.event);
+      const data = await eventService.getOne(id);
+      setEvent(data.event);
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);
         return;
       }
 
-      toast.error("Erro inesperado ao procurar eventos")
+      toast.error("erro inesperado ao procurar eventos")
     }
   };
 
@@ -36,6 +36,11 @@ export default function EventsEdit() {
         status: event.status,
         eventStartDate: event.start_at,
         eventEndDate: event.end_at,
+        description: event.description,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radius: event.radius,
+        vacancies: event.vacancies,
       }
       : undefined,
   });
@@ -73,7 +78,7 @@ export default function EventsEdit() {
         description="Edite as informações do evento e clique em confirmar para salvar as alterações"
       />
       {event && (
-        <EventsForm form={form} onSubmit={handleSubmit} event={event} />
+        <EventsForm form={form} onSubmit={handleSubmit} event={event} mode="edit" />
       )}
     </div>
   );

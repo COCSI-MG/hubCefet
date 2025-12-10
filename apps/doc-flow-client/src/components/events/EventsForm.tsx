@@ -17,13 +17,19 @@ import FormItemField from "../FormItemField";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
 
+type modes = 'create' | 'edit';
+
 interface EventsFormProps {
   form: UseFormReturn<EventCreateSchema>;
   onSubmit: (data: EventCreateSchema) => void;
   event?: Event;
+  mode: modes;
 }
 
-export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
+export default function EventsForm({ form, onSubmit, event, mode }: EventsFormProps) {
+  const discardText = mode === "edit"
+    ? "Desfazer alterações"
+    : "Limpar formulario";
   return (
     <>
       <Form {...form}>
@@ -262,7 +268,7 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
               className="rounded-xl border lg:w-full h-12 w-full"
               onClick={() => form.reset()}
             >
-              Descartar criação
+              {discardText}
             </Button>
             <Button
               type="submit"
