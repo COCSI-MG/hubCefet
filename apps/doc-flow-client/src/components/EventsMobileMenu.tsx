@@ -10,6 +10,7 @@ import { Menu } from "lucide-react";
 import AppsIcon from '@mui/icons-material/Apps';
 import EventIcon from '@mui/icons-material/Event';
 import AddIcon from '@mui/icons-material/Add';
+import { PermContactCalendar } from "@mui/icons-material";
 
 export function EventsMobileMenu() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export function EventsMobileMenu() {
                   Voltar para Apps
                 </Button>
 
+
                 {(isAdmin || isProfessor) && (
                   <Button
                     variant="ghost"
@@ -83,6 +85,17 @@ export function EventsMobileMenu() {
                   >
                     <AddIcon className="mr-2 h-4 w-4" />
                     Criar Evento
+                  </Button>
+                )}
+
+                {(isAdmin || isProfessor) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation("/events/user")}
+                  >
+                    <PermContactCalendar className="mr-2 h-4 w-4" />
+                    Meus eventos
                   </Button>
                 )}
 

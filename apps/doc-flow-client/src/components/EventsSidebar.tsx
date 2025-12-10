@@ -20,6 +20,7 @@ import EventIcon from "@mui/icons-material/Event";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { PermContactCalendar } from "@mui/icons-material";
 
 export function EventsSidebar({
   ...props
@@ -92,6 +93,15 @@ export function EventsSidebar({
                 onClick={() => navigate("/events/create")}
                 activeNavItem={location.pathname === "/events/create"}
                 icon={<AddIcon />}
+              />
+            )}
+
+            {(isAdmin || isProfessor) && (
+              <NavMenuItem
+                text="Meus Eventos"
+                onClick={() => navigate("/events/user")}
+                activeNavItem={location.pathname === "/events/user"}
+                icon={<PermContactCalendar />}
               />
             )}
 
