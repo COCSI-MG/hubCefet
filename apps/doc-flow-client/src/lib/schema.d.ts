@@ -638,6 +638,11 @@ export interface components {
        */
       name: string;
       /**
+       * @description Description of the event
+       * @example Event 1 Description
+       */
+      description: string;
+      /**
        * Format: date-time
        * @description Date of the event
        * @example 2021-01-01 00:00:00
@@ -679,6 +684,8 @@ export interface components {
 
       vacancies: number;
 
+      radius: number;
+
       user: {
         id: string;
         full_name: string;
@@ -687,19 +694,17 @@ export interface components {
     GetAllEventsResponseDto: {
       id: string;
       name: string;
+      description: string;
       start_at: string;
       end_at: string;
       status: string;
       created_at: string;
       updated_at: string;
-
       created_by_user_id: string;
-
       latitude: number;
-
       longitude: number;
-
       vacancies: number;
+      radius: number;
 
       user: {
         id: string;
