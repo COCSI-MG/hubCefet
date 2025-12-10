@@ -86,7 +86,7 @@ export class EventsController {
     return { event, isStarted, isEnded };
   }
 
-  @Profiles(Profile.Admin, Profile.Professor, Profile.Student)
+  @Profiles(Profile.Admin)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -95,7 +95,7 @@ export class EventsController {
     return await this.eventsService.update(id, updateEventDto);
   }
 
-  @Profiles(Profile.Admin, Profile.Professor)
+  @Profiles(Profile.Admin)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.eventsService.remove(id);
