@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto, UpdateEventVacanciesDto } from './dto/update-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 import { Profiles } from 'src/profile/decorators/profile.decorator';
 import { Profile } from 'src/profile/enum/profile.enum';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
