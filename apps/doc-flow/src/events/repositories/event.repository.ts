@@ -4,14 +4,13 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventStatus } from '../enum/event-status.enum';
-import { Op } from 'sequelize';
-import { User } from 'src/users/entities/user.entity';
+import { Op } from 'sequelize'; import { User } from 'src/users/entities/user.entity';
 
 export class EventRepositoryImpl implements EventRepository {
   constructor(
     @InjectModel(Event)
     private readonly eventModel: typeof Event,
-  ) {}
+  ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
     return await this.eventModel.scope('withoutTimestamps').create({
@@ -150,6 +149,14 @@ export class EventRepositoryImpl implements EventRepository {
           [Op.iLike]: `%${q}%`,
         },
       },
+    });
+  }
+
+  async updateVacancies(id: string, vacancies: number): Promise<void> {
+    const event = await this.findOne(id);
+
+    await event.update({
+      vacancies
     });
   }
 }

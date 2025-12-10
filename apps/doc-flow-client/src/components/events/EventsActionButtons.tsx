@@ -141,15 +141,7 @@ export function EventsActionButtons({ user, events, success, selectedRows, setEr
       };
 
       try {
-        await eventService.patch(event.id, {
-          name: event.name,
-          eventStartDate: event.start_at,
-          eventEndDate: event.end_at,
-          status: event.status,
-          latitude: event.latitude,
-          longitude: event.longitude,
-          vacancies: event.vacancies - 1,
-        });
+        await eventService.decreaseVacances(event.id);
 
         await presenceService.create({ ...payload });
 

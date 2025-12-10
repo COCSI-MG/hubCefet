@@ -133,9 +133,7 @@ export function getColumns(
       header: 'Ações',
       cell: ({ row }) => {
         const item = row.original
-        console.log(isAdmin)
         const canEditOrDelete = (tableType === 'user' || isAdmin)
-
         return (
           <div className="flex justify-start items-center gap-2">
             <Button

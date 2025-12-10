@@ -31,6 +31,7 @@ interface EventsDataTableProps {
   fetchEvents: (pagination: PaginationArgs) => Promise<void>;
   tableType: tableEventType;
 }
+
 export function EventsDataTable({ events, setPagination, pagination, fetchEvents, tableType }: EventsDataTableProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

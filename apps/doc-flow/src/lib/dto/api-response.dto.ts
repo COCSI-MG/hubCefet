@@ -9,7 +9,7 @@ export class ApiResponseDto<T> {
   @ApiProperty({
     description: 'Response data',
   })
-  data: T | null;
+  data: T;
 
   @ApiProperty({
     description: 'Response success status',

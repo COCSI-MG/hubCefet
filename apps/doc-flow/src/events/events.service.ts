@@ -3,6 +3,8 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -64,8 +66,9 @@ export class EventsService {
   async findOne(id: string): Promise<[Event, boolean, boolean] | null> {
     const event = await this.eventRepository.findOne(id);
     if (!event) {
-      return null;
+      throw new NotFoundException("Evento nao encontrado")
     }
+
     const now = new Date();
     const isStarted: boolean = this.eventStarted(event.start_at, now);
     const isEnded: boolean =
@@ -183,5 +186,16 @@ export class EventsService {
 
   private eventEnded(end_at: Date, now: Date): boolean {
     return end_at < now;
+  }
+
+  async decreaseVacancies(id: string) {
+    const event = await this.findOne(id)
+
+    const actualVacancies = event[0].vacancies
+    if (actualVacancies <= 0) {
+      throw new UnprocessableEntityException("Nao a vagas disponiveis")
+    }
+
+    return await this.eventRepository.updateVacancies(id, actualVacancies - 1);
   }
 }
