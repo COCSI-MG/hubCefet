@@ -68,7 +68,7 @@ export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagi
 
           <div className="flex justify-end gap-3 mt-6">
             <Button
-              className="self-end rounded-2xl text-white hover:bg-neutral-700 text-lg [&_svg]:size-5"
+              className="self-end rounded-2xl text-white bg-neutral-400 hover:bg-neutral-700 text-lg [&_svg]:size-5"
               variant="secondary"
               onClick={() => setIsModalOpen(false)}
             >
