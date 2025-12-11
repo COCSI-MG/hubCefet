@@ -738,18 +738,16 @@ export interface components {
       eventId: string;
     };
     CreateFileResponseDto: {
-      file: {
-        id: string;
-        name: string;
-        user_id: string;
-        event_id: string;
-        /** @enum {unknown} */
-        type: "image" | "document" | "certificate";
-        /** @enum {unknown} */
-        status: "waiting" | "processing" | "done" | "error";
-        path: string | null;
-        created_at: string;
-      };
+      id: string;
+      name: string;
+      user_id: string;
+      event_id: string;
+      /** @enum {unknown} */
+      type: "image" | "document" | "certificate";
+      /** @enum {unknown} */
+      status: "waiting" | "processing" | "done" | "error";
+      path: string | null;
+      created_at: string;
     };
     GetFileStatusResponseDto: {
       id?: string;
@@ -764,8 +762,19 @@ export interface components {
       message: string;
     };
     GetAllFilesResponseDto: {
-      files: components["schemas"]["File"][];
-    };
+      id: string;
+      name: string;
+      path: string | null;
+      type: string;
+      user_id: string;
+      event_id: string;
+      status: string;
+      created_at: string;
+      user: {
+        id: string;
+        full_name: string;
+      };
+    }[];
     GetFileResponseDto: {
       file: {
         id: string;
