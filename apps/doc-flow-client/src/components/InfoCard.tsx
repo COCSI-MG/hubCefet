@@ -1,5 +1,3 @@
-import { FileText, Tag } from "lucide-react";
-
 interface InfoCardProps {
   label: string;
   data: string;

@@ -17,9 +17,17 @@ export function EventMap({ lat, long, radius }: EventMapProps) {
     <MapContainer center={[lat, long]} zoom={17} className="h-full w-full rounded-xl">
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <Marker position={[lat, long]} eventHandlers={{ click: handleClick }}>
-        <Popup >Clique para abrir no Google Maps</Popup>
+      <Marker position={[lat, long]} >
+        <Popup  >
+          <a
+            className='text-base cursor-pointer'
+            onClick={handleClick}
+          >
+            Clique no link para abrir no Google Maps
+          </a>
+        </Popup>
       </Marker>
 
       <Circle center={[lat, long]} radius={radius} />
