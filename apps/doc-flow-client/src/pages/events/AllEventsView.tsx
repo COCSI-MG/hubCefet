@@ -11,7 +11,7 @@ export interface Pagination {
   pageSize: number;
 }
 
-export default function EventsView() {
+export default function AllEventsView() {
   const [events, setEvents] = useState<Event[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,

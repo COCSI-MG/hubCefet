@@ -88,16 +88,14 @@ export function EventsMobileMenu() {
                   </Button>
                 )}
 
-                {(isAdmin || isProfessor) && (
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => handleNavigation("/events/user")}
-                  >
-                    <PermContactCalendar className="mr-2 h-4 w-4" />
-                    Meus eventos
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleNavigation("/events/user")}
+                >
+                  <PermContactCalendar className="mr-2 h-4 w-4" />
+                  Meus eventos
+                </Button>
 
                 <Button
                   variant="ghost"

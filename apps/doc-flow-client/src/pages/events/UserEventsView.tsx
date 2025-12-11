@@ -12,7 +12,7 @@ export interface Pagination {
   pageSize: number;
 }
 
-export default function EventsView() {
+export default function UserEventsView() {
   const [events, setEvents] = useState<Event[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
@@ -43,7 +43,7 @@ export default function EventsView() {
 
       toast.error("Não foi possível carregar os eventos.");
     }
-  }, [user]);
+  }, [user, events]);
 
   const handleEventsOnGoing = useCallback(async () => {
     const eventsOnGoing = events.filter((event) => {
@@ -57,7 +57,7 @@ export default function EventsView() {
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize,
     });
-  }, [pagination, pagination.pageIndex, pagination.pageSize]);
+  }, [pagination]);
 
   useEffect(() => {
     handleEventsOnGoing();
@@ -67,7 +67,7 @@ export default function EventsView() {
     <div>
       <PageHeader
         title="Meus eventos"
-        description={`${eventsOnGoing.length} eventos em andamento`}
+        description={`Veja os eventos nos quais você está inscrito ou que foram criados por você — ${eventsOnGoing.length} eventos em andamento.`}
       />
       <div className="container max-w-full flex flex-col space-y-2 p-6 h-fit">
         <div className="p-1">

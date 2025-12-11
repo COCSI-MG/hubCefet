@@ -96,14 +96,12 @@ export function EventsSidebar({
               />
             )}
 
-            {(isAdmin || isProfessor) && (
-              <NavMenuItem
-                text="Meus Eventos"
-                onClick={() => navigate("/events/user")}
-                activeNavItem={location.pathname === "/events/user"}
-                icon={<PermContactCalendar />}
-              />
-            )}
+            <NavMenuItem
+              text="Meus Eventos"
+              onClick={() => navigate("/events/user")}
+              activeNavItem={location.pathname === "/events/user"}
+              icon={<PermContactCalendar />}
+            />
 
             <NavMenuItem
               text="Todos Eventos"

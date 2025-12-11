@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
 import { Event } from "@/lib/schemas/event.schema";
-import { getColumns } from "./ViewEventsTableColumns";
+import { getColumns } from "./EventsTableColumns";
 import useAuth from "@/hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router";
@@ -44,6 +44,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
   const [isProfessor, setIsProfessor] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<Event | null>(null)
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false)
   const navigate = useNavigate();
 
   const getUserProfile = () => {
@@ -70,6 +71,8 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       );
       setIsProfessor(profileLower === "professor");
     }
+
+    setIsProfileLoaded(true)
   };
 
   const openDeleteModal = (item: Event) => {
@@ -99,7 +102,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
 
 
   const columns = useMemo(
-    () => getColumns({ navigate }, openDeleteModal, tableType, isAdmin),
+    () => getColumns({ navigate }, openDeleteModal, tableType, isAdmin, isProfessor),
     [isAdmin]
   );
 
@@ -184,7 +187,8 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
               Encerrado
             </Button>
           </div>
-          {!isAdmin && !isProfessor && (
+
+          {isProfileLoaded && !isAdmin && !isProfessor && (
             <EventsActionButtons events={events} user={user} success={success} selectedRows={selectedRows} setError={setError} setSuccess={setSuccess} />
           )}
         </div>

@@ -10,6 +10,7 @@ export function getColumns(
   openDeleteModal: (item: Event) => void,
   tableType: tableEventType,
   isAdmin: boolean,
+  isProfessor: boolean,
 ): ColumnDef<Event>[] {
 
   const columns: ColumnDef<Event>[] = [
@@ -133,7 +134,8 @@ export function getColumns(
       header: 'Ações',
       cell: ({ row }) => {
         const item = row.original
-        const canEditOrDelete = (tableType === 'user' || isAdmin)
+        const canEditOrDelete = isAdmin || (tableType === 'user' && isProfessor)
+
         return (
           <div className="flex justify-start items-center gap-2">
             <Button
