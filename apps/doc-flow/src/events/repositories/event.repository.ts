@@ -1,15 +1,16 @@
-import { InjectModel } from '@nestjs/sequelize';
+import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { EventRepository } from './event.repository.interface';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventStatus } from '../enum/event-status.enum';
-import { Op } from 'sequelize'; import { User } from 'src/users/entities/user.entity';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
+import { User } from 'src/users/entities/user.entity';
 
 export class EventRepositoryImpl implements EventRepository {
   constructor(
-    @InjectModel(Event)
-    private readonly eventModel: typeof Event,
+    @InjectConnection() private readonly sequelize: Sequelize,
+    @InjectModel(Event) private readonly eventModel: typeof Event,
   ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
@@ -133,13 +134,25 @@ export class EventRepositoryImpl implements EventRepository {
     offset: number;
     limit: number;
   }): Promise<Event[]> {
-    return await this.eventModel.scope('withoutTimestamps').findAll({
-      where: {
-        created_by_user_id: userId,
+    return await this.sequelize.query(
+      `
+    SELECT DISTINCT e.*
+    FROM events e
+    LEFT JOIN presences p ON e.id = p.event_id
+    WHERE e.created_by_user_id = :userId
+       OR p.user_id = :userId
+    ORDER BY e.created_at DESC
+    LIMIT :limit OFFSET :offset;
+  `,
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          userId,
+          limit,
+          offset,
+        },
       },
-      offset,
-      limit,
-    });
+    );
   }
 
   async search(q: string) {
