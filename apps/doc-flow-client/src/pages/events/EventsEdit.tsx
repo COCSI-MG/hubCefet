@@ -56,20 +56,36 @@ export default function EventsEdit() {
   const handleSubmit = async (
     data: Omit<EventCreateSchema, "eventStartTime" | "eventEndTime">,
   ) => {
-    if (!event) {
-      return;
-    }
+    try {
+      await eventService.patch(event!.id, data);
+      navigate("/events");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
 
-    const result = await eventService.patch(event?.id, data);
-    if (result !== undefined) {
-      navigate("/events", {
-        state: {
-          action: "update",
-          message: "Evento atualizado com sucesso",
-        },
-      });
+      toast.error("Erro inesperado ao editar evento.");
     }
   };
+
+  useEffect(() => {
+    if (event) {
+      form.reset({
+        name: event.name,
+        status: event.status,
+        eventStartDate: event.start_at.split("T")[0],
+        eventEndDate: event.end_at.split("T")[0],
+        eventStartTime: event.start_at.split("T")[1].slice(0, 5),
+        eventEndTime: event.end_at.split("T")[1].slice(0, 5),
+        description: event.description,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radius: event.radius,
+        vacancies: event.vacancies,
+      })
+    }
+  }, [event])
 
   return (
     <div>

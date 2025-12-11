@@ -30,6 +30,7 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
   const discardText = mode === "edit"
     ? "Desfazer alterações"
     : "Limpar formulario";
+
   return (
     <>
       <Form {...form}>
@@ -44,10 +45,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
             <FormField
               control={form.control}
               name="description"
-              defaultValue={
-                (event && event.description) ||
-                `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloribus temporibus consequatur nostrum fuga ipsum vel, modi nesciunt hic provident quod praesentium eveniet sed earum doloremque quam error asperiores unde blanditiis.`
-              }
               render={({ field }) => (
                 <FormItemField
                   field={field}
@@ -67,7 +64,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="name"
-                  defaultValue={event ? event.name : ""}
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -83,7 +79,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="status"
-                  defaultValue={event ? event.status : "upcoming"}
                   render={({ field }) => {
                     return (
                       <FormItem>
@@ -114,7 +109,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="vacancies"
-                  defaultValue={event ? event.vacancies : 1}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -135,7 +129,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="eventStartDate"
-                  defaultValue={event ? event.start_at.split("T")[0] : ""}
                   render={({ field }) => (
                     <FormItemField
                       field={{
@@ -153,7 +146,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="eventEndDate"
-                  defaultValue={event ? event.end_at.split("T")[0] : ""}
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -172,9 +164,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="eventStartTime"
-                  defaultValue={
-                    event ? event.start_at.split("T")[1].slice(0, 5) : ""
-                  }
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -190,9 +179,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="eventEndTime"
-                  defaultValue={
-                    event ? event.end_at.split("T")[1].slice(0, 5) : ""
-                  }
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -211,7 +197,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="latitude"
-                  defaultValue={event ? event.latitude : 0}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -227,7 +212,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormField
                   control={form.control}
                   name="longitude"
-                  defaultValue={event ? event.longitude : 0}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -244,7 +228,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                   <FormField
                     control={form.control}
                     name="radius"
-                    defaultValue={event && event.radius ? event.radius : 0}
                     render={({ field }) => (
                       <FormItemField
                         field={{ ...field }}
@@ -266,7 +249,25 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               type="button"
               variant="outline"
               className="rounded-xl border lg:w-full h-12 w-full"
-              onClick={() => form.reset()}
+              onClick={() => {
+                if (mode === "edit" && event) {
+                  form.reset({
+                    name: event.name,
+                    status: event.status,
+                    eventStartDate: event.start_at.split("T")[0],
+                    eventEndDate: event.end_at.split("T")[0],
+                    eventStartTime: event.start_at.split("T")[1].slice(0, 5),
+                    eventEndTime: event.end_at.split("T")[1].slice(0, 5),
+                    description: event.description,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                    radius: event.radius,
+                    vacancies: event.vacancies,
+                  })
+                } else {
+                  form.reset()
+                }
+              }}
             >
               {discardText}
             </Button>
@@ -279,7 +280,7 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
             </Button>
           </div>
         </form>
-      </Form>
+      </Form >
     </>
   );
 }

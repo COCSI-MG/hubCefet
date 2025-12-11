@@ -32,6 +32,9 @@ export class EventRepositoryImpl implements EventRepository {
     return await this.eventModel.scope('withoutTimestamps').findAll({
       offset,
       limit,
+      order: [
+        ['created_at', 'DESC']
+      ],
       include: [
         {
           model: User,
