@@ -20,7 +20,7 @@ import { useNavigate } from "react-router";
 import { DeleteEventDialog } from "./DeleteEventDialog";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import { EventsActionButtons } from "./EventsActionButtons";
-import { Pagination } from "@/pages/events/EventsView";
+import { Pagination } from "@/pages/events/AllEventsView";
 
 export type tableEventType = 'user' | 'all'
 

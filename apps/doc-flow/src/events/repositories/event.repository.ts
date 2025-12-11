@@ -42,7 +42,16 @@ export class EventRepositoryImpl implements EventRepository {
   }
 
   async findOne(id: string): Promise<Event> {
-    return await this.eventModel.findByPk(id);
+    return await this.eventModel.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'full_name'],
+        },
+      ],
+
+    });
   }
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {

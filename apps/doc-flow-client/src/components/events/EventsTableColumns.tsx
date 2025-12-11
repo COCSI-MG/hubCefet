@@ -142,7 +142,7 @@ export function getColumns(
               className="rounded-2xl bg-blue-700 text-white hover:bg-blue-500"
               variant="secondary"
               size="sm"
-              onClick={() => navigate(`/events/${item.id}/edit`)}
+              onClick={() => navigate(`/events/${item.id}`)}
             >
               Visualizar
             </Button>
