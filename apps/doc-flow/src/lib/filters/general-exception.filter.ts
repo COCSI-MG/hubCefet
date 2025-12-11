@@ -33,7 +33,8 @@ export class GeneralExceptionFilter implements ExceptionFilter {
 
       this.logger.error(
         {
-          message,
+          stack: exception instanceof HttpException ? exception.stack : undefined,
+          error: message,
           method: request.method,
           url: request.url,
           statusCode
@@ -45,10 +46,10 @@ export class GeneralExceptionFilter implements ExceptionFilter {
     }
 
     const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-
     this.logger.error(
       {
-        err: exception instanceof Error ? exception.stack : exception,
+        stack: exception instanceof Error ? exception.stack : undefined,
+        error: exception,
         method: request.method,
         url: request.url,
         statusCode,
