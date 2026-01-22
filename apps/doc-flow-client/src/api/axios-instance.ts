@@ -21,7 +21,7 @@ export const privateAxiosInstance = axios.create({
 });
 
 publicAxiosInstance.interceptors.response.use(
-  (res) => (res.data),
+  (res) => res,
   (error) => {
     const status = error.response?.status ?? 500;
 
@@ -44,7 +44,7 @@ privateAxiosInstance.interceptors.request.use(
 );
 
 privateAxiosInstance.interceptors.response.use(
-  (res) => (res.data),
+  (res) => res,
   (error) => {
     const status = error.response?.status ?? 500;
 
