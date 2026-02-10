@@ -55,7 +55,7 @@ export function DeleteEventDialog({ fetchEvent, pagination, item, isModalOpen, s
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50 w-[38rem]">
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg z-50 w-[38rem]">
           <Dialog.Title className="text-xl font-bold">
             Confirmar Exclusão
           </Dialog.Title>

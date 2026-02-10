@@ -1,5 +1,5 @@
 import PageHeader from "@/components/PageHeader";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -21,15 +21,15 @@ export default function EventsCreate() {
       name: "",
       description: "",
       status: "upcoming",
-      eventStartDate: "",
-      eventEndDate: "",
+      start_at: "",
+      end_at: "",
       latitude: 0,
       longitude: 0,
       radius: 10,
     },
   });
 
-  const onSubmit: SubmitHandler<EventCreateSchema> = async (data: EventCreate) => {
+  async function onSubmit(data: EventCreate) {
     try {
       await eventService.create({ ...data });
 

@@ -14,10 +14,9 @@ import { Event } from "@/lib/schemas/event.schema";
 import { getColumns } from "./EventsTableColumns";
 import useAuth from "@/hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { DeleteEventDialog } from "./DeleteEventDialog";
 import { Pagination as PaginationArgs } from "@/lib/types";
-import { EventsActionButtons } from "./EventsActionButtons";
 import { Pagination } from "@/pages/events/AllEventsView";
 
 export type tableEventType = 'user' | 'all'
@@ -42,10 +41,18 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
   const [isProfessor, setIsProfessor] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<Event | null>(null)
-  const [isProfileLoaded, setIsProfileLoaded] = useState(false)
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isMyEventsPage = location.pathname === "/events/user";
 
   const getUserProfile = () => {
+    if (!user || !token) {
+      <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-semibold">
+        Carregando...
+      </div>
+    }
+
     if (token) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const decoded: any = jwtDecode(token);
@@ -69,8 +76,6 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       );
       setIsProfessor(profileLower === "professor");
     }
-
-    setIsProfileLoaded(true)
   };
 
   const openDeleteModal = (item: Event) => {
@@ -80,7 +85,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
 
   useEffect(() => {
     getUserProfile();
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     if (error) {
@@ -100,8 +105,16 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
 
 
   const columns = useMemo(
-    () => getColumns({ navigate }, openDeleteModal, tableType, isAdmin, isProfessor),
-    [isAdmin]
+    () => getColumns(
+      { navigate },
+      openDeleteModal,
+      tableType,
+      isAdmin,
+      isProfessor,
+      user!.sub,
+      isMyEventsPage
+    ),
+    [openDeleteModal, tableType, isAdmin, isProfessor, user, isMyEventsPage]
   );
 
   const table = useReactTable({
@@ -128,8 +141,6 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
     table.getColumn("status")?.setFilterValue(status);
   };
 
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-
   return (
     <div>
       <div className="flex flex-col gap-4">
@@ -146,6 +157,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
           item={itemToDelete}
           setItem={setItemToDelete}
         />
+
         <div className="flex flex-col xl:flex-row justify-between xl:items-center w-full space-y-4">
           <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
             <Button
@@ -185,10 +197,6 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
               Encerrado
             </Button>
           </div>
-
-          {isProfileLoaded && !isAdmin && !isProfessor && (
-            <EventsActionButtons events={events} user={user} success={success} selectedRows={selectedRows} setError={setError} setSuccess={setSuccess} />
-          )}
         </div>
 
       </div>

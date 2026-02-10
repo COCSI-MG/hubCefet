@@ -22,7 +22,7 @@ export default function DataTablePagination<TData>({
         }
         disabled={table.getState().pagination.pageIndex === 0}
       >
-        Previous
+        Anterior
       </Button>
       <Button
         variant="outline"
@@ -39,7 +39,7 @@ export default function DataTablePagination<TData>({
           table.getRowCount() < table.getState().pagination.pageSize
         }
       >
-        Next
+        Próximo
       </Button>
     </div>
   );

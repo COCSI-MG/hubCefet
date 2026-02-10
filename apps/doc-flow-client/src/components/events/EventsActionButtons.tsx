@@ -1,348 +1,81 @@
-import * as Dialog from '@radix-ui/react-dialog'
-import { Button } from '../ui/button'
-import CheckInForm from "../CheckInForm";
-import CheckOutForm from "../CheckOutForm";
-import { Event, Presence, PresenceCreate, PresenceFormSchema, presenceSchema, UserPayload } from '@/lib/types';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { presenceService } from '@/api/services/presence.service';
-import { toast } from 'sonner';
-import { ApiError } from '@/api/errors/ApiError';
+import { EventsSubscribeButton } from './EventsSubscribeButton';
 import { Row } from '@tanstack/react-table';
-import { eventService } from '@/api/services/event.service';
+import { Event } from '@/lib/types';
+import { QRCodeGeneratorModal } from '../QRCodeGeneratorModal';
+import { useEffect, useState } from 'react';
+import { presenceService } from '@/api/services/presence.service';
+import { ApiError } from '@/api/errors/ApiError';
+import { toast } from 'sonner';
 
 interface EventsActionButtonsProps {
-  user: UserPayload | null;
-  events: Event[];
-  success: string | null;
-  selectedRows: Row<Event>[];
-  setSuccess: React.Dispatch<React.SetStateAction<string | null>>;
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  isMyEventsPage: boolean;
+  selectedRow: Row<Event>;
+  userId: string;
+  eventAlreadyStarted: boolean;
 }
 
-export function EventsActionButtons({ user, events, success, selectedRows, setError, setSuccess }: EventsActionButtonsProps) {
-  const [openCheckIn, setOpenCheckIn] = useState(false);
-  const [openCheckOut, setOpenCheckOut] = useState(false);
-  const [presences, setPresences] = useState<Presence[]>([]);
-  const [presencesRegistered, setPresencesRegistered] = useState<Presence[]>([]);
-  const [eventIdsFromPresences, setEventIdsFromPresences] = useState<string[]>([]);
-  const [eventIdsFromPresencesRegistered, setEventIdsFromPresencesRegistered] =
-    useState<string[]>([]);
+export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, eventAlreadyStarted }: EventsActionButtonsProps) {
+  const [userHasCheckedIn, setUserHasCheckedIn] = useState(false)
+  const [userHasCheckedOut, setUserHasCheckedOut] = useState(false)
+  const [userIsSubscribed, setUserIsSubscribed] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const event = selectedRow.original;
 
-  const form = useForm<PresenceFormSchema>({
-    resolver: zodResolver(presenceSchema),
-    defaultValues: {
-      event_id: "",
-      status: "present",
-      check_out_date: "",
-      check_in_date: "",
-    },
-  });
-
-  const fetchUserPresences = async () => {
-    if (!user?.sub) return;
-
+  const fetchPresenceStatus = async () => {
     try {
-      const response = await presenceService.getAllByUser({
-        id: user?.sub,
-        offset: 0,
-        limit: 10,
-      });
-
-      const { presences } = response;
-
-      if (presences) {
-
-        setPresences(presences);
-
-        const filteredEventIds = presences
-          .filter((presence) => presence.status === "present")
-          .map((presence) => presence.event_id);
-
-        setEventIdsFromPresences(filteredEventIds);
+      const presence = await presenceService.findByUserAndEventId(userId, event.id)
+      if (presence) {
+        setUserIsSubscribed(!!presence)
+        setUserHasCheckedIn(!!presence.check_in_date)
+        setUserHasCheckedOut(!!presence.check_out_date)
       }
     } catch (err) {
       if (err instanceof ApiError) {
-        toast.error(err.message)
+        toast.error(err.message);
         return
       }
 
-      toast.error("Nao foi possivel visualizar eventos")
-
-      setPresences([]);
-      setEventIdsFromPresences([]);
+      toast.error("Erro inesperado ao procurar evento.");
+    } finally {
+      setIsLoading(false)
     }
-  };
-
-
-  const fetchUserPresencesRegistered = async () => {
-    if (!user?.sub) return;
-
-    try {
-      const response = await presenceService.getAllByUser({
-        id: user?.sub,
-        offset: 0,
-        limit: 10,
-      });
-
-      const { presences } = response;
-
-      if (presences) {
-        setPresencesRegistered(presences);
-
-        const filteredEventIds = presences
-          .filter((presence) => presence.status === "registered")
-          .map((presence) => presence.event_id);
-
-        setEventIdsFromPresencesRegistered(filteredEventIds);
-      }
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(err.message)
-        return
-      }
-
-      toast.error("Nao foi possivel visualizar eventos")
-
-      setPresencesRegistered([]);
-      setEventIdsFromPresencesRegistered([]);
-    }
-  };
-
-  const handleSubscribe = async () => {
-    if (selectedRows.length === 0) {
-      toast.error("Nenhum evento selecionado para inscrição.");
-      return;
-    }
-
-    const newEvents = selectedRows.filter(
-      (row) => !eventIdsFromPresences.includes(row.original.id)
-    );
-
-    if (newEvents.length === 0) {
-      toast.error("Você já está inscrito em todos os eventos selecionados.");
-      return;
-    }
-
-    for (const row of newEvents) {
-      const event = row.original;
-
-      if (event.vacancies <= 0) {
-        toast.error(`Vagas encerradas no evento ${event.name}`);
-        continue;
-      }
-
-      const payload: PresenceCreate = {
-        event_id: event.id,
-        status: "registered",
-        check_out_date: "",
-        check_in_date: "",
-      };
-
-      try {
-        await eventService.decreaseVacances(event.id);
-
-        await presenceService.create({ ...payload });
-
-        toast.success(
-          `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
-        );
-      } catch (err) {
-        if (err instanceof ApiError) {
-          toast.error(err.message);
-          return
-        }
-
-        toast.error("Erro inesperado ao realizar inscrição.");
-      }
-    }
-  };
-
-  const registeredEvents = events.filter((event) =>
-    eventIdsFromPresencesRegistered.includes(event.id)
-  );
-
-  const presentEvents = events.filter((event) =>
-    eventIdsFromPresences.includes(event.id)
-  );
-
-  const onSubmit = async (
-    data: PresenceCreate,
-    coordinates?: { latitude: number; longitude: number }
-  ) => {
-    try {
-
-      const eventIdFromForm = form.getValues("event_id");
-
-      const presence = presencesRegistered.find(
-        (p) => p.event_id === eventIdFromForm
-      );
-
-      if (!presence) {
-        setError("Nenhuma presença encontrada para o evento selecionado.");
-        return;
-      }
-
-      const presenceId = presence.id;
-
-      await presenceService.patch(presenceId, data, coordinates);
-
-      setSuccess("Presença Criada com sucesso!");
-
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-        return;
-      }
-
-      console.error("Erro inesperado ao criar presença:", err);
-      setError("Erro interno no servidor, tente novamente.");
-    }
-  };
-
-  const onSubmitUpdate = async (
-    data: PresenceCreate,
-    coordinates?: { latitude: number; longitude: number }
-  ) => {
-    const eventIdFromForm = form.getValues("event_id");
-
-    const presence = presences.find((p) => p.event_id === eventIdFromForm);
-
-    if (!presence) {
-      console.error(
-        "Nenhuma presença encontrada com o selectedEventId:",
-        eventIdFromForm
-      );
-      setError("Nenhuma presença encontrada para o evento selecionado.");
-      return;
-    }
-
-    const presenceId = presence.id;
-
-    const result = await presenceService.patch(presenceId, data, coordinates);
-
-    if (!result) {
-      setError("Ocorreu um erro ao cadastrar a presença");
-      return;
-    }
-
-    setSuccess("Presença Atualizada com sucesso!");
-  };
+  }
 
   useEffect(() => {
-    if (openCheckOut) {
-      form.reset();
-      fetchUserPresences();
-    } else {
-      form.reset();
-    }
-  }, [openCheckOut]);
+    fetchPresenceStatus()
+  }, [userId, event.id])
 
-  useEffect(() => {
-    if (openCheckIn) {
-      form.reset();
-      fetchUserPresencesRegistered();
-    } else {
-      form.reset();
-    }
-  }, [openCheckIn]);
+
+  if (isLoading) {
+    return (
+      <div className="flex gap-2">
+        <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />
+        {isMyEventsPage && <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />}
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-1 md:flex-row ">
-      <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
-        <Dialog.Trigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl bg-red-600 text-white"
-          >
-            Faça o seu Check-Out
-          </Button>
-        </Dialog.Trigger>
+    <div className="flex flex-col gap-1 md:flex-row min-h-[32px]">
+      {isMyEventsPage ? (
+        <div className='flex gap-2'>
+          <QRCodeGeneratorModal
+            eventId={event.id}
+            modalType='Check-In'
+            userId={userId}
+            disabled={userHasCheckedIn || !eventAlreadyStarted}
+          />
+          <QRCodeGeneratorModal
+            eventId={event.id}
+            modalType='Check-Out'
+            userId={userId}
+            disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+          />
+        </div>
 
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-            <Dialog.Title className="text-xl font-bold">
-              Check-Out
-            </Dialog.Title>
-            <Dialog.Description className="text-gray-600">
-              Insira seus dados para confirmar o check-out.
-            </Dialog.Description>
-
-            {success && (
-              <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                {success}
-              </div>
-            )}
-
-            <CheckOutForm
-              form={form}
-              onSubmit={onSubmitUpdate}
-              events={presentEvents}
-              presences={presences}
-            />
-
-            <Dialog.Close asChild>
-              <button className="absolute top-2 right-2 text-gray-600">
-                ✖
-              </button>
-            </Dialog.Close>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-
-      <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
-        <Dialog.Trigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl bg-sky-800 text-white"
-          >
-            Faça o seu Check-In
-          </Button>
-        </Dialog.Trigger>
-
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-            <Dialog.Title className="text-xl font-bold">
-              Check-In
-            </Dialog.Title>
-            <Dialog.Description className="text-gray-600">
-              Insira seus dados para confirmar o check-in.
-            </Dialog.Description>
-
-            {success && (
-              <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                {success}
-              </div>
-            )}
-
-            <CheckInForm
-              form={form}
-              onSubmit={onSubmit}
-              events={registeredEvents}
-            />
-
-            <Dialog.Close asChild>
-              <button className="absolute top-2 right-2 text-gray-600">
-                ✖
-              </button>
-            </Dialog.Close>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-
-      <Button
-        type="button"
-        variant="outline"
-        className="rounded-xl bg-sky-800 text-white"
-        onClick={handleSubscribe}
-      >
-        Inscreva-se
-      </Button>
+      ) : (
+        <EventsSubscribeButton selectedRow={selectedRow} userIsSubscribed={userIsSubscribed} />
+      )}
     </div>
   )
 }

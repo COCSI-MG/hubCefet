@@ -4,6 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { tableEventType } from "./EventsTable";
+import { EventsActionButtons } from "./EventsActionButtons";
+import { EventScannerModal } from "./EventScannerModal";
 
 export function getColumns(
   { navigate }: { navigate: (path: string) => void },
@@ -11,6 +13,8 @@ export function getColumns(
   tableType: tableEventType,
   isAdmin: boolean,
   isProfessor: boolean,
+  userId: string,
+  isMyEventsPage: boolean
 ): ColumnDef<Event>[] {
 
   const columns: ColumnDef<Event>[] = [
@@ -135,6 +139,7 @@ export function getColumns(
       cell: ({ row }) => {
         const item = row.original
         const canEditOrDelete = isAdmin || (tableType === 'user' && isProfessor)
+        const eventAlreadyStarted = item.status === 'started'
 
         return (
           <div className="flex justify-start items-center gap-2">
@@ -147,8 +152,7 @@ export function getColumns(
               Visualizar
             </Button>
 
-            {
-              canEditOrDelete &&
+            {canEditOrDelete && (
               <>
                 <Button
                   className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
@@ -166,8 +170,14 @@ export function getColumns(
                 >
                   Excluir
                 </Button>
+
+                <EventScannerModal eventId={item.id} eventStatus={item.status} eventAlreadyStarted={eventAlreadyStarted} />
               </>
-            }
+            )}
+
+            {!isAdmin && !isProfessor && (
+              <EventsActionButtons userId={userId} selectedRow={row} isMyEventsPage={isMyEventsPage} eventAlreadyStarted={eventAlreadyStarted} />
+            )}
 
           </div>
         )
