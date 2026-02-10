@@ -3,12 +3,14 @@ import { PresenceRepository } from './presence.repository.interface';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
 import { UpdatePresenceDto } from '../dto/update-presence.dto';
 import { Presence } from '../entities/presence.entity';
+import { Op } from 'sequelize';
+import { PresenceStatus } from '../enum/presence-status.enum';
 
 export class PresenceRepositoryImpl implements PresenceRepository {
   constructor(
     @InjectModel(Presence)
     private readonly presenceModel: typeof Presence,
-  ) {}
+  ) { }
 
   async create(createPresenceDto: CreatePresenceDto): Promise<Presence> {
     return await this.presenceModel.create({
@@ -44,9 +46,6 @@ export class PresenceRepositoryImpl implements PresenceRepository {
   async findOrCreatedPresence(
     userId: string,
     eventId: string,
-    status: string,
-    checkInDate: string | null,
-    checkOutDate: string | null,
   ): Promise<[Presence, boolean]> {
     return await this.presenceModel.findOrCreate({
       where: {
@@ -56,9 +55,6 @@ export class PresenceRepositoryImpl implements PresenceRepository {
       defaults: {
         user_id: userId,
         event_id: eventId,
-        status: status,
-        check_in_date: checkInDate,
-        check_out_date: checkOutDate,
       },
     });
   }
@@ -69,5 +65,19 @@ export class PresenceRepositoryImpl implements PresenceRepository {
 
   async findAllByUser(userId: string): Promise<Presence[]> {
     return await this.presenceModel.findAll({ where: { user_id: userId } });
+  }
+
+  async findByUserAndEventId(userId: string, eventId: string): Promise<Presence> {
+    return await this.presenceModel.findOne({
+      where: {
+        [Op.and]: [{ event_id: eventId }, { user_id: userId }]
+      }
+    });
+  }
+
+  async updateAllStatusByEventId(eventId: string, status: PresenceStatus): Promise<void> {
+    await this.presenceModel.update({ status }, {
+      where: { event_id: eventId }
+    })
   }
 }
