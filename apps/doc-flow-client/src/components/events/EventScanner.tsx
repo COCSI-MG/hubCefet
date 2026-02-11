@@ -2,7 +2,7 @@ import { ApiError } from '@/api/errors/ApiError';
 import { presenceService } from '@/api/services/presence.service';
 import { PresenceUpdate } from '@/lib/types';
 import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface EventScannerProps {
@@ -18,13 +18,15 @@ interface QrContent {
 
 export const EventScanner = ({ eventId, eventStatus }: EventScannerProps) => {
   const [loading, setLoading] = useState(false);
+  const isProcessing = useRef(false);
 
   const handleScan = async (detectedCodes: IDetectedBarcode[]) => {
-    if (loading || detectedCodes.length === 0) return;
+    if (isProcessing.current || detectedCodes.length === 0) return;
 
     const rawValue = detectedCodes[0].rawValue;
     if (!rawValue) return;
 
+    isProcessing.current = true;
     setLoading(true);
 
     try {
@@ -60,20 +62,17 @@ export const EventScanner = ({ eventId, eventStatus }: EventScannerProps) => {
       toast.error('falha ao realizar escaneamento')
     } finally {
       setLoading(false)
+      isProcessing.current = false;
     }
   };
 
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto space-y-4">
-      <h2 className="text-xl font-bold text-gray-800">
-        Scan QR Code do Evento
-      </h2>
 
       <div className="relative w-full aspect-square overflow-hidden rounded-xl border-2 border-gray-300 bg-black">
         <Scanner
           onScan={handleScan}
           scanDelay={2000}
-          allowMultiple={true}
           styles={{ container: { width: '100%', height: '100%' } }}
         />
         {loading && (
