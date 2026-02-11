@@ -21,7 +21,7 @@ export default function ActionsTableColumn({
       setisDownloading(true);
 
       await fileService.download(props.fileId);
-
+      toast.success(`Arquivo baixado com sucesso!`);
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

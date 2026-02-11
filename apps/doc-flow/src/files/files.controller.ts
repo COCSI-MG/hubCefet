@@ -8,12 +8,11 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  Res,
   Req,
-  Query,
   UnauthorizedException,
   NotFoundException,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -25,7 +24,6 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { File } from './entities/file.entity';
 import { CreateFileDto } from './dto/create-file.dto';
 import { memoryStorage } from 'multer';
 import { UserRequest } from 'src';
@@ -34,7 +32,6 @@ import { GetFileStatusResponseDto } from './dto/get-file-status-response.dto';
 import { GetAllFilesResponseDto } from './dto/get-all-files-response.dto';
 import { GetFileResponseDto } from './dto/get-file-response.dto';
 import { DownloadFileResponseDto } from './dto/download-file-response.dto';
-import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
 import { UploadFileDto } from './dto/upload-file.dto';
 
 @Controller('files')
@@ -148,43 +145,19 @@ export class FilesController {
     return await this.filesService.findOne(id);
   }
 
+  @Get('download/:id')
   @ApiOperation({ summary: 'Download a file' })
   @ApiResponse({
     status: 200,
     description: 'Return the file',
     type: DownloadFileResponseDto,
   })
-  @Get('download/:id')
-  async getFile(@Param('id') id: string, @Res() res: Response) {
-    try {
-      const filePath = await this.filesService.getFilePath(id);
-      res.download(filePath, (err) => {
-        if (err) {
-          if (process.env.APP_ENV === 'development') {
-            console.error(err);
-          }
-          return res
-            .status(500)
-            .json(
-              new ApiResponseDto<null>(
-                500,
-                false,
-                null,
-                'Internal server error',
-              ),
-            );
-        }
-      });
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
-    }
+  downloadFile(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Req() req: UserRequest,
+  ) {
+    return this.filesService.downloadFile(id, res, req.user.sub);
   }
 
   @Patch(':id')
