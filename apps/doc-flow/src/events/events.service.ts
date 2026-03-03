@@ -28,11 +28,11 @@ export class EventsService {
     }
 
     const eventEndDate =
-      createEventDto.eventEndDate !== undefined
-        ? new Date(createEventDto.eventEndDate)
+      createEventDto.end_at !== undefined
+        ? new Date(createEventDto.end_at)
         : null;
     const now = new Date();
-    const eventStartDate = new Date(createEventDto.eventStartDate);
+    const eventStartDate = new Date(createEventDto.start_at);
     if (createEventDto.status !== undefined) {
       const [result, message] = this.isValidEventStatusForEventDates(
         eventStartDate,
@@ -40,6 +40,7 @@ export class EventsService {
         now,
         createEventDto.status,
       );
+
       if (!result && message !== null) {
         throw new BadRequestException(message);
       }
@@ -47,8 +48,8 @@ export class EventsService {
 
     return await this.eventRepository.create({
       name: createEventDto.name,
-      eventStartDate: eventStartDate.toISOString(),
-      eventEndDate: eventEndDate?.toISOString() || null,
+      start_at: eventStartDate.toISOString(),
+      end_at: eventEndDate?.toISOString() || null,
       status: createEventDto.status,
       created_by_user_id: createEventDto.created_by_user_id,
       latitude: createEventDto.latitude,
@@ -79,9 +80,9 @@ export class EventsService {
   async update(id: string, updateEventDto: UpdateEventDto) {
     if (updateEventDto.status != null) {
       const [result, message] = this.isValidEventStatusForEventDates(
-        new Date(updateEventDto.eventStartDate),
-        updateEventDto.eventEndDate !== undefined
-          ? new Date(updateEventDto.eventEndDate)
+        new Date(updateEventDto.end_at),
+        updateEventDto.end_at !== undefined
+          ? new Date(updateEventDto.end_at)
           : null,
         new Date(),
         updateEventDto.status,
@@ -89,6 +90,8 @@ export class EventsService {
       if (!result && message !== null) {
         throw new BadRequestException(message);
       }
+
+      console.log(result)
     }
 
     return await this.eventRepository.update(id, updateEventDto);
@@ -155,7 +158,7 @@ export class EventsService {
           eventEndDate !== null &&
           !this.isValidEventEndDate(eventEndDate, now)
         ) {
-          return [false, 'Invalid event end date'];
+          return [false, 'Data de termino de evento deve ser maior que a atual'];
         }
         break;
       case EventStatus.STATUS_UPCOMING:

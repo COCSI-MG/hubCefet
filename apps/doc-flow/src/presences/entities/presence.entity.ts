@@ -68,14 +68,16 @@ export class Presence extends Model {
   updated_at: Date;
 
   @ApiProperty({
-    example: 'inscrito',
+    enum: ['registered', 'present', 'finalized'],
+    example: 'registered',
     description: 'Status da Presença',
   })
   @Column({
-    type: DataType.STRING,
+    type: DataType.ENUM('registered', 'present', 'finalized'),
     allowNull: false,
+    defaultValue: 'registered',
   })
-  status: string;
+  status: 'registered' | 'present' | 'finalized';
 
   @ApiProperty({
     example: '2021-01-01T00:00:00.000Z',

@@ -1,4 +1,4 @@
-import { EventCreateSchema, Event, createEventSchema } from "@/lib/types";
+import { EventCreateSchema, Event, createEventSchema, EventCreate } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -8,11 +8,29 @@ import PageHeader from "@/components/PageHeader";
 import { eventService } from "@/api/services/event.service";
 import { toast } from "sonner";
 import { ApiError } from "@/api/errors/ApiError";
+import { FormatFormDateToLocal } from "@/lib/utils/form";
 
 export default function EventsEdit() {
   const [event, setEvent] = useState<Event | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const form = useForm<EventCreateSchema>({
+    resolver: zodResolver(createEventSchema),
+    defaultValues: event
+      ? {
+        name: event.name,
+        status: event.status,
+        start_at: event.start_at,
+        end_at: event.end_at,
+        description: event.description,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radius: event.radius,
+        vacancies: event.vacancies,
+      }
+      : undefined,
+  });
 
   const fetchEvent = async (id: string) => {
     try {
@@ -28,23 +46,6 @@ export default function EventsEdit() {
     }
   };
 
-  const form = useForm<EventCreateSchema>({
-    resolver: zodResolver(createEventSchema),
-    defaultValues: event
-      ? {
-        name: event.name,
-        status: event.status,
-        eventStartDate: event.start_at,
-        eventEndDate: event.end_at,
-        description: event.description,
-        latitude: event.latitude,
-        longitude: event.longitude,
-        radius: event.radius,
-        vacancies: event.vacancies,
-      }
-      : undefined,
-  });
-
   useEffect(() => {
     const id = location.pathname.split("/")[2];
     if (!id) {
@@ -53,11 +54,10 @@ export default function EventsEdit() {
     fetchEvent(id);
   }, [location.pathname, navigate]);
 
-  const handleSubmit = async (
-    data: Omit<EventCreateSchema, "eventStartTime" | "eventEndTime">,
-  ) => {
+  const handleSubmit = async (data: EventCreate) => {
     try {
       await eventService.patch(event!.id, data);
+      toast.success("Evento atualizado com sucesso");
       navigate("/events");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -71,13 +71,16 @@ export default function EventsEdit() {
 
   useEffect(() => {
     if (event) {
+      const startParts = FormatFormDateToLocal(event.start_at);
+      const endParts = FormatFormDateToLocal(event.end_at);
+
       form.reset({
         name: event.name,
         status: event.status,
-        eventStartDate: event.start_at.split("T")[0],
-        eventEndDate: event.end_at.split("T")[0],
-        eventStartTime: event.start_at.split("T")[1].slice(0, 5),
-        eventEndTime: event.end_at.split("T")[1].slice(0, 5),
+        start_at: startParts.date,
+        eventStartTime: startParts.time,
+        end_at: endParts.date,
+        eventEndTime: endParts.time,
         description: event.description,
         latitude: event.latitude,
         longitude: event.longitude,

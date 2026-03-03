@@ -14,18 +14,7 @@ export class EventRepositoryImpl implements EventRepository {
   ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    return await this.eventModel.scope('withoutTimestamps').create({
-      name: createEventDto.name,
-      description: createEventDto.description,
-      radius: createEventDto.radius,
-      start_at: createEventDto.eventStartDate,
-      end_at: createEventDto.eventEndDate,
-      status: createEventDto.status,
-      created_by_user_id: createEventDto.created_by_user_id,
-      latitude: createEventDto?.latitude || 0,
-      longitude: createEventDto.longitude || 0,
-      vacancies: createEventDto.vacancies,
-    });
+    return await this.eventModel.scope('withoutTimestamps').create({ ...createEventDto });
   }
 
   async findAll(offset: number, limit: number): Promise<Event[]> {

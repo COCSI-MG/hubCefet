@@ -1,10 +1,10 @@
-import { ApiResponse } from "@/lib/types";
 import AbstractService from "./abstract.service";
 import type {
   GetAllPresencesResponseDto,
   PresenceCreate,
   /*GetPresenceResponseDto*/ Presence,
   GetAllPresencesByUserResponseDto,
+  PresenceUpdate,
 } from "@/lib/types";
 
 export default class PresenceService extends AbstractService {
@@ -39,41 +39,19 @@ export default class PresenceService extends AbstractService {
 
   async create(
     data: PresenceCreate,
-    coordinates?: { latitude: number; longitude: number }
   ): Promise<Presence> {
-    if (coordinates) {
-      // Add geolocation headers if coordinates are provided
-      const config = {
-        headers: {
-          "x-user-latitude": coordinates.latitude.toString(),
-          "x-user-longitude": coordinates.longitude.toString(),
-        },
-      };
-      return await this.api.post(this.basePath, data, config);
-    }
-
-    // Make request without geolocation headers if no coordinates provided
     return await this.api.post(this.basePath, data);
   }
 
-  async patch(
+  async update(
     id: string,
-    data: PresenceCreate,
-    coordinates?: { latitude: number; longitude: number }
+    data: PresenceUpdate,
   ): Promise<Presence> {
-    if (coordinates) {
-      // Add geolocation headers if coordinates are provided
-      const config = {
-        headers: {
-          "x-user-latitude": coordinates.latitude.toString(),
-          "x-user-longitude": coordinates.longitude.toString(),
-        },
-      };
-      return await this.api.patch(this.basePath + `/${id}`, data, config);
-    }
-
-    // Make request without geolocation headers if no coordinates provided
     return await this.api.patch(this.basePath + `/${id}`, data);
+  }
+
+  async findByUserAndEventId(userId: string, eventId: string): Promise<Presence> {
+    return await this.api.get(this.basePath + `/${userId}/${eventId}`)
   }
 }
 

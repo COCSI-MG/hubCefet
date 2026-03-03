@@ -611,12 +611,12 @@ export interface components {
        * @description Event start date
        * @example 2024-12-14T10:00:00Z
        */
-      eventStartDate: string;
+      start_at: string;
       /**
        * @description Event end date
        * @example 2024-12-17T10:00:00Z
        */
-      eventEndDate: string;
+      end_at: string;
       /**
        * @description Status of the event
        * @example upcoming
@@ -658,7 +658,7 @@ export interface components {
        * @description Event status
        * @example upcoming
        */
-      status: string;
+      status: 'upcoming' | 'started' | 'ended';
       /**
        * Format: date-time
        * @description Date that the event was created
@@ -790,9 +790,6 @@ export interface components {
     UpdateFileDto: Record<string, never>;
     CreatePresenceDto: {
       event_id: string;
-      status: string;
-      check_out_date: string;
-      check_in_date: string;
     };
     Presence: {
       /**
@@ -842,10 +839,8 @@ export interface components {
       };
     };
     UpdatePresenceDto: {
-      event_id: string;
-      status: string;
-      check_out_date: string;
-      check_in_date: string;
+      check_out_date?: string;
+      check_in_date?: string;
     };
     GetAllPresencesByEventResponseDto: {
       presences?: components["schemas"]["Presence"][];

@@ -43,6 +43,7 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
+      timezone: '-03:00',
       autoLoadModels: true,
       logging: true,
       define: {
@@ -51,6 +52,10 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
       },
+      dialectOptions: {
+        useUTC: false,
+        timezone: '-03:00'
+      }
     }),
     JwtModule.register({
       global: true,

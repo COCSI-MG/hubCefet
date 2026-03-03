@@ -16,6 +16,7 @@ import { EventCreateSchema, Event } from "@/lib/schemas/event.schema";
 import FormItemField from "../FormItemField";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
+import { FormatFormDateToLocal } from "@/lib/utils/form";
 
 type modes = 'create' | 'edit';
 
@@ -128,14 +129,14 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               <div>
                 <FormField
                   control={form.control}
-                  name="eventStartDate"
+                  name="start_at"
                   render={({ field }) => (
                     <FormItemField
                       field={{
                         ...field,
                       }}
                       label="Data de início"
-                      error={form.formState.errors.eventStartDate?.message}
+                      error={form.formState.errors.start_at?.message}
                       type="date"
                       placeholder="Data de início"
                     />
@@ -145,12 +146,12 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               <div>
                 <FormField
                   control={form.control}
-                  name="eventEndDate"
+                  name="end_at"
                   render={({ field }) => (
                     <FormItemField
                       field={field}
                       label="Data de término"
-                      error={form.formState.errors.eventEndDate?.message}
+                      error={form.formState.errors.end_at?.message}
                       type="date"
                       placeholder="Data de término"
                     />
@@ -251,13 +252,16 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               className="rounded-xl border lg:w-full h-12 w-full"
               onClick={() => {
                 if (mode === "edit" && event) {
+                  const startParts = FormatFormDateToLocal(event.start_at);
+                  const endParts = FormatFormDateToLocal(event.end_at);
+
                   form.reset({
                     name: event.name,
                     status: event.status,
-                    eventStartDate: event.start_at.split("T")[0],
-                    eventEndDate: event.end_at.split("T")[0],
-                    eventStartTime: event.start_at.split("T")[1].slice(0, 5),
-                    eventEndTime: event.end_at.split("T")[1].slice(0, 5),
+                    start_at: startParts.date,
+                    eventStartTime: startParts.time,
+                    end_at: endParts.date,
+                    eventEndTime: endParts.time,
                     description: event.description,
                     latitude: event.latitude,
                     longitude: event.longitude,

@@ -6,10 +6,7 @@ import {
   Patch,
   Param,
   Req,
-  Headers,
   UnauthorizedException,
-  NotFoundException,
-  BadRequestException,
   Delete,
 } from '@nestjs/common';
 import { PresencesService } from './presences.service';
@@ -83,49 +80,16 @@ export class PresencesController {
     return await this.presencesService.findOne(id);
   }
 
-  @Profiles(Profile.Admin, Profile.Professor, Profile.Student)
+  @Profiles(Profile.Admin, Profile.Professor)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updatePresenceDto: UpdatePresenceDto,
-    @Req() req: UserRequest,
-    @Headers('x-user-latitude') userLatitude?: string,
-    @Headers('x-user-longitude') userLongitude?: string,
   ) {
-    const isCheckIn =
-      updatePresenceDto.check_in_date &&
-      (updatePresenceDto.status === 'present' || updatePresenceDto.status === 'present2');
-
-    if (isCheckIn) {
-      if (!userLatitude || !userLongitude) {
-        throw new BadRequestException('User location is required for check-in');
-      }
-
-      const lat = parseFloat(userLatitude);
-      const lng = parseFloat(userLongitude);
-      if (isNaN(lat) || isNaN(lng)) {
-        throw new BadRequestException('Coordenadas invalidas');
-      }
-
-      const updatedPresence = await this.presencesService.updateWithGeofencing(
-        id,
-        updatePresenceDto,
-        req.user.sub,
-        { latitude: lat, longitude: lng },
-      );
-      if (!updatedPresence) {
-        throw new NotFoundException('Presence not found');
-      }
-
-      return { presence: updatedPresence };
-    } else {
-      const updatedPresence = await this.presencesService.update(id, updatePresenceDto);
-      if (!updatedPresence) {
-        throw new NotFoundException('Presenca nao cadastrada');
-      }
-
-      return { presence: updatedPresence };
-    }
+    return await this.presencesService.update(
+      id,
+      updatePresenceDto,
+    );
   }
 
   @Profiles(Profile.Admin, Profile.Professor)
@@ -154,5 +118,19 @@ export class PresencesController {
   @Get('user/:id')
   async findAllByUser(@Param('id') id: string) {
     return await this.presencesService.findAllByUser(id);
+  }
+
+  @ApiOperation({ summary: 'Get one presence using event and user id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Get one presence using event and user id',
+    type: GetPresenceResponseDto,
+  })
+  @Get(':userId/:eventId')
+  async findByUserAndEventId(
+    @Param('userId') userId: string,
+    @Param('eventId') eventId: string
+  ) {
+    return await this.presencesService.findByUserAndEventId(userId, eventId);
   }
 }
