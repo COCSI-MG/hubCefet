@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { ComplementaryActivity } from './complementary-activity.entity';
+import { Activity } from './activity.entity';
 
 @Table({
-  tableName: 'activity_types',
+  tableName: 'activity_statuses',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 })
-export class ActivityType extends Model {
+export class ActivityStatus extends Model {
   @ApiProperty({
     example: 1,
-    description: 'Activity Type ID',
+    description: 'Activity Status ID',
   })
   @Column({
     type: DataType.INTEGER,
@@ -22,19 +22,19 @@ export class ActivityType extends Model {
   id: number;
 
   @ApiProperty({
-    example: 'Atividades de Ensino',
-    description: 'Name of the activity type',
+    example: 'PENDING',
+    description: 'Status name',
   })
   @Column({
-    type: DataType.STRING(100),
+    type: DataType.STRING(50),
     allowNull: false,
     unique: true,
   })
   name: string;
 
   @ApiProperty({
-    example: 'Monitorias, cursos de extensão, disciplinas especiais',
-    description: 'Description of the activity type',
+    example: 'Atividade aguardando aprovação dos professores',
+    description: 'Description of the status',
   })
   @Column({
     type: DataType.TEXT,
@@ -62,8 +62,8 @@ export class ActivityType extends Model {
   })
   updated_at: Date;
 
-  @HasMany(() => ComplementaryActivity, 'activity_type_id')
-  complementaryActivities: ComplementaryActivity[];
-} 
- 
- 
+  @HasMany(() => Activity, 'status_id')
+  complementaryActivities: Activity[];
+}
+
+

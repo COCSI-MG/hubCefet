@@ -12,15 +12,17 @@ import { Input } from "@/components/ui/input";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { cn } from "@/lib/utils";
 
-import { CertificateFormData } from "@/lib/types/certificate.types";
-import { useComplementaryHourTypes } from "@/hooks/useComplementaryHourTypes";
+import { ActivityTypeEnum, CertificateFormData } from "@/lib/types/certificate.types";
 import CertificateFileUpload from "./CertificateFileUpload";
 import HoursInput from "./HoursInput";
+import { useActivityTypes } from "@/hooks/useActivityTypes";
 
 const certificateFormSchema = z.object({
-  complementaryHourType: z.string().min(1, "Selecione o tipo de hora complementar"),
+  activityType: z.string().min(1, "Selecione o tipo de atividade"),
   hours: z.number().min(1, "Quantidade de horas deve ser maior que 0").max(999, "Quantidade máxima é 999 horas"),
   courseName: z.string().min(2, "Nome do curso deve ter pelo menos 2 caracteres").max(100, "Nome muito longo"),
+  complementaryHoursType: z.string().min(1, "Selecione o tipo de atividade complementar").optional(),
+
 });
 
 type CertificateFormSchema = z.infer<typeof certificateFormSchema>;
@@ -33,15 +35,16 @@ interface CertificateFormProps {
 export default function CertificateForm({ onSubmit, disabled = false }: CertificateFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { complementaryHourTypes, loading: typesLoading, error: typesError, refetch } = useComplementaryHourTypes();
+
+  const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
 
   const form = useForm<CertificateFormSchema>({
     resolver: zodResolver(certificateFormSchema),
     defaultValues: {
-      complementaryHourType: "",
+      activityType: undefined,
       hours: 1,
       courseName: "",
+      complementaryHoursType: undefined
     },
   });
 
@@ -53,18 +56,18 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
 
     try {
       setIsSubmitting(true);
-      
+
       const formData: CertificateFormData = {
         ...data,
         certificateFile: selectedFile,
       };
 
       await onSubmit(formData);
-      
+
       form.reset();
       setSelectedFile(null);
+
       toast.success("Certificado enviado com sucesso!");
-      
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao enviar certificado");
     } finally {
@@ -78,11 +81,13 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
 
   const isFormDisabled = disabled || isSubmitting || typesLoading;
 
+  const activityTypeValue = form.watch('activityType')
+
   if (typesError) {
     return (
       <Box className="text-center p-8 space-y-4">
         <Typography variant="body1" color="error">
-          Erro ao carregar tipos de horas complementares
+          Erro ao carregar tipos de atividades
         </Typography>
         <Button onClick={refetch} variant="outline">
           Tentar novamente
@@ -104,16 +109,15 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
         <Box component="form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="complementaryHourType"
+            name="activityType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Hora Complementar</FormLabel>
+                <FormLabel>Tipo de Atividade</FormLabel>
                 <FormControl>
                   <SearchableSelect
-                    options={complementaryHourTypes.map(type => ({
+                    options={activityTypes.map(type => ({
                       value: type.id,
                       label: type.name,
-                      description: type.description
                     }))}
                     value={field.value}
                     onValueChange={field.onChange}
@@ -122,7 +126,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
                     emptyText="Nenhum tipo encontrado"
                     disabled={isFormDisabled}
                     className={cn(
-                      form.formState.errors.complementaryHourType && "border-destructive"
+                      form.formState.errors.activityType && "border-destructive"
                     )}
                   />
                 </FormControl>
@@ -130,6 +134,37 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
               </FormItem>
             )}
           />
+
+          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && (
+            <FormField
+              control={form.control}
+              name="complementaryHoursType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Atividade Complementar</FormLabel>
+                  <FormControl>
+                    <SearchableSelect
+                      options={activityTypes.map(type => ({
+                        value: type.id,
+                        label: type.name,
+                      }))}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Selecione o tipo de atividade complementar"
+                      searchPlaceholder="Buscar tipos de atividades complementares..."
+                      emptyText="Nenhum tipo encontrado"
+                      disabled={isFormDisabled}
+                      className={cn(
+                        form.formState.errors.complementaryHoursType && "border-destructive"
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
 
           <FormField
             control={form.control}
@@ -173,9 +208,9 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
           />
 
           <Box className="space-y-2">
-            <Typography 
-              component="label" 
-              variant="body2" 
+            <Typography
+              component="label"
+              variant="body2"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Certificado (PDF)
@@ -205,6 +240,6 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
       </Form>
     </Box>
   );
-} 
- 
- 
+}
+
+

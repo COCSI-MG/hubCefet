@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, IsOptional, Min, Max } from 'class-validator';
 
-export class CreateComplementaryActivityDto {
+export class CreateActivityDto {
   @ApiProperty({
     example: 'Curso de React Avançado',
     description: 'Nome do curso/atividade',
@@ -24,11 +24,20 @@ export class CreateComplementaryActivityDto {
 
   @ApiProperty({
     example: 1,
-    description: 'ID do tipo de atividade complementar',
+    description: 'ID do tipo de atividade',
   })
   @IsNotEmpty()
   @IsNumber()
   activity_type_id: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID do tipo de atividade complementar',
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  complementary_activity_type_id: number
 
   @ApiProperty({
     example: 'certificate.pdf',
@@ -38,6 +47,6 @@ export class CreateComplementaryActivityDto {
   @IsOptional()
   @IsString()
   certificate_url?: string;
-} 
- 
- 
+}
+
+

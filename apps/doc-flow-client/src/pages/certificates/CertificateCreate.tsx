@@ -4,15 +4,10 @@ import CertificateForm from "@/components/certificates/CertificateForm";
 import { CertificateFormData } from "@/lib/types/certificate.types";
 import { certificateService } from "@/api/services/certificate.service";
 import { Box, Typography } from "@mui/material";
-import { toast } from "sonner";
 
 export default function CertificateCreate() {
   const handleSubmit = useCallback(async (data: CertificateFormData) => {
-    try {
-      await certificateService.uploadCertificate(data);
-    } catch (error) {
-      toast.error("Falha o fazer upload do certificado");
-    }
+    await certificateService.uploadCertificate(data);
   }, []);
 
   return (

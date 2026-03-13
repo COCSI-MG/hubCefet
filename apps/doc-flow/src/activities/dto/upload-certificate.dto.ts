@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Min, Max, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UploadCertificateDto {
@@ -25,11 +25,19 @@ export class UploadCertificateDto {
 
   @ApiProperty({
     example: 1,
-    description: 'ID do tipo de atividade complementar',
+    description: 'ID do tipo de atividade',
   })
-  @Transform(({ value }) => parseInt(value))
   @IsNumber()
   activity_type_id: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID do tipo de atividade complementar',
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  complementary_activity_type_id: number;
 
   @ApiProperty({
     type: 'string',
@@ -37,6 +45,6 @@ export class UploadCertificateDto {
     description: 'Arquivo PDF do certificado',
   })
   certificate: any;
-} 
- 
- 
+}
+
+

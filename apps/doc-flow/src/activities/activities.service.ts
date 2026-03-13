@@ -3,36 +3,36 @@ import { Response } from 'express';
 import { createReadStream, existsSync } from 'fs';
 import { join } from 'path';
 import { Logger } from '@nestjs/common';
-import { ComplementaryActivityRepository } from './repositories/complementary-activity.repository';
+import { ActivityRepository } from './repositories/activity.repository';
 import { ActivityTypeRepository } from './repositories/activity-type.repository';
 import { ActivityReviewRepository } from './repositories/activity-review.repository';
 import { ActivityReviewerRepository } from './repositories/activity-reviewer.repository';
 import { ReviewSettingRepository } from './repositories/review-setting.repository';
-import { CreateComplementaryActivityDto } from './dto/create-complementary-activity.dto';
-import { UpdateComplementaryActivityDto } from './dto/update-complementary-activity.dto';
 import { ReviewActivityDto } from './dto/review-activity.dto';
 import { UploadCertificateDto } from './dto/upload-certificate.dto';
-import { ComplementaryActivity, ActivityType } from './entities';
+import { Activity, ActivityType } from './entities';
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
+import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Injectable()
-export class ComplementaryActivitiesService {
+export class ActivitiesService {
   constructor(
-    private readonly activityRepository: ComplementaryActivityRepository,
+    private readonly activityRepository: ActivityRepository,
     private readonly activityTypeRepository: ActivityTypeRepository,
     private readonly activityReviewRepository: ActivityReviewRepository,
     private readonly activityReviewerRepository: ActivityReviewerRepository,
     private readonly reviewSettingRepository: ReviewSettingRepository,
     private readonly professorSelectionService: ProfessorSelectionService,
     private readonly fileUploadService: FileUploadService,
-  ) {}
+  ) { }
 
   async uploadCertificate(
     uploadDto: UploadCertificateDto,
     file: Express.Multer.File,
     userId: string,
-  ): Promise<ComplementaryActivity> {
+  ): Promise<Activity> {
     if (!this.fileUploadService.validatePdfFile(file)) {
       throw new BadRequestException('Arquivo deve ser um PDF válido');
     }
@@ -63,10 +63,11 @@ export class ComplementaryActivitiesService {
         hours: uploadDto.hours,
         activity_type_id: uploadDto.activity_type_id,
         certificate_url: filePath,
+        complementary_activity_type_id: uploadDto.complementary_activity_type_id
       }, userId, transaction);
 
       const selectedProfessors = await this.professorSelectionService.selectRandomProfessors(requiredReviewers);
-      
+
       await this.activityReviewerRepository.createMultipleWithTransaction(activity.id, selectedProfessors, transaction);
 
       await transaction.commit();
@@ -78,7 +79,7 @@ export class ComplementaryActivitiesService {
         certificate_url: activity.certificate_url,
         activity_type_id: activity.activity_type_id,
         created_at: activity.created_at,
-      } as ComplementaryActivity;
+      } as Activity;
 
     } catch (error) {
       await transaction.rollback();
@@ -87,9 +88,9 @@ export class ComplementaryActivitiesService {
   }
 
   async create(
-    createDto: CreateComplementaryActivityDto,
+    createDto: CreateActivityDto,
     userId: string,
-  ): Promise<ComplementaryActivity> {
+  ): Promise<Activity> {
     const activityType = await this.activityTypeRepository.findOne(createDto.activity_type_id);
     if (!activityType) {
       throw new NotFoundException('Tipo de atividade não encontrado');
@@ -98,33 +99,33 @@ export class ComplementaryActivitiesService {
     return this.activityRepository.create(createDto, userId);
   }
 
-  async findAll(): Promise<ComplementaryActivity[]> {
+  async findAll(): Promise<Activity[]> {
     return this.activityRepository.findAll();
   }
 
-  async findAllByUser(userId: string): Promise<ComplementaryActivity[]> {
+  async findAllByUser(userId: string): Promise<Activity[]> {
     return this.activityRepository.findByUserId(userId);
   }
 
-  async findAllByReviewer(reviewerId: string): Promise<ComplementaryActivity[]> {
+  async findAllByReviewer(reviewerId: string): Promise<Activity[]> {
     return this.activityRepository.findByReviewer(reviewerId);
   }
 
-  async findOne(id: string): Promise<ComplementaryActivity> {
+  async findOne(id: string): Promise<Activity> {
     const activity = await this.activityRepository.findOne(id);
     if (!activity) {
-      throw new NotFoundException('Atividade complementar não encontrada');
+      throw new NotFoundException('Atividade  não encontrada');
     }
     return activity;
   }
 
   async update(
     id: string,
-    updateDto: UpdateComplementaryActivityDto,
+    updateDto: UpdateActivityDto,
     userId: string,
-  ): Promise<ComplementaryActivity> {
+  ): Promise<Activity> {
     const activity = await this.findOne(id);
-    
+
     if (activity.user_id !== userId) {
       throw new ForbiddenException('Você não tem permissão para editar esta atividade');
     }
@@ -146,7 +147,7 @@ export class ComplementaryActivitiesService {
 
   async remove(id: string, userId: string): Promise<void> {
     const activity = await this.findOne(id);
-    
+
     if (activity.user_id !== userId) {
       throw new ForbiddenException('Você não tem permissão para excluir esta atividade');
     }
@@ -206,7 +207,7 @@ export class ComplementaryActivitiesService {
     return this.activityTypeRepository.findAll();
   }
 
-  async getPendingActivities(): Promise<ComplementaryActivity[]> {
+  async getPendingActivities(): Promise<Activity[]> {
     return this.activityRepository.findPendingReview();
   }
 
@@ -216,7 +217,7 @@ export class ComplementaryActivitiesService {
 
   async getUserActivityStats(userId: string): Promise<any> {
     const activities = await this.activityRepository.findByUserId(userId);
-    
+
     const stats = {
       total: activities.length,
       pending: activities.filter(a => a.status_id === 1).length,
@@ -269,6 +270,6 @@ export class ComplementaryActivitiesService {
     const fileStream = createReadStream(fullPath);
     fileStream.pipe(res);
   }
-} 
- 
- 
+}
+
+
