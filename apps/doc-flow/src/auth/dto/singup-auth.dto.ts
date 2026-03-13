@@ -12,14 +12,16 @@ export class SignUpAuthDto {
   @IsEmail()
   @Matches(/(@cefet-rj\.br|@aluno\.cefet-rj\.br)$/, {
     message:
-      'Only emails from cefet-rj.br or aluno.cefet-rj.br domains are allowed',
+      'Apenas e-mails dos domínios cefet-rj.br ou aluno.cefet-rj.br são permitidos',
   })
   @IsNotEmpty()
   email: string;
 
   @ApiProperty()
   @IsString()
-  @IsStrongPassword()
+  @IsStrongPassword({}, {
+    message: 'A senha deve ser forte e conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.'
+  })
   @IsNotEmpty()
   password: string;
 
@@ -30,7 +32,7 @@ export class SignUpAuthDto {
 
   @ApiProperty()
   @Matches(/\d{4}\d{3}[A-Z]{4}$/, {
-    message: 'Enrollment must be in the format 99992020SINF',
+    message: 'Matricula deve estar no formato 99992020SINF',
   })
   @IsString()
   enrollment?: string;

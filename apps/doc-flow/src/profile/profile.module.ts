@@ -15,6 +15,6 @@ import { PROFILE_REPOSITORY } from './repositories/profile-repository.token';
       useClass: ProfileRepositoryImpl,
     },
   ],
-  exports: [ProfileService],
+  exports: [ProfileService, SequelizeModule],
 })
-export class ProfileModule {}
+export class ProfileModule { }

@@ -24,6 +24,7 @@ export default class PresenceService extends AbstractService {
       this.basePath + `?offset=${data.offset}&limit=${data.limit}`
     );
   }
+
   async getAllByUser(data: {
     id: string;
     offset: number;
@@ -31,15 +32,15 @@ export default class PresenceService extends AbstractService {
   }): Promise<GetAllPresencesByUserResponseDto> {
     return await this.api.get(
       this.basePath +
-        `/user/${data.id}` +
-        `?offset=${data.offset}&limit=${data.limit}`
+      `/user/${data.id}` +
+      `?offset=${data.offset}&limit=${data.limit}`
     );
   }
 
   async create(
     data: PresenceCreate,
     coordinates?: { latitude: number; longitude: number }
-  ): Promise<ApiResponse<Presence>> {
+  ): Promise<Presence> {
     if (coordinates) {
       // Add geolocation headers if coordinates are provided
       const config = {
@@ -59,11 +60,7 @@ export default class PresenceService extends AbstractService {
     id: string,
     data: PresenceCreate,
     coordinates?: { latitude: number; longitude: number }
-  ): Promise<
-    ApiResponse<{
-      presence: Presence;
-    }>
-  > {
+  ): Promise<Presence> {
     if (coordinates) {
       // Add geolocation headers if coordinates are provided
       const config = {
@@ -79,3 +76,5 @@ export default class PresenceService extends AbstractService {
     return await this.api.patch(this.basePath + `/${id}`, data);
   }
 }
+
+export const presenceService = new PresenceService()

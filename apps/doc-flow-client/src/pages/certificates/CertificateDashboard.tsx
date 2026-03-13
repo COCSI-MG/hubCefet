@@ -39,6 +39,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import DownloadIcon from '@mui/icons-material/Download';
 import { IconButton } from '@mui/material';
+import { ApiError } from '@/api/errors/ApiError';
 
 interface Activity {
   id: string;
@@ -86,39 +87,59 @@ export default function CertificateDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+
       const [activitiesData, statsData, typesData] = await Promise.all([
         certificateService.getMyActivities(),
         certificateService.getMyStats(),
-        certificateService.getActivityTypes()
+        certificateService.getActivityTypes(),
       ]);
 
       setActivities(activitiesData || []);
-      setStats(statsData || { total: 0, pending: 0, approved: 0, rejected: 0, totalHours: 0 });
+      setStats(
+        statsData || {
+          total: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          totalHours: 0,
+        }
+      );
       setActivityTypes(typesData || []);
-    } catch (error) {
-      console.error('Erro ao carregar dados da dashboard:', error);
-      toast.error('Erro ao carregar dados da dashboard');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao carregar dados da dashboard");
     } finally {
       setLoading(false);
     }
   };
 
   const getActivityTypeName = (typeId: number) => {
-    const type = activityTypes.find(t => t.id === typeId);
-    return type?.name || 'Tipo não encontrado';
+    const type = activityTypes.find((t) => t.id === typeId);
+    return type?.name || "Tipo não encontrado";
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
-  const handleDownloadCertificate = async (activityId: string, courseName: string) => {
+  const handleDownloadCertificate = async (
+    activityId: string,
+    courseName: string
+  ) => {
     try {
       await certificateService.downloadCertificate(activityId);
       toast.success(`Arquivo do curso "${courseName}" baixado com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao baixar arquivo:', error);
-      toast.error('Erro ao baixar arquivo. Tente novamente.');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao baixar arquivo. Tente novamente.");
     }
   };
 
@@ -237,9 +258,9 @@ export default function CertificateDashboard() {
                   {progressPercentage.toFixed(1)}%
                 </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={progressPercentage} 
+              <LinearProgress
+                variant="determinate"
+                value={progressPercentage}
                 sx={{ height: 8, borderRadius: 4 }}
               />
             </Box>
@@ -280,13 +301,13 @@ export default function CertificateDashboard() {
                         ))}
                       </Pie>
                       <Tooltip formatter={(value, name) => [value, name]} />
-                      <Legend 
-                        verticalAlign="bottom" 
+                      <Legend
+                        verticalAlign="bottom"
                         height={36}
                       />
                     </PieChart>
                   </ResponsiveContainer>
-                  
+
                   {/* Resumo dos dados */}
                   <Box className="mt-4 grid grid-cols-3 gap-4 text-center">
                     <Box>
@@ -432,6 +453,6 @@ export default function CertificateDashboard() {
       </Box>
     </>
   );
-} 
- 
- 
+}
+
+

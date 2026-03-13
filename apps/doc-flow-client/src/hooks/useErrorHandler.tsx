@@ -3,12 +3,11 @@ import { ErrorProcessor } from '@/lib/utils/errorProcessor';
 import { ErrorContext, ProcessedError } from '@/lib/types/errors';
 
 interface UseErrorHandlerOptions {
-  showToast?: boolean;
   context?: Partial<ErrorContext>;
 }
 
 export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
-  const { showToast = true, context = {} } = options;
+  const { context = {} } = options;
 
   const handleError = useCallback((error: unknown, additionalContext?: Partial<ErrorContext>): ProcessedError => {
     const fullContext: ErrorContext = {
@@ -17,12 +16,8 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
       ...additionalContext
     };
 
-    if (showToast) {
-      return ErrorProcessor.showErrorToast(error, fullContext);
-    } else {
-      return ErrorProcessor.handleError(error, fullContext);
-    }
-  }, [showToast, context]);
+    return ErrorProcessor.handleError(error, fullContext);
+  }, [context]);
 
   const handleAsyncError = useCallback(async (
     asyncFn: () => Promise<unknown>,

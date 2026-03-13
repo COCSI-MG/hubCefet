@@ -15,14 +15,14 @@ export class EventsService {
   constructor(
     @Inject('IEventRepository')
     private readonly eventRepository: EventRepository,
-  ) {}
+  ) { }
 
   async create(createEventDto: CreateEventDto): Promise<null | Event> {
     const event = await this.eventRepository.findEventByName(
       createEventDto.name,
     );
     if (event) {
-      throw new ConflictException('Event already exists');
+      throw new ConflictException('Evento com este nome ja existe');
     }
 
     const eventEndDate =
@@ -145,7 +145,7 @@ export class EventsService {
         if (eventStartDate >= now) {
           return [
             false,
-            'Event start date is in the future, status must be upcoming',
+            'Data de inicio do evento e no futuro, status deve ser Proximo',
           ];
         }
         if (
@@ -159,7 +159,7 @@ export class EventsService {
         if (eventStartDate <= now) {
           return [
             false,
-            'Event start date is in the past, status must be started',
+            'Data de inicio do evento e no passado, status deve ser Em andamento',
           ];
         }
         break;
@@ -167,7 +167,7 @@ export class EventsService {
         if (eventEndDate === null || eventEndDate >= now) {
           return [
             false,
-            'Event end date is in the future, status cannot be ended',
+            'Data de inicio do evento e no futuro, status nao pode ser Em andamento',
           ];
         }
         break;

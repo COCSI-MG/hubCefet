@@ -6,10 +6,11 @@ import { toast } from "sonner";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import SearchBar from "@/components/SearchBar";
 import { GetComplementaryActivityTypeColumns } from "@/components/complementaryActivityType/ComplementaryActivityTypeColumns";
-import { ComplementaryActivityType, complementaryActivityTypeService, ComplementaryActivityTypeWithTotal } from "@/api/services/complementary-activity-type-service";
+import { ComplementaryActivityType, complementaryActivityTypeService, ComplementaryActivityTypeWithTotal } from "@/api/services/complementary-activity-type.service";
 import { CreateActivityTypeDialog } from "@/components/complementaryActivityType/CreateActivityTypeDialog";
 import { UpdateActivityTypeDialog } from "@/components/complementaryActivityType/UpdateActivityTypeDialog";
 import { DeleteActivityTypeDialog } from "@/components/complementaryActivityType/DeleteActivityTypeDialog";
+import { ApiError } from "@/api/errors/ApiError";
 
 export interface Pagination {
   pageIndex: number;
@@ -36,7 +37,12 @@ export function ComplementaryActivityTypeManagement() {
     try {
       const response = await complementaryActivityTypeService.findAll(pagination)
       setComplementaryActivity(response)
-    } catch (error) {
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error('Nao foi possivel carregas os tipos de atividades complementares')
     }
   }

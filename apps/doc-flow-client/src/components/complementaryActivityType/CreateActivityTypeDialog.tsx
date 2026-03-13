@@ -1,4 +1,4 @@
-import { complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service";
+import { complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { CirclePlus, X } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface CreationDialogProps {
   pagination: Pagination
@@ -48,7 +49,7 @@ export function CreateActivityTypeDialog({ pagination, fetchComplementaryActivit
 
       toast.success("Tipo atividade complementar criado com sucesso!")
     } catch (err) {
-      if (err instanceof Error) {
+      if (err instanceof ApiError) {
         toast.error(err.message)
         return
       }

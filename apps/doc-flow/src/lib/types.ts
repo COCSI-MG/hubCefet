@@ -1,6 +1,13 @@
 export type ApiResponse<T> = {
-  error: string[] | null | string;
+  error: string;
   status: number;
-  data: T | null;
+  data: T;
   success: boolean;
 };
+
+
+export interface ExceptionResponseObject {
+  statusCode: Number;
+  error: string;
+  message: string | string[]
+}

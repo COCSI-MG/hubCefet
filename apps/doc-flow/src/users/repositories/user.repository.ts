@@ -13,7 +13,7 @@ export class UserRepositoryImpl implements UserRepository {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto, profileId: string): Promise<User> {
     const newUser = await this.userModel.create(
@@ -38,9 +38,6 @@ export class UserRepositoryImpl implements UserRepository {
 
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id);
-    if (!user) {
-      throw new Error('User not found');
-    }
     return user;
   }
 

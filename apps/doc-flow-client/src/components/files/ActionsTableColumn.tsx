@@ -1,8 +1,9 @@
-import { download, remove } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface ActionsTableColumnProps {
   fileId: string;
@@ -16,26 +17,42 @@ export default function ActionsTableColumn({
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const handlePrimaryClick = async () => {
-    setisDownloading(true);
-    const result = await download(props.fileId);
-    if (result !== undefined) {
-      toast.error("Erro ao baixar arquivo");
+    try {
+      setisDownloading(true);
+
+      await fileService.download(props.fileId);
+
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return
+      }
+      toast.error("Erro ao baixar arquivo. Tente novamente.");
+    } finally {
+      setisDownloading(false);
     }
-    setisDownloading(false);
-  }
+  };
+
 
   const handleDestructiveClick = async () => {
-    setIsDeleting(true);
-    const data = await remove(props.fileId);
-    if (data?.error) {
-      toast.error("Erro ao excluir arquivo");
+    try {
+      setIsDeleting(true);
+
+      await fileService.remove(props.fileId);
+
+      toast.success("Arquivo excluído com sucesso");
+      props.onDelete?.();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return
+      }
+
+      toast.error("Erro ao excluir arquivo.");
+    } finally {
       setIsDeleting(false);
-      return;
     }
-    toast.success("Arquivo excluído com sucesso");
-    setIsDeleting(false);
-    props.onDelete();
-  }
+  };
 
   return (
     <div className="flex items-center space-x-2">

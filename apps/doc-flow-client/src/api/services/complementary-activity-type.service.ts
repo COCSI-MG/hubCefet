@@ -1,4 +1,3 @@
-import { ApiResponse } from "@/lib/types";
 import AbstractService from "./abstract.service";
 
 export interface ComplementaryActivityType {
@@ -33,6 +32,7 @@ class ComplementaryActivityTypeService extends AbstractService {
     offset: number
   }): Promise<ComplementaryActivityTypeWithTotal> {
     const params = args ? `?limit=${args.limit}&offset=${args.offset}` : ''
+
     return await this.api.get(this.basePath + params);
   }
 
@@ -40,15 +40,15 @@ class ComplementaryActivityTypeService extends AbstractService {
     return await this.api.get(this.basePath + `/${id}`);
   }
 
-  async create(createComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
+  async create(createComplementaryActivityType: UpsertComplementaryActivityType): Promise<string> {
     return await this.api.post(this.basePath, createComplementaryActivityType)
   }
 
-  async update(id: number, updateComplementaryActivityType: UpsertComplementaryActivityType): Promise<ApiResponse<string>> {
+  async update(id: number, updateComplementaryActivityType: UpsertComplementaryActivityType): Promise<string> {
     return await this.api.patch(this.basePath + `/${id}`, updateComplementaryActivityType)
   }
 
-  async remove(id: number): Promise<ApiResponse<string>> {
+  async remove(id: number): Promise<string> {
     return await this.api.delete(this.basePath + `/${id}`)
   }
 }

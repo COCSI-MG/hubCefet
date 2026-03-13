@@ -16,6 +16,6 @@ import { ProfileModule } from '../profile/profile.module';
       useClass: UserRepositoryImpl,
     },
   ],
-  exports: [UsersService],
+  exports: [UsersService, SequelizeModule],
 })
-export class UsersModule {}
+export class UsersModule { }

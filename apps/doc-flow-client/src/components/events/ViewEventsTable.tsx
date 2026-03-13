@@ -25,18 +25,19 @@ import { Button } from "../ui/button";
 import { useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
-import { getAllEvents } from "@/api/data/events.data";
 import { Event } from "@/lib/schemas/event.schema";
 import { Presence } from "@/lib/types";
 import { getColumns } from "./ViewEventsTableColumns";
-import { getUserPresences } from "@/api/data/presence.data";
 import {
   createPresenceWithGeolocation as createPresence,
   patchPresenceWithGeolocation as patchPresence,
 } from "@/lib/utils/presenceWithGeolocation";
-import { patch } from "@/api/data/events.data";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { eventService } from "@/api/services/event.service";
+import { presenceService } from "@/api/services/presence.service";
+import { ApiError } from "@/api/errors/ApiError";
+import { jwtDecode } from "jwt-decode";
 
 interface Pagination {
   pageIndex: number;
@@ -62,21 +63,55 @@ export function ViewEventsDataTable() {
   );
   const [eventIdsFromPresencesRegistered, setEventIdsFromPresencesRegistered] =
     useState<string[]>([]);
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isProfessor, setIsProfessor] = useState(false);
 
   const fetchEvents = async (data: Pagination) => {
-    const events = await getAllEvents({
-      limit: data.pageSize,
-      offset: data.pageIndex * data.pageSize,
-    });
-    if (!events) {
-      return;
+    try {
+      const response = await eventService.getAll({
+        limit: data.pageSize,
+        offset: data.pageIndex * data.pageSize,
+      });
+
+      setData(response);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+      toast.error("Não foi possível carregar os eventos.");
     }
-    setData(events);
+  };
+
+  const getUserProfile = () => {
+    if (token) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decoded: any = jwtDecode(token);
+
+      let profileName = "";
+      if (typeof decoded.profile === "string") {
+        profileName = decoded.profile;
+      } else if (decoded.profile?.name) {
+        profileName = decoded.profile.name;
+      } else if (
+        decoded.profile?.roles &&
+        decoded.profile.roles.length > 0
+      ) {
+        profileName = decoded.profile.roles[0];
+      }
+
+      const profileLower = profileName.toLowerCase();
+
+      setIsAdmin(
+        profileLower === "admin" || profileLower === "coordinator"
+      );
+      setIsProfessor(profileLower === "professor");
+    }
   };
 
   const handleSubscribe = async () => {
@@ -86,6 +121,7 @@ export function ViewEventsDataTable() {
       toast.error("Nenhum evento selecionado para inscrição.");
       return;
     }
+
     const newEvents = selectedRows.filter(
       (row) => !eventIdsFromPresences.includes(row.original.id)
     );
@@ -96,43 +132,43 @@ export function ViewEventsDataTable() {
     }
 
     for (const row of newEvents) {
-      const eventId = row.original.id;
-      const valVacancies = row.original.vacancies;
+      const event = row.original;
+
+      if (event.vacancies <= 0) {
+        toast.error(`Vagas encerradas no evento ${event.name}`);
+        continue;
+      }
 
       const payload: PresenceCreate = {
-        event_id: eventId,
+        event_id: event.id,
         status: "registered",
         check_out_date: "",
         check_in_date: "",
       };
 
       try {
-        if (valVacancies > 0) {
-          const result = await createPresence(payload);
-          if (result) {
-            toast.success(
-              `Inscrições realizadas com sucesso! Agora você pode realizar check-ins no evento  ${row.original.name}.`
-            );
-            if (valVacancies > 0)
-              patch(eventId, {
-                name: row.original.name,
-                eventStartDate: row.original.start_at,
-                eventEndDate: row.original.end_at,
-                status: row.original.status,
-                latitude: row.original.latitude,
-                longitude: row.original.longitude,
-                vacancies: row.original.vacancies - 1,
-              });
-            toast.success(
-              `Número de vacancies no evento ${row.original.name}: ${row.original.vacancies - 1
-              }`
-            );
-          }
-        } else {
-          toast.error(`vacancies encerradas no evento ${row.original.name}`);
+        await eventService.patch(event.id, {
+          name: event.name,
+          eventStartDate: event.start_at,
+          eventEndDate: event.end_at,
+          status: event.status,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          vacancies: event.vacancies - 1,
+        });
+
+        await createPresence(payload);
+
+        toast.success(
+          `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
+        );
+      } catch (err) {
+        if (err instanceof ApiError) {
+          toast.error(err.message);
+          return
         }
-      } catch (error) {
-        console.error("Error while subscribing to event:", error);
+
+        toast.error("Erro inesperado ao realizar inscrição.");
       }
     }
   };
@@ -141,25 +177,32 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await getUserPresences({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
-      if (response && response.length > 0) {
-        setPresences(response);
 
-        const filteredEventIds = response
+      const { presences } = response;
+
+      if (presences) {
+
+        setPresences(presences);
+
+        const filteredEventIds = presences
           .filter((presence) => presence.status === "present")
           .map((presence) => presence.event_id);
 
         setEventIdsFromPresences(filteredEventIds);
-      } else {
-        setPresences([]);
-        setEventIdsFromPresences([]);
       }
-    } catch (error) {
-      console.error("Erro ao buscar presenças:", error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel visualizar eventos")
+
       setPresences([]);
       setEventIdsFromPresences([]);
     }
@@ -169,26 +212,31 @@ export function ViewEventsDataTable() {
     if (!user?.sub) return;
 
     try {
-      const response = await getUserPresences({
+      const response = await presenceService.getAllByUser({
         id: user?.sub,
         offset: 0,
         limit: 10,
       });
 
-      if (response && response.length > 0) {
-        setPresencesRegistered(response);
+      const { presences } = response;
 
-        const filteredEventIds = response
+      if (presences) {
+        setPresencesRegistered(presences);
+
+        const filteredEventIds = presences
           .filter((presence) => presence.status === "registered")
           .map((presence) => presence.event_id);
 
         setEventIdsFromPresencesRegistered(filteredEventIds);
-      } else {
-        setPresencesRegistered([]);
-        setEventIdsFromPresencesRegistered([]);
       }
-    } catch (error) {
-      console.error("Erro ao buscar presenças:", error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel visualizar eventos")
+
       setPresencesRegistered([]);
       setEventIdsFromPresencesRegistered([]);
     }
@@ -212,6 +260,11 @@ export function ViewEventsDataTable() {
     }
   }, [openCheckIn]);
 
+
+  useEffect(() => {
+    getUserProfile();
+  }, [token]);
+
   const form = useForm<PresenceFormSchema>({
     resolver: zodResolver(presenceSchema),
     defaultValues: {
@@ -226,31 +279,34 @@ export function ViewEventsDataTable() {
     data: PresenceCreate,
     coordinates?: { latitude: number; longitude: number }
   ) => {
-    const eventIdFromForm = form.getValues("event_id");
+    try {
 
-    const presence = presencesRegistered.find(
-      (p) => p.event_id === eventIdFromForm
-    );
+      const eventIdFromForm = form.getValues("event_id");
 
-    if (!presence) {
-      console.error(
-        "Nenhuma presença encontrada com o selectedEventId:",
-        eventIdFromForm
+      const presence = presencesRegistered.find(
+        (p) => p.event_id === eventIdFromForm
       );
-      setError("Nenhuma presença encontrada para o evento selecionado.");
-      return;
+
+      if (!presence) {
+        setError("Nenhuma presença encontrada para o evento selecionado.");
+        return;
+      }
+
+      const presenceId = presence.id;
+
+      await patchPresence(presenceId, data, coordinates);
+
+      setSuccess("Presença Criada com sucesso!");
+
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
+
+      console.error("Erro inesperado ao criar presença:", err);
+      setError("Erro interno no servidor, tente novamente.");
     }
-
-    const presenceId = presence.id;
-
-    const result = await patchPresence(presenceId, data, coordinates);
-
-    if (!result) {
-      setError("Ocorreu um erro ao cadastrar a presença");
-      return;
-    }
-
-    setSuccess("Presença Criada com sucesso!");
   };
 
   const onSubmitUpdate = async (
@@ -383,102 +439,105 @@ export function ViewEventsDataTable() {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-1 md:flex-row ">
-            <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
-              <Dialog.Trigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl bg-red-600 text-white"
-                >
-                  Faça o seu Check-Out
-                </Button>
-              </Dialog.Trigger>
+          {!isAdmin && !isProfessor &&
+            <div className="flex flex-col gap-1 md:flex-row ">
+              <Dialog.Root open={openCheckOut} onOpenChange={setOpenCheckOut}>
+                <Dialog.Trigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl bg-red-600 text-white"
+                  >
+                    Faça o seu Check-Out
+                  </Button>
+                </Dialog.Trigger>
 
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                  <Dialog.Title className="text-xl font-bold">
-                    Check-Out
-                  </Dialog.Title>
-                  <Dialog.Description className="text-gray-600">
-                    Insira seus dados para confirmar o check-out.
-                  </Dialog.Description>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                  <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                    <Dialog.Title className="text-xl font-bold">
+                      Check-Out
+                    </Dialog.Title>
+                    <Dialog.Description className="text-gray-600">
+                      Insira seus dados para confirmar o check-out.
+                    </Dialog.Description>
 
-                  {success && (
-                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                      {success}
-                    </div>
-                  )}
+                    {success && (
+                      <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                        {success}
+                      </div>
+                    )}
 
-                  <CheckOutForm
-                    form={form}
-                    onSubmit={onSubmitUpdate}
-                    events={presentEvents}
-                    presences={presences}
-                  />
+                    <CheckOutForm
+                      form={form}
+                      onSubmit={onSubmitUpdate}
+                      events={presentEvents}
+                      presences={presences}
+                    />
 
-                  <Dialog.Close asChild>
-                    <button className="absolute top-2 right-2 text-gray-600">
-                      ✖
-                    </button>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                    <Dialog.Close asChild>
+                      <button className="absolute top-2 right-2 text-gray-600">
+                        ✖
+                      </button>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
 
-            <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
-              <Dialog.Trigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl bg-sky-800 text-white"
-                >
-                  Faça o seu Check-In
-                </Button>
-              </Dialog.Trigger>
+              <Dialog.Root open={openCheckIn} onOpenChange={setOpenCheckIn}>
+                <Dialog.Trigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl bg-sky-800 text-white"
+                  >
+                    Faça o seu Check-In
+                  </Button>
+                </Dialog.Trigger>
 
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-                <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
-                  <Dialog.Title className="text-xl font-bold">
-                    Check-In
-                  </Dialog.Title>
-                  <Dialog.Description className="text-gray-600">
-                    Insira seus dados para confirmar o check-in.
-                  </Dialog.Description>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
+                  <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                    <Dialog.Title className="text-xl font-bold">
+                      Check-In
+                    </Dialog.Title>
+                    <Dialog.Description className="text-gray-600">
+                      Insira seus dados para confirmar o check-in.
+                    </Dialog.Description>
 
-                  {success && (
-                    <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
-                      {success}
-                    </div>
-                  )}
+                    {success && (
+                      <div className="bg-green-100 text-green-700 p-3 rounded-md mb-3">
+                        {success}
+                      </div>
+                    )}
 
-                  <CheckInForm
-                    form={form}
-                    onSubmit={onSubmit}
-                    events={registeredEvents}
-                  />
+                    <CheckInForm
+                      form={form}
+                      onSubmit={onSubmit}
+                      events={registeredEvents}
+                    />
 
-                  <Dialog.Close asChild>
-                    <button className="absolute top-2 right-2 text-gray-600">
-                      ✖
-                    </button>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                    <Dialog.Close asChild>
+                      <button className="absolute top-2 right-2 text-gray-600">
+                        ✖
+                      </button>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl bg-sky-800 text-white"
-              onClick={handleSubscribe}
-            >
-              Inscreva-se
-            </Button>
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl bg-sky-800 text-white"
+                onClick={handleSubscribe}
+              >
+                Inscreva-se
+              </Button>
+            </div>
+          }
         </div>
+
       </div>
       <div className="w-full mb-3 mt-2 bg-sky-50 border rounded-xl h-fit-content flex items-center space-x-1 px-2">
         <BadgeMinus />

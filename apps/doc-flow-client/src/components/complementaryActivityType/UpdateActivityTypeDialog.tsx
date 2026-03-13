@@ -1,4 +1,4 @@
-import { ComplementaryActivityType, complementaryActivityTypeService, UpsertComplementaryActivityType } from "@/api/services/complementary-activity-type-service"
+import { ComplementaryActivityType, complementaryActivityTypeService, UpsertComplementaryActivityType } from "@/api/services/complementary-activity-type.service"
 import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType"
 import { Pagination as PaginationArgs } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -9,6 +9,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface UpdateActivityTypeDialogProps {
   pagination: Pagination;
@@ -49,16 +50,25 @@ export function UpdateActivityTypeDialog({ pagination, fetchComplementaryActivit
   const handleUpdate = async (formData: UpsertComplementaryActivityType) => {
     if (!item) return
 
-    await complementaryActivityTypeService.update(item.id, formData)
-    setIsModalOpen(false)
-    reset()
+    try {
+      await complementaryActivityTypeService.update(item.id, formData)
+      setIsModalOpen(false)
+      reset()
 
-    await fetchComplementaryActivityTypes({
-      limit: pagination.pageSize,
-      offset: pagination.pageIndex * pagination.pageSize,
-    });
+      await fetchComplementaryActivityTypes({
+        limit: pagination.pageSize,
+        offset: pagination.pageIndex * pagination.pageSize,
+      });
 
-    toast.success("Tipo atividade complementar updateada com sucesso!")
+      toast.success("Tipo atividade complementar updateada com sucesso!")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel atualizar um tipo de atividade complementar")
+    }
   }
 
 

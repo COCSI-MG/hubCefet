@@ -2,11 +2,12 @@ import { Form, FormField } from "@/components/ui/form";
 import { PresenceFormSchema } from "@/lib/types";
 import FormItemField from "./FormItemField";
 import { UseFormReturn } from "react-hook-form";
-import { getEvent } from "@/api/data/events.data";
 import { useState, useEffect } from "react";
 import { Event } from "@/lib/types";
 import { toast } from "sonner";
 import { getCurrentPosition } from "@/lib/utils/geolocation";
+import { eventService } from "@/api/services/event.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface PresenceFormProps {
   form: UseFormReturn<PresenceFormSchema>;
@@ -92,45 +93,64 @@ export default function PresencesForm({
         `🎯 Localização do evento - Lat: ${event.latitude}, Lng: ${event.longitude}`
       );
 
-      if (isWithinRange(latitude, longitude, event.latitude, event.longitude)) {
-        // Call onSubmit with coordinates
-        onSubmit(data, { latitude, longitude });
-      } else {
+      const isInsideOfRange = isWithinRange(latitude, longitude, event.latitude, event.longitude)
+
+      if (!isInsideOfRange) {
         toast.error(
           "Você não está dentro da área do evento para realizar o check-in.",
           { duration: 5000 }
         );
+        return
       }
-    } catch (error) {
-      console.error(error);
+
+      onSubmit(data, { latitude, longitude });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      console.error(err);
       toast.error(
         "Erro ao obter sua localização. Verifique se a geolocalização está habilitada.",
         { duration: 5000 }
       );
-    }
-  };
+    };
+  }
 
   const validateEventId = async (eventId: string) => {
     if (!eventId) return;
 
     setLoading(true);
-    try {
-      const event = await getEvent(eventId);
 
-      if (event != null) {
-        setEvent(event);
-        setEventExists(true);
-      } else {
+    try {
+      const response = await eventService.getOne(eventId);
+      const foundEvent = response.event;
+
+      if (!foundEvent) {
         setEvent(null);
         setEventExists(false);
+        return;
       }
+
+      setEvent(foundEvent);
+      setEventExists(true);
     } catch (error) {
-      if (error) setEvent(null);
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        setEvent(null);
+        setEventExists(false);
+        return;
+      }
+
+      console.error(error);
+      toast.error("Erro ao buscar informações do evento.");
+      setEvent(null);
       setEventExists(false);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (checkOutDate) {

@@ -22,13 +22,14 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import useProfile from "@/hooks/useProfile";
-import { updateUserPatchVerb } from "@/api/data/users.data";
+import { userService } from "@/api/services/users.service";
 import useUser from "@/hooks/useUser";
 import { LoaderCircle } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function UserEditDialog() {
   const [profiles, setProfiles] = useState<ProfileSchema[]>([]);
@@ -47,10 +48,27 @@ export default function UserEditDialog() {
   });
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    if (import.meta.env.DEV) toast.info("Perfis carregados com sucesso");
-    setProfiles(profiles);
+    try {
+      const response = await profileService.getAll({ limit: 10, offset: 0 });
+      const { profiles } = response.data;
+
+      if (!profiles) {
+        return;
+      }
+
+      if (import.meta.env.DEV) {
+        toast.info("Perfis carregados com sucesso");
+      }
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Não foi possível carregar os perfis");
+    }
   };
 
   useEffect(() => {
@@ -64,19 +82,33 @@ export default function UserEditDialog() {
       enrollment: user?.enrollment || "",
       profileId: user?.profile_id || "",
     });
-  }, [form, user]);
+  }, [user]);
 
   const handleSubmit = async (data: CreateUser) => {
-    setIsSubmitting(true);
     if (!user) return;
-    const updatedUser = await updateUserPatchVerb(user.id, data);
-    if (updatedUser) {
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await userService.patch(user.id, data);
+      const { user: updatedUser } = response.data;
+
+      if (!updatedUser) {
+        toast.error("Erro ao atualizar usuário");
+        return;
+      }
+
       toast.success("Usuário atualizado com sucesso");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return; // early-return para erros da API
+      }
+
+      toast.error("Não foi possível atualizar o usuário");
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-    setIsSubmitting(false);
-    toast.error("Erro ao atualizar usuário");
   };
 
   return (
@@ -106,7 +138,7 @@ export default function UserEditDialog() {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="fullName"
+                name="full_name"
                 defaultValue={user?.full_name || ""}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
@@ -116,7 +148,7 @@ export default function UserEditDialog() {
                         className={cn(
                           "rounded-2xl bg-white bg-opacity-60",
                           form.formState.errors?.full_name &&
-                            "border-destructive",
+                          "border-destructive",
                           "col-span-3"
                         )}
                         type="text"
@@ -168,7 +200,7 @@ export default function UserEditDialog() {
                         className={cn(
                           "rounded-2xl bg-white bg-opacity-60",
                           form.formState.errors.enrollment?.message &&
-                            "border-destructive",
+                          "border-destructive",
                           "col-span-3"
                         )}
                         type="text"
@@ -189,7 +221,7 @@ export default function UserEditDialog() {
               />
               <FormField
                 control={form.control}
-                name="profile_id"
+                name="profileId"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
                     <FormLabel className="text-right">Perfil</FormLabel>

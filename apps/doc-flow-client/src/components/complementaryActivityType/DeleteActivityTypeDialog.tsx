@@ -1,10 +1,11 @@
-import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service"
+import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service"
 import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType"
 import { Pagination as PaginationArgs } from "@/lib/types";
 import * as Dialog from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
 
 interface DeleteActivityTypeDialogProps {
   pagination: Pagination;
@@ -20,15 +21,24 @@ export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagi
   const handleDelete = async () => {
     if (!item) return
 
-    await complementaryActivityTypeService.remove(item.id)
-    setIsModalOpen(false)
+    try {
+      await complementaryActivityTypeService.remove(item.id)
+      setIsModalOpen(false)
 
-    await fetchComplementaryActivityTypes({
-      limit: pagination.pageSize,
-      offset: pagination.pageIndex * pagination.pageSize,
-    });
+      await fetchComplementaryActivityTypes({
+        limit: pagination.pageSize,
+        offset: pagination.pageIndex * pagination.pageSize,
+      });
 
-    toast.success("Tipo atividade complementar excluida com sucesso!")
+      toast.success("Tipo atividade complementar excluida com sucesso!")
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.error("Nao foi possivel deletar um tipo de atividade complementar")
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { hash, compare } from 'bcrypt';
@@ -19,17 +19,19 @@ export class AuthService {
     private jwtService: JwtService,
     private magicLoginService: MagicLoginService,
     private profileService: ProfileService,
-  ) {}
+  ) { }
 
   private async authenticate(email: string, password: string): Promise<User> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      return null;
+      throw new UnauthorizedException('Email e/ou senha invalidos')
     }
+
     const isPasswordMatching = await compare(password, user.password);
     if (!isPasswordMatching) {
-      return null;
+      throw new UnauthorizedException('Email e/ou senha invalidos')
     }
+
     return user;
   }
 
@@ -53,11 +55,9 @@ export class AuthService {
       signInDto.email,
       signInDto.password,
     );
-    if (!authenticateUser) {
-      return null;
-    }
-    const accessToken =
-      await this.generateJwtPayloadAndGetAccessToken(authenticateUser);
+
+    const accessToken = await this.generateJwtPayloadAndGetAccessToken(authenticateUser);
+
     return {
       access_token: accessToken,
     };
@@ -65,18 +65,18 @@ export class AuthService {
 
   async signUp(signupDto: SignUpAuthDto): Promise<{ access_token: string }> {
     const user = await this.usersService.findByEmail(signupDto.email);
+    if (user) {
+      throw new ConflictException('Usuario com este email ja existente');
+    }
 
     const defaultProfile = await this.profileService.findByProfileName(
       UNAUTHED_SIGNUP_PROFILE,
     );
 
     if (!defaultProfile) {
-      throw new Error('Default profile not found');
+      throw new BadRequestException('Perfil padrao nao encontrado, tente novamente mais tarde');
     }
 
-    if (user) {
-      throw new Error('User already exists');
-    }
 
     const hashedPassword = await this.hashPassword(signupDto.password);
     const newUser = await this.usersService.create({
@@ -86,12 +86,10 @@ export class AuthService {
       full_name: signupDto.fullName,
       profileId: defaultProfile?.id,
     });
-    const accessToken = await this.generateJwtPayloadAndGetAccessToken(
-      newUser.data.user,
-    );
-    return {
-      access_token: accessToken,
-    };
+
+    const accessToken = await this.generateJwtPayloadAndGetAccessToken(newUser.data.user);
+
+    return { access_token: accessToken };
   }
 
   async requestMagicLogin(

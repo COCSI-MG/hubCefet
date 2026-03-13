@@ -1,4 +1,3 @@
-import { getEvent } from "@/api/data/events.data";
 import { EventCreateSchema, Event, createEventSchema } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import EventsForm from "@/components/events/EventsForm";
 import PageHeader from "@/components/PageHeader";
-import { patch } from "@/api/data/events.data";
+import { eventService } from "@/api/services/event.service";
+import { toast } from "sonner";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function EventsEdit() {
   const [event, setEvent] = useState<Event | null>(null);
@@ -14,9 +15,16 @@ export default function EventsEdit() {
   const navigate = useNavigate();
 
   const fetchEvent = async (id: string) => {
-    const event = await getEvent(id);
-    if (event) {
-      setEvent(event);
+    try {
+      const response = await eventService.getOne(id);
+      setEvent(response.event);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro inesperado ao procurar eventos")
     }
   };
 
@@ -24,11 +32,11 @@ export default function EventsEdit() {
     resolver: zodResolver(createEventSchema),
     defaultValues: event
       ? {
-          name: event.name,
-          status: event.status,
-          eventStartDate: event.start_at,
-          eventEndDate: event.end_at,
-        }
+        name: event.name,
+        status: event.status,
+        eventStartDate: event.start_at,
+        eventEndDate: event.end_at,
+      }
       : undefined,
   });
 
@@ -46,7 +54,8 @@ export default function EventsEdit() {
     if (!event) {
       return;
     }
-    const result = await patch(event?.id, data);
+
+    const result = await eventService.patch(event?.id, data);
     if (result !== undefined) {
       navigate("/events", {
         state: {

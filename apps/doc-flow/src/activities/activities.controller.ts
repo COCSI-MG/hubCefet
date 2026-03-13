@@ -12,6 +12,7 @@ import {
   UploadedFile,
   BadRequestException,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -58,6 +59,7 @@ export class ActivitiesController {
       },
     }),
   )
+
   uploadCertificate(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadDto: UploadCertificateDto,
@@ -68,7 +70,7 @@ export class ActivitiesController {
     }
 
     if (!req.user || !req.user.sub) {
-      throw new BadRequestException('Usuário não autenticado');
+      throw new UnauthorizedException('Usuário não autenticado');
     }
 
     return this.activitiesService.uploadCertificate(uploadDto, file, req.user.sub);

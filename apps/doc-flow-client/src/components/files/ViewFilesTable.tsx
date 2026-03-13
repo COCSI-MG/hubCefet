@@ -15,7 +15,7 @@ import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
 import { getColumns } from "./ViewFileTableColumns";
 import { File } from "@/lib/schemas/file.schema";
-import { getFilesByUser } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ interface Pagination {
 }
 
 export function ViewFilesTable() {
-  const [data, setData] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<Pagination>({
@@ -41,11 +41,12 @@ export function ViewFilesTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const fetchEvents = async (data: PaginationArgs) => {
-    const files = await getFilesByUser({ ...data });
-    if (!files) {
+    const response = await fileService.getAllByUser({ ...data });
+    if (!response.files) {
       return;
     }
-    setData(files);
+
+    setFiles(response.files);
   };
 
   const onDelete = useCallback(() => {
@@ -65,7 +66,7 @@ export function ViewFilesTable() {
   const columns = useMemo(() => getColumns({ onDelete }), [onDelete]);
 
   const table = useReactTable({
-    data,
+    data: files,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -81,7 +82,7 @@ export function ViewFilesTable() {
       pagination,
       sorting,
     },
-    pageCount: Math.ceil(data.length / pagination.pageSize),
+    pageCount: Math.ceil(files.length / pagination.pageSize),
   });
 
   const handleSorting = (target: "creator" | "time" | "") => {

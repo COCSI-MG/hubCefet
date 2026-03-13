@@ -4,8 +4,7 @@ export interface ApiError {
   status: number;
   success: false;
   data: null;
-  error: string | string[];
-  message?: string | string[];
+  error: string;
 }
 
 export interface ApiSuccess<T> {
@@ -21,7 +20,7 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 // Error severity levels
 export enum ErrorSeverity {
   INFO = 'info',
-  WARNING = 'warning', 
+  WARNING = 'warning',
   ERROR = 'error',
   CRITICAL = 'critical'
 }

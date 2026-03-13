@@ -32,6 +32,7 @@ import {
 import PageHeader from '@/components/PageHeader';
 import { certificateService } from '@/api/services/certificate.service';
 import { toast } from 'sonner';
+import { ApiError } from '@/api/errors/ApiError';
 
 interface Activity {
   id: string;
@@ -75,18 +76,25 @@ export default function CertificateReview() {
     loadActivities();
   }, []);
 
+
   const loadActivities = async () => {
     try {
       setLoading(true);
+
       const data = await certificateService.getActivitiesForReview();
-      setActivities(data || []);
+      setActivities(data);
     } catch (error) {
-      console.error('Erro ao carregar atividades:', error);
-      toast.error('Erro ao carregar atividades para revisar');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao carregar atividades para revisar");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleOpenReviewDialog = (activity: Activity, decision: 'APPROVED' | 'REJECTED') => {
     setReviewDialog({
@@ -106,11 +114,13 @@ export default function CertificateReview() {
     setComments('');
   };
 
+
   const handleSubmitReview = async () => {
     if (!reviewDialog.activity || !reviewDialog.decision) return;
 
     try {
       setSubmitting(true);
+
       await certificateService.reviewActivity(
         reviewDialog.activity.id,
         reviewDialog.decision,
@@ -118,16 +128,20 @@ export default function CertificateReview() {
       );
 
       toast.success(
-        reviewDialog.decision === 'APPROVED'
-          ? 'Certificado aprovado com sucesso!'
-          : 'Certificado rejeitado!'
+        reviewDialog.decision === "APPROVED"
+          ? "Certificado aprovado com sucesso!"
+          : "Certificado rejeitado!"
       );
 
       handleCloseReviewDialog();
       loadActivities();
     } catch (error) {
-      console.error('Erro ao avaliar certificado:', error);
-      toast.error('Erro ao avaliar certificado');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao avaliar certificado");
     } finally {
       setSubmitting(false);
     }
@@ -136,10 +150,14 @@ export default function CertificateReview() {
   const handleDownloadCertificate = async (activity: Activity) => {
     try {
       await certificateService.downloadCertificate(activity.id);
-      toast.success('Download iniciado!');
+      toast.success("Download iniciado!");
     } catch (error) {
-      console.error('Erro ao baixar certificado:', error);
-      toast.error('Erro ao baixar certificado');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao baixar certificado");
     }
   };
 

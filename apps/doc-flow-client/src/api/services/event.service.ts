@@ -7,7 +7,7 @@ import type {
   Event,
 } from "@/lib/schemas/event.schema";
 
-export default class AuthService extends AbstractService {
+export default class EventService extends AbstractService {
   constructor() {
     super("/events", true);
   }
@@ -32,8 +32,8 @@ export default class AuthService extends AbstractService {
   }): Promise<GetAllEventsResponseDto> {
     return await this.api.get(
       this.basePath +
-        `/user-events/${data.id}` +
-        `?offset=${data.offset}&limit=${data.limit}`,
+      `/user-events/${data.id}` +
+      `?offset=${data.offset}&limit=${data.limit}`,
     );
   }
 
@@ -44,11 +44,7 @@ export default class AuthService extends AbstractService {
   async patch(
     id: string,
     data: EventCreate,
-  ): Promise<
-    ApiResponse<{
-      event: Event;
-    }>
-  > {
+  ): Promise<Event> {
     return await this.api.patch(this.basePath + `/${id}`, data);
   }
 
@@ -56,3 +52,5 @@ export default class AuthService extends AbstractService {
     return await this.api.get(this.basePath + `/search?q=${q}`);
   }
 }
+
+export const eventService = new EventService()

@@ -10,8 +10,10 @@ import {
   UploadedFile,
   Res,
   Req,
-  ConflictException,
   Query,
+  UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -37,7 +39,7 @@ import { UploadFileDto } from './dto/upload-file.dto';
 
 @Controller('files')
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(private readonly filesService: FilesService) { }
 
   @ApiOperation({ summary: 'Create a file register in database' })
   @ApiResponse({
@@ -49,41 +51,13 @@ export class FilesController {
   async create(
     @Req() req: UserRequest,
     @Body() fileCreateDto: CreateFileDto,
-    @Res() res: Response,
   ) {
-    try {
-      const userId: string = req.user?.sub;
-      if (!userId) {
-        return res
-          .status(401)
-          .json(new ApiResponseDto<null>(401, false, null, 'Unauthorized'));
-      }
-      const file: File = await this.filesService.create(fileCreateDto, userId);
-      return res
-        .status(201)
-        .json(
-          new ApiResponseDto<{ file: File }>(
-            201,
-            true,
-            { file },
-            'File created successfully, you are able to upload it now',
-          ),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      if (err instanceof ConflictException) {
-        return res
-          .status(409)
-          .json(new ApiResponseDto<null>(409, false, null, err.message));
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
+    const userId = req.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Nao autorizado');
     }
+
+    return await this.filesService.create(fileCreateDto, userId);
   }
 
   @ApiOperation({ summary: 'Get the status of a file' })
@@ -93,34 +67,13 @@ export class FilesController {
     type: GetFileStatusResponseDto,
   })
   @Get('status/:id')
-  async getStatus(@Param('id') id: string, @Res() res: Response) {
-    try {
-      const file = await this.filesService.findOne(id);
-      if (!file) {
-        return res
-          .status(404)
-          .json(new ApiResponseDto<null>(404, false, null, 'File not found'));
-      }
-      return res
-        .status(200)
-        .json(
-          new ApiResponseDto<{ file: { id: string; status: string } }>(
-            200,
-            true,
-            { file: { id: file.id, status: file.status } },
-            null,
-          ),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
+  async getStatus(@Param('id') id: string) {
+    const file = await this.filesService.findOne(id);
+    if (!file) {
+      throw new NotFoundException('Arquivo nao encontrado')
     }
+
+    return file
   }
 
   @Post('upload/:id')
@@ -148,85 +101,28 @@ export class FilesController {
       },
     }),
   )
+
   async uploadFile(
     @UploadedFile()
     file: Express.Multer.File,
     @Param('id') id: string,
-    @Res() res: Response,
   ) {
-    try {
-      if (!file) {
-        return res
-          .status(400)
-          .json(new ApiResponseDto<null>(400, false, null, 'File not found'));
-      }
-      if (!isNaN(Number(id)) || id.length !== 36) {
-        return res
-          .status(400)
-          .json(new ApiResponseDto<null>(400, false, null, 'Invalid id'));
-      }
-      await this.filesService.upload(file, id);
-      return res
-        .status(202)
-        .json(
-          new ApiResponseDto<string>(
-            202,
-            true,
-            'File enqueued to be processed',
-            null,
-          ),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      if (err instanceof ConflictException) {
-        return res
-          .status(409)
-          .json(new ApiResponseDto<null>(409, false, null, err.message));
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
+    if (!file) {
+      throw new BadRequestException('Arquivo nao encontrado');
     }
+
+    if (!isNaN(Number(id)) || id.length !== 36) {
+      throw new BadRequestException('ID do aruiqov invalido');
+    }
+
+    await this.filesService.upload(file, id);
+
+    return 'Arquivo adicionado na fila de upload';
   }
 
   @Get('user')
-  async findAllByUser(
-    @Req() req: UserRequest,
-    @Res() res: Response,
-    @Query('limit') limit: number,
-    @Query('offset') offset: number,
-  ) {
-    try {
-      const files = await this.filesService.findByUserId(
-        req.user.sub,
-        limit,
-        offset,
-      );
-      return res
-        .status(200)
-        .json(
-          new ApiResponseDto<{ files: File[] } | null>(
-            200,
-            true,
-            { files },
-            null,
-          ),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
-    }
+  async findAllByUser() {
+    return await this.filesService.findAll();
   }
 
   @ApiOperation({ summary: 'Return all files' })
@@ -236,29 +132,10 @@ export class FilesController {
     type: GetAllFilesResponseDto,
   })
   @Get()
-  async findAll(@Res() res: Response) {
-    try {
-      const files = await this.filesService.findAll();
-      if (!files) {
-        return res
-          .status(404)
-          .json(new ApiResponseDto<null>(404, false, null, 'Files not found'));
-      }
-      return res
-        .status(200)
-        .json(
-          new ApiResponseDto<{ files: File[] }>(200, true, { files }, null),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
-    }
+  async findAll() {
+    const files = await this.filesService.findAll();
+
+    return files
   }
 
   @Get(':id')
@@ -267,27 +144,8 @@ export class FilesController {
     description: 'Return a file',
     type: GetFileResponseDto,
   })
-  async findOne(@Res() res: Response, @Param('id') id: string) {
-    try {
-      const file = await this.filesService.findOne(id);
-      if (!file) {
-        return res
-          .status(404)
-          .json(new ApiResponseDto<null>(404, false, null, 'file not found'));
-      }
-      return res
-        .status(200)
-        .json(new ApiResponseDto<File>(200, true, file, null));
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
-    }
+  async findOne(@Param('id') id: string) {
+    return await this.filesService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Download a file' })
@@ -330,33 +188,12 @@ export class FilesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFileDto: UpdateFileDto) {
-    return this.filesService.update(id, updateFileDto);
+  async update(@Param('id') id: string, @Body() updateFileDto: UpdateFileDto) {
+    await this.filesService.update(id, updateFileDto);
   }
 
   @Delete(':id')
-  async remove(@Res() res: Response, @Param('id') id: string) {
-    try {
-      await this.filesService.remove(id);
-      return res
-        .status(200)
-        .json(
-          new ApiResponseDto<null>(
-            200,
-            true,
-            null,
-            'File deleted successfully',
-          ),
-        );
-    } catch (err) {
-      if (process.env.APP_ENV === 'development') {
-        console.error(err);
-      }
-      return res
-        .status(500)
-        .json(
-          new ApiResponseDto<null>(500, false, null, 'Internal server error'),
-        );
-    }
+  async remove(@Param('id') id: string) {
+    await this.filesService.remove(id);
   }
 }

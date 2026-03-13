@@ -47,3 +47,5 @@ export default class FileService extends AbstractService {
     return await this.api.delete(this.basePath + `/${fileId}`);
   }
 }
+
+export const fileService = new FileService()
