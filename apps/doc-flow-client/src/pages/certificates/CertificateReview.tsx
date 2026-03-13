@@ -28,7 +28,6 @@ import {
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   Download as DownloadIcon,
-  Visibility as ViewIcon
 } from '@mui/icons-material';
 import PageHeader from '@/components/PageHeader';
 import { certificateService } from '@/api/services/certificate.service';

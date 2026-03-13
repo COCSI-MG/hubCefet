@@ -38,7 +38,7 @@ export function ProfileSidebar({
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu className="space-y-1">
+          <SidebarMenu >
             <NavMenuItem
               text="Voltar para Apps"
               onClick={() => navigate("/apps")}
@@ -51,7 +51,7 @@ export function ProfileSidebar({
       </SidebarContent>
       <SidebarFooter>
         <Button
-          className="rounded-2xl bg-sky-900 text-white"
+          className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
           onClick={() => logout()}
         >
           Sair

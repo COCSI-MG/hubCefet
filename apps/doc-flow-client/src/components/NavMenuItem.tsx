@@ -11,11 +11,10 @@ export default function NavMenuItem({ ...props }: NavMenuItemProps) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        className={`${
-          props.activeNavItem
-            ? "bg-sky-900 text-white border rounded-xl min-h-10  hover:bg-sky-800"
-            : "text-muted"
-        } p-4 mb-4`}
+        className={`${props.activeNavItem
+          ? "bg-sky-900 text-white border rounded-xl min-h-10  hover:bg-sky-800"
+          : "text-muted rounded-xl min-h-10"
+          } p-4 mb-4`}
         type="button"
         onClick={props.onClick}
       >

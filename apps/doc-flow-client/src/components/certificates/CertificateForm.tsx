@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import { ActivityTypeEnum, CertificateFormData } from "@/lib/types/certificate.t
 import CertificateFileUpload from "./CertificateFileUpload";
 import HoursInput from "./HoursInput";
 import { useActivityTypes } from "@/hooks/useActivityTypes";
+import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type-service";
 
 const certificateFormSchema = z.object({
   activityType: z.string().min(1, "Selecione o tipo de atividade"),
@@ -35,8 +36,11 @@ interface CertificateFormProps {
 export default function CertificateForm({ onSubmit, disabled = false }: CertificateFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<ComplementaryActivityType[]>()
+  const [loaded, setLoaded] = useState(false)
 
   const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
+
 
   const form = useForm<CertificateFormSchema>({
     resolver: zodResolver(certificateFormSchema),
@@ -75,6 +79,15 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
     }
   };
 
+  async function fetchComplementaryActivityTypes() {
+    try {
+      const response = await complementaryActivityTypeService.findAll()
+      setComplementaryActivityTypes(response.rows)
+    } catch (error) {
+      toast.error('Nao foi possivel carregas os tipos de atividades complementares')
+    }
+  }
+
   const handleHoursChange = (value: number) => {
     form.setValue("hours", value, { shouldValidate: true });
   };
@@ -82,6 +95,15 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
   const isFormDisabled = disabled || isSubmitting || typesLoading;
 
   const activityTypeValue = form.watch('activityType')
+
+  useEffect(() => {
+    if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && !loaded) {
+      fetchComplementaryActivityTypes().then(() => setLoaded(true))
+    } else {
+      setComplementaryActivityTypes(undefined)
+      setLoaded(false)
+    }
+  }, [activityTypeValue])
 
   if (typesError) {
     return (
@@ -135,7 +157,7 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
             )}
           />
 
-          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && (
+          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && complementaryActivityTypes && (
             <FormField
               control={form.control}
               name="complementaryHoursType"
@@ -144,8 +166,8 @@ export default function CertificateForm({ onSubmit, disabled = false }: Certific
                   <FormLabel>Tipo de Atividade Complementar</FormLabel>
                   <FormControl>
                     <SearchableSelect
-                      options={activityTypes.map(type => ({
-                        value: type.id,
+                      options={complementaryActivityTypes.map(type => ({
+                        value: type.id.toString(),
                         label: type.name,
                       }))}
                       value={field.value}

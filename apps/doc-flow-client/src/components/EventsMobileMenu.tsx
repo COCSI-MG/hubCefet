@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
@@ -11,11 +10,9 @@ import { Menu } from "lucide-react";
 import AppsIcon from '@mui/icons-material/Apps';
 import EventIcon from '@mui/icons-material/Event';
 import AddIcon from '@mui/icons-material/Add';
-import PersonIcon from '@mui/icons-material/Person';
 
 export function EventsMobileMenu() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout, token } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -97,15 +94,6 @@ export function EventsMobileMenu() {
                   <EventIcon className="mr-2 h-4 w-4" />
                   Todos Eventos
                 </Button>
-
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleNavigation("/events/profile")}
-                >
-                  <PersonIcon className="mr-2 h-4 w-4" />
-                  Perfil
-                </Button>
               </nav>
             </div>
 
@@ -115,7 +103,7 @@ export function EventsMobileMenu() {
                 <p className="text-muted-foreground">{user?.email || "Email não encontrado"}</p>
               </div>
               <Button
-                className="w-full bg-sky-900 text-white"
+                className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
                 onClick={() => logout()}
               >
                 Sair

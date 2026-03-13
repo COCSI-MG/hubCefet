@@ -33,12 +33,14 @@ export class CreateEventDto {
   })
   @IsISO8601({}, { message: 'Incorrect date format' })
   eventStartDate: string;
+
   @ApiProperty({
     description: 'Event end date',
     example: '2024-12-17T10:00:00Z',
   })
   @IsISO8601({}, { message: 'Incorrect date format' })
   eventEndDate?: string;
+
   @ApiProperty({
     description: 'Status of the event',
     example: 'upcoming',

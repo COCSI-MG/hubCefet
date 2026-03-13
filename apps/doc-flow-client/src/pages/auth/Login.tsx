@@ -12,6 +12,7 @@ import { authFormSchema, type AuthFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import AuthService from "@/api/services/auth.service";
 import { Separator } from "@/components/ui/separator";
+import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
 const authService = new AuthService();
 
@@ -34,14 +35,22 @@ export default function Login() {
   });
 
   const handleSubmit = async (data: AuthFormSchema) => {
-    const accessToken = await getAccessToken({ ...data });
-    if (!accessToken) {
-      setError("Não foi possível fazer login. Tente novamente.");
-      return;
+    try {
+      const response = await getAccessToken({ ...data });
+
+      if (!response) {
+        setError("nao foi possivel fazer login no momento tente novamente mais tarde")
+        return
+      }
+
+      localStorage.setItem("accessToken", response.access_token);
+      await checkAuthentication();
+      navigate("/events");
+    } catch (err: any) {
+      const processedError = ErrorProcessor.processError(err)
+
+      setError(processedError.message)
     }
-    localStorage.setItem("accessToken", accessToken);
-    await checkAuthentication();
-    navigate("/events");
   };
 
   const handleMagicLogin = async () => {

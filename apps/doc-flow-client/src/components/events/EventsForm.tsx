@@ -255,11 +255,11 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
             </div>
           </div>
 
-          <div className="flex max-md:flex-col max-md:space-y-3 max-md:space-x-1 justify-end space-x-3">
+          <div className="flex md:flex-row flex-col md:space-x-3 space-y-3 md:space-y-0 justify-end">
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl border w-1/5 h-12 max-md:w-full"
+              className="rounded-xl border lg:w-full h-12 w-full"
               onClick={() => form.reset()}
             >
               Descartar criação
@@ -267,7 +267,7 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
             <Button
               type="submit"
               variant="outline"
-              className="rounded-xl bg-sky-900 text-white w-1/5 h-12 hover:bg-sky-800 max-md:w-full"
+              className="rounded-xl bg-sky-900 text-white lg:w-full h-12 hover:bg-sky-800 w-full pl-0"
             >
               Confirmar
             </Button>

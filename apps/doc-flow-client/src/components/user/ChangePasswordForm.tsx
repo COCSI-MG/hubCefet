@@ -11,8 +11,10 @@ import ConfirmPassword from "@/components/ConfirmPassword";
 import { changePassword } from "@/api/data/auth.data";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function ChangePasswordForm() {
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate();
 
   const form = useForm<ChangePasswordType>({
@@ -86,7 +88,7 @@ export default function ChangePasswordForm() {
               />
             </div>
             <div>
-              <ConfirmPassword onchange={handleConfirmPassword} />
+              <ConfirmPassword onchange={handleConfirmPassword} showPassword={showPassword} setShowPassword={setShowPassword} />
             </div>
             <div>
               <Button

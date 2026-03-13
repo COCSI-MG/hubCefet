@@ -6,6 +6,7 @@ import FormItemField from "./FormItemField";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ConfirmPassword from "./ConfirmPassword";
+import { Eye, EyeOff } from 'lucide-react';
 
 interface AuthFormProps {
   form: ReturnType<typeof useForm<SignupFormSchema>>;
@@ -14,6 +15,7 @@ interface AuthFormProps {
 
 export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
   const location = useLocation();
 
   const handleConfirmPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +49,7 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
               label="Email"
               error={form.formState.errors.email?.message}
               type="email"
-              placeholder="email"
+              placeholder="exemplo@cefet-rj.br"
             />
           )}
         />
@@ -64,6 +66,7 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
             />
           )}
         />
+
         <FormField
           control={form.control}
           name="enrollment"
@@ -73,25 +76,36 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
               label="Matricula"
               error={form.formState.errors.enrollment?.message}
               type="text"
-              placeholder="matricula"
+              placeholder="Matricula"
             />
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItemField
-              field={field}
-              label="Senha"
-              error={form.formState.errors.password?.message}
-              type="password"
-              placeholder="senha"
-            />
-          )}
-        />
-        <ConfirmPassword onchange={handleConfirmPassword} />
+        <div className="relative">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItemField
+                field={field}
+                label="Senha"
+                error={form.formState.errors.password?.message}
+                type={showPassword ? "text" : "password"}
+                placeholder="Senha"
+              />
+            )}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-10 text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+
+        <ConfirmPassword onchange={handleConfirmPassword} showPassword={showPassword} setShowPassword={() => setShowPassword} />
         <Button
           className="w-full bg-sky-900 text-white hover:bg-sky-700 rounded-2xl"
           type="submit"

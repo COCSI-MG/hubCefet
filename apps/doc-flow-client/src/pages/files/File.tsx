@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 export default function File() {
   return (
     <div>
-      <PageHeader title="Seus Arquivos" description="" />
+      <PageHeader title="Seus Arquivos" description="Visualize seus arquivos e seus status" />
 
       <div className="container max-w-full flex flex-col space-y-2 p-6 h-fit">
         <div className="p-1">

@@ -9,7 +9,7 @@ export class ProfileService {
   constructor(
     @Inject(PROFILE_REPOSITORY)
     private readonly profileRepository: ProfileRepository,
-  ) {}
+  ) { }
 
   async create(createProfileDto: CreateProfileDto) {
     const profileAlreadyExists = await this.profileRepository.findByProfileName(

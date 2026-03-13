@@ -19,7 +19,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import FolderIcon from '@mui/icons-material/Folder';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { Award } from 'lucide-react';
-import { Dashboard, RateReview } from '@mui/icons-material';
+import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -74,7 +74,7 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu className="space-y-1">
+          <SidebarMenu>
             <NavMenuItem
               text="Voltar para Apps"
               onClick={() => navigate("/apps")}
@@ -124,12 +124,22 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
                 icon={<RateReview />}
               />
             )}
+
+            {(isAdmin) && (
+              <NavMenuItem
+                text="Horas Complementares"
+                onClick={() => navigate("/docflow/complementary")}
+                activeNavItem={location.pathname === "/docflow/complementary"}
+                icon={<AccessAlarm />}
+              />
+            )}
+
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <Button
-          className="rounded-2xl bg-sky-900 text-white"
+          className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
           onClick={() => logout()}
         >
           Sair

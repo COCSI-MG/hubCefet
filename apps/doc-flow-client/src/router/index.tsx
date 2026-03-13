@@ -22,6 +22,8 @@ import { AppSelection } from "@/pages/AppSelection";
 import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
 import { CertificateReview } from "@/pages/certificates";
+import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
+import AppSelecionLayout from "@/layouts/AppSelectionLayout";
 
 export default function Router() {
   return (
@@ -30,7 +32,9 @@ export default function Router() {
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<Navigate to="/apps" replace />} />
 
-          <Route path="/apps" element={<AppSelection />} />
+          <Route path="/apps" element={<AppSelecionLayout />}>
+            <Route path="" element={<AppSelection />} />
+          </Route>
 
           <Route path="/profile" element={<Profile />} />
 
@@ -44,6 +48,13 @@ export default function Router() {
               >
                 <Route path="create" element={<FileCreate />} />
               </Route>
+            </Route>
+
+            <Route
+              path="complementary"
+              element={<ProfileRoute profile={["Admin"]} />}
+            >
+              <Route path="" element={<ComplementaryActivityTypeManagement />} />
             </Route>
 
             <Route path="certificates">
@@ -84,6 +95,6 @@ export default function Router() {
         <Route path="/forbidden" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </AuthProvider>
+    </AuthProvider >
   );
 }

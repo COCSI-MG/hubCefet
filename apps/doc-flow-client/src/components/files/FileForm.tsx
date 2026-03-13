@@ -50,81 +50,79 @@ export default function FileForm({ ...props }: FileFormProps) {
   };
 
   return (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="grid grid-cols-6 items-center gap-4">
-                <FormLabel className="text-right">Nome</FormLabel>
-                <FormControl>
-                  <Input
-                    className={cn(
-                      "rounded-2xl bg-white bg-opacity-60",
-                      form.formState.errors?.name && "border-destructive",
-                      "col-span-5"
-                    )}
-                    type="text"
-                    placeholder="Nome do Arquivo"
-                    {...field}
-                    required
-                    onInput={() => {
-                      if (form.formState.errors.name?.message) {
-                        toast.error(form.formState.errors.name.message);
-                      }
-                      props.onFileModified?.(); // Call when field is modified
-                    }}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="grid grid-cols-6 items-center gap-4">
-                <FormLabel className="text-right">Tipo do arquivo</FormLabel>
-                <FormControl>
-                  <Select
-                    defaultValue={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      props.onFileModified?.();
-                    }}
-                  >
-                    <SelectTrigger className="col-span-5 rounded-2xl">
-                      <SelectValue placeholder="Selecione um tipo" />
-                    </SelectTrigger>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="grid gap-1 xl:grid-cols-6 xl:items-center">
+              <FormLabel className="w-fit">Nome</FormLabel>
+              <FormControl>
+                <Input
+                  className={cn(
+                    "rounded-2xl bg-white bg-opacity-60",
+                    form.formState.errors?.name && "border-destructive",
+                    "col-span-5"
+                  )}
+                  type="text"
+                  placeholder="Nome do Arquivo"
+                  {...field}
+                  required
+                  onInput={() => {
+                    if (form.formState.errors.name?.message) {
+                      toast.error(form.formState.errors.name.message);
+                    }
+                    props.onFileModified?.(); // Call when field is modified
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem className="grid gap-1 xl:grid-cols-6 xl:items-center">
+              <FormLabel className="w-fit">Tipo do arquivo</FormLabel>
+              <FormControl>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFileModified?.();
+                  }}
+                >
+                  <SelectTrigger className="col-span-5 rounded-2xl">
+                    <SelectValue placeholder="Selecione um tipo" />
+                  </SelectTrigger>
 
-                    <SelectContent>
-                      <SelectItem value="certificate">Certificado</SelectItem>
-                      <SelectItem value="image">Imagem</SelectItem>
-                      <SelectItem value="document">Documento</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Button
-            type="submit"
-            className="w-full bg-sky-700 hover:bg-sky-900 text-white rounded-xl"
-            disabled={isCreating || props.disabled}
-          >
-            {isCreating ? (
-              <>
-                <LoaderCircle className="animate-spin w-12 h-12" />
-                Criando...
-              </>
-            ) : (
-              "Criar"
-            )}
-          </Button>
-        </form>
-      </Form>
-    </>
+                  <SelectContent>
+                    <SelectItem value="certificate">Certificado</SelectItem>
+                    <SelectItem value="image">Imagem</SelectItem>
+                    <SelectItem value="document">Documento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <Button
+          type="submit"
+          className="w-full bg-sky-700 hover:bg-sky-900 text-white rounded-xl"
+          disabled={isCreating || props.disabled}
+        >
+          {isCreating ? (
+            <>
+              <LoaderCircle className="animate-spin w-12 h-12" />
+              Criando...
+            </>
+          ) : (
+            "Criar"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
