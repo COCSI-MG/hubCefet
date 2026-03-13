@@ -4,13 +4,14 @@ import CertificateForm from "@/components/certificates/CertificateForm";
 import { CertificateFormData } from "@/lib/types/certificate.types";
 import { certificateService } from "@/api/services/certificate.service";
 import { Box, Typography } from "@mui/material";
+import { toast } from "sonner";
 
 export default function CertificateCreate() {
   const handleSubmit = useCallback(async (data: CertificateFormData) => {
     try {
       await certificateService.uploadCertificate(data);
     } catch (error) {
-      throw error;
+      toast.error("Falha o fazer upload do certificado");
     }
   }, []);
 
@@ -18,9 +19,9 @@ export default function CertificateCreate() {
     <>
       <PageHeader
         title="Cadastro de Certificados"
-        description="Cadastre seus certificados de horas complementares para validação acadêmica"
+        description="Cadastre seus certificados para validação acadêmica"
       />
-      
+
       <Box className="ml-6 mr-6 mt-6 max-w-full p-6 border rounded-xl">
         <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Box className="lg:col-span-2">
@@ -60,7 +61,7 @@ export default function CertificateCreate() {
                 ⚠️ Importante
               </Typography>
               <Typography variant="body2" className="text-sm text-yellow-800">
-                Todos os certificados passarão por análise da coordenação acadêmica. 
+                Todos os certificados passarão por análise da coordenação acadêmica.
                 Documentos inválidos ou fraudulentos serão rejeitados.
               </Typography>
             </Box>
@@ -69,6 +70,6 @@ export default function CertificateCreate() {
       </Box>
     </>
   );
-} 
- 
- 
+}
+
+
