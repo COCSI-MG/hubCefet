@@ -21,7 +21,7 @@ import { QueuesModule } from './queues/queues.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { ComplementaryActivityTypeModule } from './complementary-activity-type/complementary-activity-type.module';
 import { LoggerModule } from 'nestjs-pino';
-import { GeneralExceptionFilter } from './lib/filters/general-exception.filter';
+import { GeneralExceptionFilter } from './lib/filters/general.filter';
 
 @Module({
   imports: [
@@ -43,6 +43,7 @@ import { GeneralExceptionFilter } from './lib/filters/general-exception.filter';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
+      timezone: '-03:00',
       autoLoadModels: true,
       logging: true,
       define: {
@@ -51,6 +52,10 @@ import { GeneralExceptionFilter } from './lib/filters/general-exception.filter';
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
       },
+      dialectOptions: {
+        useUTC: false,
+        timezone: '-03:00'
+      }
     }),
     JwtModule.register({
       global: true,

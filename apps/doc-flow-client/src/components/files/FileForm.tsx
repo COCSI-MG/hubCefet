@@ -34,6 +34,10 @@ export default function FileForm({ ...props }: FileFormProps) {
   const [isCreating, setIsCreating] = useState<boolean>(false);
 
   const form = useForm<CreateFile>({
+    defaultValues: {
+      name: "",
+      type: undefined
+    },
     resolver: zodResolver(createFileSchema),
   });
 
@@ -43,8 +47,9 @@ export default function FileForm({ ...props }: FileFormProps) {
 
       const response = await fileService.create(data);
 
-      props.onFileCreated(response.file.id);
+      props.onFileCreated(response.id);
       toast.success("Arquivo criado com sucesso");
+      form.reset()
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);
@@ -83,6 +88,7 @@ export default function FileForm({ ...props }: FileFormProps) {
                     }
                     props.onFileModified?.(); // Call when field is modified
                   }}
+                  disabled={isCreating || props.disabled}
                 />
               </FormControl>
             </FormItem>
@@ -96,11 +102,12 @@ export default function FileForm({ ...props }: FileFormProps) {
               <FormLabel className="w-fit">Tipo do arquivo</FormLabel>
               <FormControl>
                 <Select
-                  defaultValue={field.value}
+                  value={field.value ?? ""}
                   onValueChange={(value) => {
                     field.onChange(value);
                     props.onFileModified?.();
                   }}
+                  disabled={isCreating || props.disabled}
                 >
                   <SelectTrigger className="col-span-5 rounded-2xl">
                     <SelectValue placeholder="Selecione um tipo" />

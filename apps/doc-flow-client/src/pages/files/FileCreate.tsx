@@ -57,19 +57,7 @@ export default function FileCreate() {
     formData.append("file", file);
 
     try {
-      const data = await fileService.upload(createdFileId, formData, onProgress);
-
-      if (!data?.success) {
-        if (data?.status === 409) {
-          toast.error("Arquivo já existe");
-          return;
-        }
-
-        toast.error(data?.error || "Ocorreu um erro ao realizar upload", {
-          duration: 5000,
-        });
-        return;
-      }
+      await fileService.upload(createdFileId, formData, onProgress);
 
       setCanUpload(false);
       toast.success("Upload feito com sucesso");
@@ -98,11 +86,11 @@ export default function FileCreate() {
               onFileCreated={(fileId) => {
                 setCreatedFileId(fileId);
                 setCanUpload(true);
-                setIsFileModified(false); // Reset modification flag when file is created
+                setIsFileModified(false);
               }}
               onFileModified={() => {
                 setIsFileModified(true);
-                setCanUpload(false); // Block upload when file is modified
+                setCanUpload(false);
               }}
               disabled={canUpload && !isFileModified}
             />

@@ -1,5 +1,5 @@
 import PageHeader from "@/components/PageHeader";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,10 +8,12 @@ import EventsForm from "@/components/events/EventsForm";
 import { EventCreate, EventCreateSchema, createEventSchema } from "@/lib/types";
 import { eventService } from "@/api/services/event.service";
 import { ApiError } from "@/api/errors/ApiError";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 export default function EventsCreate() {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate()
 
   const form = useForm<EventCreateSchema>({
     resolver: zodResolver(createEventSchema),
@@ -19,19 +21,20 @@ export default function EventsCreate() {
       name: "",
       description: "",
       status: "upcoming",
-      eventStartDate: "",
-      eventEndDate: "",
+      start_at: "",
+      end_at: "",
       latitude: 0,
       longitude: 0,
       radius: 10,
     },
   });
 
-  const onSubmit: SubmitHandler<EventCreateSchema> = async (data: EventCreate) => {
+  async function onSubmit(data: EventCreate) {
     try {
       await eventService.create({ ...data });
 
-      setSuccess("Evento criado com sucesso");
+      toast.success("Evento criado com sucesso");
+      navigate('/events/user')
     } catch (error) {
       if (error instanceof ApiError) {
         setError(error.message);
@@ -50,14 +53,6 @@ export default function EventsCreate() {
     }
   }, [error]);
 
-  useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        setSuccess(null);
-      }, 10000);
-    }
-  }, [success]);
-
   return (
     <div>
       <PageHeader
@@ -72,16 +67,7 @@ export default function EventsCreate() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        {success && (
-          <Alert variant="default" className="bg-green-200 w-full">
-            <AlertCircle className="h-4-w-4" />
-            <AlertTitle>{success}</AlertTitle>
-            <AlertDescription>
-              Para editar ou visualizar seu evento vá para página de eventos
-            </AlertDescription>
-          </Alert>
-        )}
-        <EventsForm form={form} onSubmit={onSubmit} />
+        <EventsForm form={form} onSubmit={onSubmit} mode="create" />
       </div>
     </div>
   );

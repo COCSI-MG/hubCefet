@@ -82,9 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     checkAuthentication();
-    if (isLoading) return;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;

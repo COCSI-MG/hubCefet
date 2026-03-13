@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PresencesService } from './presences.service';
 import { PresencesController } from './presences.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -10,9 +10,9 @@ import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Presence]), 
-    UsersModule, 
-    EventsModule,
+    SequelizeModule.forFeature([Presence]),
+    UsersModule,
+    forwardRef(() => EventsModule),
     BullModule.registerQueue({
       name: 'pdf-generation',
     }),
@@ -25,5 +25,6 @@ import { BullModule } from '@nestjs/bull';
       useClass: PresenceRepositoryImpl,
     },
   ],
+  exports: [PresencesService]
 })
-export class PresencesModule {}
+export class PresencesModule { }

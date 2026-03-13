@@ -1,5 +1,3 @@
-"use client";
-
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -24,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Filter } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
+import { toast } from "sonner";
 
 interface Pagination {
   pageIndex: number;
@@ -41,12 +41,18 @@ export function ViewFilesTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const fetchEvents = async (data: PaginationArgs) => {
-    const response = await fileService.getAllByUser({ ...data });
-    if (!response.files) {
-      return;
-    }
+    try {
+      const files = await fileService.getAllByUser({ ...data });
 
-    setFiles(response.files);
+      setFiles(files);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao visualizar arquivos");
+    }
   };
 
   const onDelete = useCallback(() => {

@@ -7,9 +7,7 @@ import Login from "@/pages/auth/Login";
 import MagicLogin from "@/pages/auth/MagicLogin";
 import { AuthProvider } from "@/context/AuthProvider";
 import Signup from "@/pages/auth/Signup";
-import EventsView from "@/pages/events/EventsView";
 import EventsCreate from "@/pages/events/EventsCreate";
-import EventsUserView from "@/pages/events/EventsUserView";
 import EventsEdit from "@/pages/events/EventsEdit";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
@@ -24,6 +22,9 @@ import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
 import { CertificateReview } from "@/pages/certificates";
 import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
 import AppSelecionLayout from "@/layouts/AppSelectionLayout";
+import AllEventsView from "@/pages/events/AllEventsView";
+import UserEventsView from "@/pages/events/UserEventsView";
+import { EventView } from "@/pages/events/EventView";
 
 export default function Router() {
   return (
@@ -71,11 +72,11 @@ export default function Router() {
           <Route path="/events" element={<EventsLayout />}>
             <Route index element={<Navigate to="/events/all" replace />} />
 
-            <Route path="all" element={<EventsView />} />
+            <Route path="all" element={<AllEventsView />} />
+            <Route path="user" element={<UserEventsView />} />
+            <Route path=":eventId" element={<EventView />} />
 
-            {/* TODO: Remover essa pagina Events User View e Jogar a Opcao de Editar para dentro de Events View Alem de Poder Remover Evento*/}
             <Route element={<ProfileRoute profile={["Admin", "Professor"]} />}>
-              <Route path="user" element={<EventsUserView />} />
               <Route path="create" element={<EventsCreate />} />
             </Route>
 

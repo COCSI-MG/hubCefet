@@ -611,12 +611,12 @@ export interface components {
        * @description Event start date
        * @example 2024-12-14T10:00:00Z
        */
-      eventStartDate: string;
+      start_at: string;
       /**
        * @description Event end date
        * @example 2024-12-17T10:00:00Z
        */
-      eventEndDate: string;
+      end_at: string;
       /**
        * @description Status of the event
        * @example upcoming
@@ -638,6 +638,11 @@ export interface components {
        */
       name: string;
       /**
+       * @description Description of the event
+       * @example Event 1 Description
+       */
+      description: string;
+      /**
        * Format: date-time
        * @description Date of the event
        * @example 2021-01-01 00:00:00
@@ -653,7 +658,7 @@ export interface components {
        * @description Event status
        * @example upcoming
        */
-      status: string;
+      status: 'upcoming' | 'started' | 'ended';
       /**
        * Format: date-time
        * @description Date that the event was created
@@ -679,6 +684,8 @@ export interface components {
 
       vacancies: number;
 
+      radius: number;
+
       user: {
         id: string;
         full_name: string;
@@ -687,19 +694,17 @@ export interface components {
     GetAllEventsResponseDto: {
       id: string;
       name: string;
+      description: string;
       start_at: string;
       end_at: string;
       status: string;
       created_at: string;
       updated_at: string;
-
       created_by_user_id: string;
-
       latitude: number;
-
       longitude: number;
-
       vacancies: number;
+      radius: number;
 
       user: {
         id: string;
@@ -733,18 +738,16 @@ export interface components {
       eventId: string;
     };
     CreateFileResponseDto: {
-      file: {
-        id: string;
-        name: string;
-        user_id: string;
-        event_id: string;
-        /** @enum {unknown} */
-        type: "image" | "document" | "certificate";
-        /** @enum {unknown} */
-        status: "waiting" | "processing" | "done" | "error";
-        path: string | null;
-        created_at: string;
-      };
+      id: string;
+      name: string;
+      user_id: string;
+      event_id: string;
+      /** @enum {unknown} */
+      type: "image" | "document" | "certificate";
+      /** @enum {unknown} */
+      status: "waiting" | "processing" | "done" | "error";
+      path: string | null;
+      created_at: string;
     };
     GetFileStatusResponseDto: {
       id?: string;
@@ -759,8 +762,19 @@ export interface components {
       message: string;
     };
     GetAllFilesResponseDto: {
-      files: components["schemas"]["File"][];
-    };
+      id: string;
+      name: string;
+      path: string | null;
+      type: string;
+      user_id: string;
+      event_id: string;
+      status: string;
+      created_at: string;
+      user: {
+        id: string;
+        full_name: string;
+      };
+    }[];
     GetFileResponseDto: {
       file: {
         id: string;
@@ -776,9 +790,6 @@ export interface components {
     UpdateFileDto: Record<string, never>;
     CreatePresenceDto: {
       event_id: string;
-      status: string;
-      check_out_date: string;
-      check_in_date: string;
     };
     Presence: {
       /**
@@ -828,10 +839,8 @@ export interface components {
       };
     };
     UpdatePresenceDto: {
-      event_id: string;
-      status: string;
-      check_out_date: string;
-      check_in_date: string;
+      check_out_date?: string;
+      check_in_date?: string;
     };
     GetAllPresencesByEventResponseDto: {
       presences?: components["schemas"]["Presence"][];

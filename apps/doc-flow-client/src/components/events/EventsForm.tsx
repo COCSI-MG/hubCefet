@@ -16,14 +16,22 @@ import { EventCreateSchema, Event } from "@/lib/schemas/event.schema";
 import FormItemField from "../FormItemField";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
+import { FormatFormDateToLocal } from "@/lib/utils/form";
+
+type modes = 'create' | 'edit';
 
 interface EventsFormProps {
   form: UseFormReturn<EventCreateSchema>;
   onSubmit: (data: EventCreateSchema) => void;
   event?: Event;
+  mode: modes;
 }
 
-export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
+export default function EventsForm({ form, onSubmit, event, mode }: EventsFormProps) {
+  const discardText = mode === "edit"
+    ? "Desfazer alterações"
+    : "Limpar formulario";
+
   return (
     <>
       <Form {...form}>
@@ -38,10 +46,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
             <FormField
               control={form.control}
               name="description"
-              defaultValue={
-                (event && event.description) ||
-                `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloribus temporibus consequatur nostrum fuga ipsum vel, modi nesciunt hic provident quod praesentium eveniet sed earum doloremque quam error asperiores unde blanditiis.`
-              }
               render={({ field }) => (
                 <FormItemField
                   field={field}
@@ -61,7 +65,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="name"
-                  defaultValue={event ? event.name : ""}
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -77,7 +80,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="status"
-                  defaultValue={event ? event.status : "upcoming"}
                   render={({ field }) => {
                     return (
                       <FormItem>
@@ -108,7 +110,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="vacancies"
-                  defaultValue={event ? event.vacancies : 1}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -128,15 +129,14 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
               <div>
                 <FormField
                   control={form.control}
-                  name="eventStartDate"
-                  defaultValue={event ? event.start_at.split("T")[0] : ""}
+                  name="start_at"
                   render={({ field }) => (
                     <FormItemField
                       field={{
                         ...field,
                       }}
                       label="Data de início"
-                      error={form.formState.errors.eventStartDate?.message}
+                      error={form.formState.errors.start_at?.message}
                       type="date"
                       placeholder="Data de início"
                     />
@@ -146,13 +146,12 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
               <div>
                 <FormField
                   control={form.control}
-                  name="eventEndDate"
-                  defaultValue={event ? event.end_at.split("T")[0] : ""}
+                  name="end_at"
                   render={({ field }) => (
                     <FormItemField
                       field={field}
                       label="Data de término"
-                      error={form.formState.errors.eventEndDate?.message}
+                      error={form.formState.errors.end_at?.message}
                       type="date"
                       placeholder="Data de término"
                     />
@@ -166,9 +165,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="eventStartTime"
-                  defaultValue={
-                    event ? event.start_at.split("T")[1].slice(0, 5) : ""
-                  }
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -184,9 +180,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="eventEndTime"
-                  defaultValue={
-                    event ? event.end_at.split("T")[1].slice(0, 5) : ""
-                  }
                   render={({ field }) => (
                     <FormItemField
                       field={field}
@@ -205,7 +198,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="latitude"
-                  defaultValue={event ? event.latitude : 0}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -221,7 +213,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                 <FormField
                   control={form.control}
                   name="longitude"
-                  defaultValue={event ? event.longitude : 0}
                   render={({ field }) => (
                     <FormItemField
                       field={{ ...field }}
@@ -238,7 +229,6 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
                   <FormField
                     control={form.control}
                     name="radius"
-                    defaultValue={event && event.radius ? event.radius : 0}
                     render={({ field }) => (
                       <FormItemField
                         field={{ ...field }}
@@ -260,9 +250,30 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
               type="button"
               variant="outline"
               className="rounded-xl border lg:w-full h-12 w-full"
-              onClick={() => form.reset()}
+              onClick={() => {
+                if (mode === "edit" && event) {
+                  const startParts = FormatFormDateToLocal(event.start_at);
+                  const endParts = FormatFormDateToLocal(event.end_at);
+
+                  form.reset({
+                    name: event.name,
+                    status: event.status,
+                    start_at: startParts.date,
+                    eventStartTime: startParts.time,
+                    end_at: endParts.date,
+                    eventEndTime: endParts.time,
+                    description: event.description,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                    radius: event.radius,
+                    vacancies: event.vacancies,
+                  })
+                } else {
+                  form.reset()
+                }
+              }}
             >
-              Descartar criação
+              {discardText}
             </Button>
             <Button
               type="submit"
@@ -273,7 +284,7 @@ export default function EventsForm({ form, onSubmit, event }: EventsFormProps) {
             </Button>
           </div>
         </form>
-      </Form>
+      </Form >
     </>
   );
 }

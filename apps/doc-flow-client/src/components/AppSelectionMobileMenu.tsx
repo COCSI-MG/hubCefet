@@ -10,7 +10,7 @@ export function AppSelectionMobileMenu() {
 
   return (
     <header className="bg-sky-900 text-white p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold">DocFlow</h1>
+      <h1 className="text-xl font-bold">Apps</h1>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>

@@ -1,43 +1,43 @@
-import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service"
-import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType"
-import { Pagination as PaginationArgs } from "@/lib/types";
 import * as Dialog from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { Pagination } from "@/pages/complementaryActivityType/ComplementaryActivityType"
+import { Pagination as PaginationArgs } from "@/lib/types";
 import { X } from "lucide-react";
 import { ApiError } from "@/api/errors/ApiError";
+import { Event } from "@/lib/schemas/event.schema";
+import { eventService } from "@/api/services/event.service";
 
-interface DeleteActivityTypeDialogProps {
+interface DeleteEventsDialogProps {
   pagination: Pagination;
-  fetchComplementaryActivityTypes: (pagination: PaginationArgs) => Promise<void>;
-  item: ComplementaryActivityType | null;
-  setItem: React.Dispatch<React.SetStateAction<ComplementaryActivityType | null>>;
+  fetchEvent: (pagination: PaginationArgs) => Promise<void>;
+  item: Event | null;
+  setItem: React.Dispatch<React.SetStateAction<Event | null>>;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagination, item, isModalOpen, setIsModalOpen, setItem }: DeleteActivityTypeDialogProps) {
+export function DeleteEventDialog({ fetchEvent, pagination, item, isModalOpen, setIsModalOpen, setItem }: DeleteEventsDialogProps) {
 
   const handleDelete = async () => {
     if (!item) return
 
     try {
-      await complementaryActivityTypeService.remove(item.id)
+      await eventService.delete(item.id)
       setIsModalOpen(false)
 
-      await fetchComplementaryActivityTypes({
+      await fetchEvent({
         limit: pagination.pageSize,
         offset: pagination.pageIndex * pagination.pageSize,
       });
 
-      toast.success("Tipo atividade complementar excluida com sucesso!")
+      toast.success("Evento excluido com sucesso!")
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message)
         return
       }
 
-      toast.error("Nao foi possivel deletar um tipo de atividade complementar")
+      toast.error("Nao foi possivel deletar o evento")
     }
   }
 
@@ -55,13 +55,13 @@ export function DeleteActivityTypeDialog({ fetchComplementaryActivityTypes, pagi
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50 w-[38rem]">
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-lg z-50 w-[38rem]">
           <Dialog.Title className="text-xl font-bold">
             Confirmar Exclusão
           </Dialog.Title>
 
           <p className="mt-4 text-gray-700">
-            Tem certeza que deseja excluir o tipo de atividade:
+            Tem certeza que deseja excluir o evento:
             <br />
             <strong>{item?.name}</strong>?
           </p>
