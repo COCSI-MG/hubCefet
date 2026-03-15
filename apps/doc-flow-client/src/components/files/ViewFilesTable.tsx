@@ -1,5 +1,3 @@
-"use client";
-
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -15,7 +13,7 @@ import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
 import { getColumns } from "./ViewFileTableColumns";
 import { File } from "@/lib/schemas/file.schema";
-import { getFilesByUser } from "@/api/data/file.data";
+import { fileService } from "@/api/services/files.service";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import {
   DropdownMenu,
@@ -24,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Filter } from "lucide-react";
+import { ApiError } from "@/api/errors/ApiError";
+import { toast } from "sonner";
 
 interface Pagination {
   pageIndex: number;
@@ -31,7 +31,7 @@ interface Pagination {
 }
 
 export function ViewFilesTable() {
-  const [data, setData] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<Pagination>({
@@ -41,11 +41,18 @@ export function ViewFilesTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const fetchEvents = async (data: PaginationArgs) => {
-    const files = await getFilesByUser({ ...data });
-    if (!files) {
-      return;
+    try {
+      const files = await fileService.getAllByUser({ ...data });
+
+      setFiles(files);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao visualizar arquivos");
     }
-    setData(files);
   };
 
   const onDelete = useCallback(() => {
@@ -65,7 +72,7 @@ export function ViewFilesTable() {
   const columns = useMemo(() => getColumns({ onDelete }), [onDelete]);
 
   const table = useReactTable({
-    data,
+    data: files,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -81,7 +88,7 @@ export function ViewFilesTable() {
       pagination,
       sorting,
     },
-    pageCount: Math.ceil(data.length / pagination.pageSize),
+    pageCount: Math.ceil(files.length / pagination.pageSize),
   });
 
   const handleSorting = (target: "creator" | "time" | "") => {
@@ -110,14 +117,13 @@ export function ViewFilesTable() {
         placeholder="Pesquisar arquivos"
         onChange={(e) => table.setGlobalFilter(e.target.value)}
       />
-      <div className="flex flex-row justify-between items-center w-full space-y-4">
-        <div className="space-x-1">
+      <div className="flex flex-col md:flex-row justify-between md:items-center w-full space-y-4">
+        <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
           <Button
             variant="outline"
             size="sm"
-            className={`border rounded-xl ${
-              sorting.length === 0 && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${sorting.length === 0 && "bg-neutral-300"
+              }`}
             onClick={() => handleSorting("")}
           >
             Todos
@@ -126,9 +132,8 @@ export function ViewFilesTable() {
             variant="outline"
             size="sm"
             onClick={() => handleSorting("creator")}
-            className={`border rounded-xl ${
-              table.getColumn("user")?.getIsSorted() && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${table.getColumn("user")?.getIsSorted() && "bg-neutral-300"
+              }`}
           >
             Responsável
           </Button>
@@ -136,21 +141,20 @@ export function ViewFilesTable() {
             variant="outline"
             size="sm"
             onClick={() => handleSorting("time")}
-            className={`border rounded-xl ${
-              table.getColumn("created_at")?.getIsSorted() && "bg-neutral-300"
-            }`}
+            className={`border rounded-xl ${table.getColumn("created_at")?.getIsSorted() && "bg-neutral-300"
+              }`}
           >
             Por tempo de criação
           </Button>
         </div>
 
-        <div>
+        <div className="max-md:w-full">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant={"outline"}
                 size={"lg"}
-                className="rounded-2xl bg-neutral-100 text-sky-700"
+                className="rounded-2xl bg-neutral-100 text-sky-700 max-md:w-full"
               >
                 <Filter />
                 Filtrar

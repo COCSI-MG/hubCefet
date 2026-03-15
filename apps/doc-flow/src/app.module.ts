@@ -10,24 +10,18 @@ import { FilesModule } from './files/files.module';
 import { PresencesModule } from './presences/presences.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ProfileGuard } from './profile/profile.guard';
 import { RolesGuard } from './roles/roles.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
-import { TccModule } from './tcc/tcc.module';
-import { TccPresentationsModule } from './tcc-presentations/tcc-presentations.module';
-import { TccStudentsModule } from './tcc-students/tcc-students.module';
-import { BuildingsModule } from './buildings/buildings.module';
-import { RoomsModule } from './rooms/rooms.module';
-import { SubjectsModule } from './subjects/subjects.module';
-import { SemestersModule } from './semesters/semesters.module';
-import { SchedulesModule } from './schedules/schedules.module';
-import { ClassesModule } from './classes/classes.module';
 import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
-import { ComplementaryActivitiesModule } from './complementary-activities/complementary-activities.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { ComplementaryActivityTypeModule } from './complementary-activity-type/complementary-activity-type.module';
+import { LoggerModule } from 'nestjs-pino';
+import { GeneralExceptionFilter } from './lib/filters/general.filter';
 
 @Module({
   imports: [
@@ -49,26 +43,32 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
+      timezone: '-03:00',
       autoLoadModels: true,
       logging: true,
-      models: [__dirname + '/**/*.entity{.ts, .js}'],
-      modelMatch: (filename, member) => {
-        return (
-          filename.substring(0, filename.indexOf('.entity')) ===
-          member.toLowerCase()
-        );
-      },
       define: {
         underscored: false,
         timestamps: true,
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
       },
+      dialectOptions: {
+        useUTC: false,
+        timezone: '-03:00'
+      }
     }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_KEY,
       signOptions: { expiresIn: '1d' },
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        transport: process.env.APP_ENV !== 'production'
+          ? { target: 'pino-pretty', options: { colorize: true } }
+          : undefined
+      }
     }),
     UsersModule,
     ProfileModule,
@@ -77,18 +77,10 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
     EventsModule,
     FilesModule,
     PresencesModule,
-    TccModule,
-    TccPresentationsModule,
-    TccStudentsModule,
-    BuildingsModule,
-    RoomsModule,
-    SubjectsModule,
-    SemestersModule,
-    ClassesModule,
-    SchedulesModule,
     EmailModule,
     QueuesModule,
-    ComplementaryActivitiesModule,
+    ActivitiesModule,
+    ComplementaryActivityTypeModule,
   ],
   controllers: [],
   providers: [
@@ -105,6 +97,10 @@ import { ComplementaryActivitiesModule } from './complementary-activities/comple
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    {
+      provide: APP_FILTER,
+      useClass: GeneralExceptionFilter,
+    }
   ],
 })
-export class AppModule {}
+export class AppModule { }

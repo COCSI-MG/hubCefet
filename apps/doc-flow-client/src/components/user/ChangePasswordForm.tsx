@@ -8,11 +8,14 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ConfirmPassword from "@/components/ConfirmPassword";
-import { changePassword } from "@/api/data/auth.data";
+import { authService } from "@/api/services/auth.service";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function ChangePasswordForm() {
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate();
 
   const form = useForm<ChangePasswordType>({
@@ -37,17 +40,19 @@ export default function ChangePasswordForm() {
   const handleFormSubmit: SubmitHandler<ChangePasswordType> = async (
     data: ChangePasswordType,
   ) => {
-    const result = await changePassword({ ...data });
-    if (result) {
-      toast.error(
-        "Ocorreu um erro ao alterar a senha, por favor tente novamente",
-      );
-      form.reset();
-      return;
-    }
+    try {
+      await authService.changePassword({ ...data });
 
-    toast.success("Senha alterada com sucesso");
-    navigate("/profile");
+      toast.success("Senha alterada com sucesso");
+      navigate("/profile");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Ocorreu um erro ao alterar a senha, por favor tente novamente");
+    }
   };
 
   return (
@@ -86,7 +91,7 @@ export default function ChangePasswordForm() {
               />
             </div>
             <div>
-              <ConfirmPassword onchange={handleConfirmPassword} />
+              <ConfirmPassword onchange={handleConfirmPassword} showPassword={showPassword} setShowPassword={setShowPassword} />
             </div>
             <div>
               <Button

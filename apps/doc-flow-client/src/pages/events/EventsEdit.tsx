@@ -1,36 +1,50 @@
-import { getEvent } from "@/api/data/events.data";
-import { EventCreateSchema, Event, createEventSchema } from "@/lib/types";
+import { EventCreateSchema, Event, createEventSchema, EventCreate } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import EventsForm from "@/components/events/EventsForm";
 import PageHeader from "@/components/PageHeader";
-import { patch } from "@/api/data/events.data";
+import { eventService } from "@/api/services/event.service";
+import { toast } from "sonner";
+import { ApiError } from "@/api/errors/ApiError";
+import { FormatFormDateToLocal } from "@/lib/utils/form";
 
 export default function EventsEdit() {
   const [event, setEvent] = useState<Event | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchEvent = async (id: string) => {
-    const event = await getEvent(id);
-    if (event) {
-      setEvent(event);
-    }
-  };
-
   const form = useForm<EventCreateSchema>({
     resolver: zodResolver(createEventSchema),
     defaultValues: event
       ? {
-          name: event.name,
-          status: event.status,
-          eventStartDate: event.start_at,
-          eventEndDate: event.end_at,
-        }
+        name: event.name,
+        status: event.status,
+        start_at: event.start_at,
+        end_at: event.end_at,
+        description: event.description,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radius: event.radius,
+        vacancies: event.vacancies,
+      }
       : undefined,
   });
+
+  const fetchEvent = async (id: string) => {
+    try {
+      const data = await eventService.getOne(id);
+      setEvent(data.event);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("erro inesperado ao procurar eventos")
+    }
+  };
 
   useEffect(() => {
     const id = location.pathname.split("/")[2];
@@ -40,22 +54,41 @@ export default function EventsEdit() {
     fetchEvent(id);
   }, [location.pathname, navigate]);
 
-  const handleSubmit = async (
-    data: Omit<EventCreateSchema, "eventStartTime" | "eventEndTime">,
-  ) => {
-    if (!event) {
-      return;
-    }
-    const result = await patch(event?.id, data);
-    if (result !== undefined) {
-      navigate("/events", {
-        state: {
-          action: "update",
-          message: "Evento atualizado com sucesso",
-        },
-      });
+  const handleSubmit = async (data: EventCreate) => {
+    try {
+      await eventService.patch(event!.id, data);
+      toast.success("Evento atualizado com sucesso");
+      navigate("/events");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro inesperado ao editar evento.");
     }
   };
+
+  useEffect(() => {
+    if (event) {
+      const startParts = FormatFormDateToLocal(event.start_at);
+      const endParts = FormatFormDateToLocal(event.end_at);
+
+      form.reset({
+        name: event.name,
+        status: event.status,
+        start_at: startParts.date,
+        eventStartTime: startParts.time,
+        end_at: endParts.date,
+        eventEndTime: endParts.time,
+        description: event.description,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        radius: event.radius,
+        vacancies: event.vacancies,
+      })
+    }
+  }, [event])
 
   return (
     <div>
@@ -64,7 +97,7 @@ export default function EventsEdit() {
         description="Edite as informações do evento e clique em confirmar para salvar as alterações"
       />
       {event && (
-        <EventsForm form={form} onSubmit={handleSubmit} event={event} />
+        <EventsForm form={form} onSubmit={handleSubmit} event={event} mode="edit" />
       )}
     </div>
   );

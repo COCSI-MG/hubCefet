@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useAuth from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, User, Calendar, Shield, ArrowLeft } from "lucide-react";
+import { Mail, User, Calendar, Shield } from "lucide-react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ProfileSidebar } from "@/components/ProfileSideBar";
 

@@ -1,20 +1,19 @@
-export interface ComplementaryHourType {
+export interface ActivityType {
   id: string;
   name: string;
-  description?: string;
 }
 
 export interface CertificateFormData {
-  complementaryHourType: string;
+  activityType: string;
   hours: number;
   courseName: string;
   certificateFile: File | null;
+  complementaryHoursType?: string | undefined;
 }
 
-export interface CertificateFormSchema {
-  complementaryHourType: string;
-  hours: number;
-  courseName: string;
-} 
- 
- 
+export enum ActivityTypeEnum {
+  COMPLEMENTARY = 1,
+  EXTENSION = 2
+}
+
+

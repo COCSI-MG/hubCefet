@@ -1,12 +1,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signup } from "@/api/data/auth.data";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { SignupFormSchema, singupFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import SignupAuthForm from "@/components/SignupAuthForm";
+import { authService } from "@/api/services/auth.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -22,17 +23,30 @@ export default function Signup() {
 
   const handleSubmit = async (data: SignupFormSchema) => {
     localStorage.removeItem("accessToken");
-    const accessToken = await signup({ ...data });
-    if (!accessToken) {
-      setError(
-        "Não foi possível realizar o cadastro. Tente novamente mais tarde.",
+
+    try {
+      const response = await authService.signup(
+        data.email,
+        data.password,
+        data.enrollment,
+        data.fullName
       );
+
+      localStorage.setItem("accessToken", response.access_token);
+      setToken(response.access_token);
+
+      setIsAuthenticated(true);
+
+      navigate("/events");
       return;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
+
+      setError("Erro inesperado ao fazer o cadastro");
     }
-    localStorage.setItem("accessToken", accessToken);
-    setToken(accessToken);
-    setIsAuthenticated(true);
-    navigate("/events");
   };
 
   return (

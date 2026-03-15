@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import {
   Form,
   FormControl,
@@ -32,6 +32,7 @@ import {
 } from "../ui/select";
 import { LoaderCircle } from "lucide-react";
 import { components } from "@/lib/schema";
+import { ApiError } from "@/api/errors/ApiError";
 
 type User = components["schemas"]["User"];
 
@@ -61,9 +62,21 @@ export default function UserEditDialogAdmin({
   });
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    setProfiles(profiles);
+    try {
+      const response = await profileService.getAll({ limit: 100, offset: 0 });
+
+      const { profiles } = response.data;
+      if (!profiles) return;
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Não foi possível carregar os perfis");
+    }
   };
 
   useEffect(() => {

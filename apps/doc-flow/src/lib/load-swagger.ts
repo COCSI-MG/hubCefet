@@ -2,9 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { File } from 'src/files/entities/file.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { TccPresentation } from 'src/tcc-presentations/entities/tcc-presentation.entity';
-import { TccStudents } from 'src/tcc-students/entities/tcc-students.entity';
-import { Tcc } from 'src/tcc/entities/tcc.entity';
 
 export function loadSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -15,7 +12,7 @@ export function loadSwagger(app: INestApplication) {
     .build();
   const documentFactory = () =>
     SwaggerModule.createDocument(app, config, {
-      extraModels: [Role, Tcc, TccPresentation, TccStudents, File],
+      extraModels: [Role, File],
     });
   SwaggerModule.setup('api', app, documentFactory, {
     jsonDocumentUrl: '/api-json',

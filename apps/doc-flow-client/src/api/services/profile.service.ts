@@ -4,7 +4,7 @@ import AbstractService from "./abstract.service";
 type GetAllProfilesResponseDto =
   components["schemas"]["GetAllProfilesResponseDto"];
 
-export default class FileService extends AbstractService {
+export default class ProfileService extends AbstractService {
   constructor() {
     super("/profile", true);
   }
@@ -18,3 +18,5 @@ export default class FileService extends AbstractService {
     );
   }
 }
+
+export const profileService = new ProfileService()

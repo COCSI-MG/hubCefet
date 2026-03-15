@@ -1,16 +1,19 @@
 import PageHeader from "@/components/PageHeader";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createEvent } from "@/api/data/events.data";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import EventsForm from "@/components/events/EventsForm";
 import { EventCreate, EventCreateSchema, createEventSchema } from "@/lib/types";
+import { eventService } from "@/api/services/event.service";
+import { ApiError } from "@/api/errors/ApiError";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 export default function EventsCreate() {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate()
 
   const form = useForm<EventCreateSchema>({
     resolver: zodResolver(createEventSchema),
@@ -18,23 +21,28 @@ export default function EventsCreate() {
       name: "",
       description: "",
       status: "upcoming",
-      eventStartDate: "",
-      eventEndDate: "",
+      start_at: "",
+      end_at: "",
       latitude: 0,
       longitude: 0,
       radius: 10,
     },
   });
 
-  const onSubmit: SubmitHandler<EventCreateSchema> = async (
-    data: EventCreate
-  ) => {
-    const result = await createEvent({ ...data });
-    if (!result) {
-      setError("Ocorre um erro ao criar um evento, tente novamente");
-      return;
+  async function onSubmit(data: EventCreate) {
+    try {
+      await eventService.create({ ...data });
+
+      toast.success("Evento criado com sucesso");
+      navigate('/events/user')
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setError(error.message);
+        return;
+      }
+
+      setError("Erro inesperado ao criar evento.");
     }
-    setSuccess("Evento criado com sucesso");
   };
 
   useEffect(() => {
@@ -45,14 +53,6 @@ export default function EventsCreate() {
     }
   }, [error]);
 
-  useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        setSuccess(null);
-      }, 10000);
-    }
-  }, [success]);
-
   return (
     <div>
       <PageHeader
@@ -61,22 +61,13 @@ export default function EventsCreate() {
       />
       <div className="ml-6 mr-6 max-w-full p-6 border rounded-xl mb-4 mt-5">
         {error && (
-          <Alert variant="destructive" className="w-1/2">
+          <Alert variant="destructive" className="w-full">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Ah, não</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        {success && (
-          <Alert variant="default" className="bg-green-200 w-1/2">
-            <AlertCircle className="h-4-w-4" />
-            <AlertTitle>{success}</AlertTitle>
-            <AlertDescription>
-              Para editar ou visualizar seu evento vá para página de eventos
-            </AlertDescription>
-          </Alert>
-        )}
-        <EventsForm form={form} onSubmit={onSubmit} />
+        <EventsForm form={form} onSubmit={onSubmit} mode="create" />
       </div>
     </div>
   );

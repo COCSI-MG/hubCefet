@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccessToken } from "@/api/data/auth.data";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import AuthForm from "@/components/AuthForm";
@@ -12,6 +11,7 @@ import { authFormSchema, type AuthFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import AuthService from "@/api/services/auth.service";
 import { Separator } from "@/components/ui/separator";
+import { ApiError } from "@/api/errors/ApiError";
 
 const authService = new AuthService();
 
@@ -34,14 +34,21 @@ export default function Login() {
   });
 
   const handleSubmit = async (data: AuthFormSchema) => {
-    const accessToken = await getAccessToken({ ...data });
-    if (!accessToken) {
-      setError("Não foi possível fazer login. Tente novamente.");
-      return;
+    try {
+      const response = await authService.signin(data.email, data.password);
+
+      localStorage.setItem("accessToken", response.access_token);
+
+      await checkAuthentication();
+      navigate("/");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        return;
+      }
+
+      setError("Erro inesperado ao fazer o login");
     }
-    localStorage.setItem("accessToken", accessToken);
-    await checkAuthentication();
-    navigate("/events");
   };
 
   const handleMagicLogin = async () => {
@@ -57,8 +64,13 @@ export default function Login() {
 
       const response = await authService.requestMagicLogin(magicEmail);
       setMagicMessage(response.message);
-    } catch (error: any) {
-      setMagicError(error.response?.data?.message || "Erro ao enviar magic link");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setMagicError(err.message);
+        return;
+      }
+
+      setMagicError("Erro inesperado ao tentar enviar link de magic login");
     } finally {
       setMagicLoading(false);
     }
@@ -66,34 +78,7 @@ export default function Login() {
 
   return (
     <>
-      {!showMagicLogin ? (
-        <>
-          <AuthForm onSubmit={handleSubmit} form={form} />
-
-          <div className="flex items-center my-4">
-            <Separator className="flex-1" />
-            <span className="mx-3 text-sm text-gray-500">ou</span>
-            <Separator className="flex-1" />
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-sky-900 text-sky-900 hover:bg-sky-50 rounded-2xl"
-            onClick={() => setShowMagicLogin(true)}
-          >
-            🔐 Acesso sem Senha
-          </Button>
-
-          <p className="text-sky-900 mt-4">Não possui conta?</p>
-          <Button
-            className="w-full bg-sky-900 text-white hover:bg-sky-800 rounded-2xl"
-            onClick={() => navigate("/signup")}
-          >
-            Cadastrar
-          </Button>
-        </>
-      ) : (
+      {showMagicLogin ? (
         <>
           <div className="space-y-4">
             <div className="text-center">
@@ -154,6 +139,33 @@ export default function Login() {
               ← Voltar ao Login Normal
             </Button>
           </div>
+        </>
+      ) : (
+        <>
+          <AuthForm onSubmit={handleSubmit} form={form} />
+
+          <div className="flex items-center my-4">
+            <Separator className="flex-1" />
+            <span className="mx-3 text-sm text-gray-500">ou</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-sky-900 text-sky-900 hover:bg-sky-50 rounded-2xl"
+            onClick={() => setShowMagicLogin(true)}
+          >
+            🔐 Acesso sem Senha
+          </Button>
+
+          <p className="text-sky-900 mt-4">Não possui conta?</p>
+          <Button
+            className="w-full bg-sky-900 text-white hover:bg-sky-800 rounded-2xl"
+            onClick={() => navigate("/signup")}
+          >
+            Cadastrar
+          </Button>
         </>
       )}
     </>

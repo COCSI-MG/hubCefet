@@ -28,11 +28,11 @@ import {
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   Download as DownloadIcon,
-  Visibility as ViewIcon
 } from '@mui/icons-material';
 import PageHeader from '@/components/PageHeader';
 import { certificateService } from '@/api/services/certificate.service';
 import { toast } from 'sonner';
+import { ApiError } from '@/api/errors/ApiError';
 
 interface Activity {
   id: string;
@@ -76,18 +76,25 @@ export default function CertificateReview() {
     loadActivities();
   }, []);
 
+
   const loadActivities = async () => {
     try {
       setLoading(true);
+
       const data = await certificateService.getActivitiesForReview();
-      setActivities(data || []);
+      setActivities(data);
     } catch (error) {
-      console.error('Erro ao carregar atividades:', error);
-      toast.error('Erro ao carregar atividades para revisar');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao carregar atividades para revisar");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleOpenReviewDialog = (activity: Activity, decision: 'APPROVED' | 'REJECTED') => {
     setReviewDialog({
@@ -107,11 +114,13 @@ export default function CertificateReview() {
     setComments('');
   };
 
+
   const handleSubmitReview = async () => {
     if (!reviewDialog.activity || !reviewDialog.decision) return;
 
     try {
       setSubmitting(true);
+
       await certificateService.reviewActivity(
         reviewDialog.activity.id,
         reviewDialog.decision,
@@ -119,16 +128,20 @@ export default function CertificateReview() {
       );
 
       toast.success(
-        reviewDialog.decision === 'APPROVED' 
-          ? 'Certificado aprovado com sucesso!' 
-          : 'Certificado rejeitado!'
+        reviewDialog.decision === "APPROVED"
+          ? "Certificado aprovado com sucesso!"
+          : "Certificado rejeitado!"
       );
 
       handleCloseReviewDialog();
       loadActivities();
     } catch (error) {
-      console.error('Erro ao avaliar certificado:', error);
-      toast.error('Erro ao avaliar certificado');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao avaliar certificado");
     } finally {
       setSubmitting(false);
     }
@@ -137,10 +150,14 @@ export default function CertificateReview() {
   const handleDownloadCertificate = async (activity: Activity) => {
     try {
       await certificateService.downloadCertificate(activity.id);
-      toast.success('Download iniciado!');
+      toast.success("Download iniciado!");
     } catch (error) {
-      console.error('Erro ao baixar certificado:', error);
-      toast.error('Erro ao baixar certificado');
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.error("Erro ao baixar certificado");
     }
   };
 
@@ -174,7 +191,7 @@ export default function CertificateReview() {
     <>
       <PageHeader
         title="Avaliação de Certificados"
-        description="Analise e aprove/rejeite os certificados de horas complementares"
+        description="Analise e aprove/rejeite os certificados de atividades"
       />
 
       <Box className="ml-6 mr-6 mt-6 max-w-full">
@@ -184,10 +201,10 @@ export default function CertificateReview() {
               <Typography variant="h6" className="font-semibold">
                 Certificados Pendentes de Avaliação
               </Typography>
-              <Chip 
-                label={`${activities.length} certificados`} 
-                color="primary" 
-                variant="outlined" 
+              <Chip
+                label={`${activities.length} certificados`}
+                color="primary"
+                variant="outlined"
               />
             </Box>
 
@@ -253,7 +270,7 @@ export default function CertificateReview() {
                                   <DownloadIcon />
                                 </IconButton>
                               </Tooltip>
-                              
+
                               <Tooltip title="Aprovar">
                                 <IconButton
                                   size="small"
@@ -263,7 +280,7 @@ export default function CertificateReview() {
                                   <ApproveIcon />
                                 </IconButton>
                               </Tooltip>
-                              
+
                               <Tooltip title="Rejeitar">
                                 <IconButton
                                   size="small"
@@ -324,7 +341,7 @@ export default function CertificateReview() {
               </Typography>
             </Box>
           )}
-          
+
           <TextField
             autoFocus
             margin="dense"
@@ -353,13 +370,13 @@ export default function CertificateReview() {
             disabled={submitting}
             startIcon={submitting ? <CircularProgress size={20} /> : null}
           >
-            {submitting ? 'Processando...' : 
-             reviewDialog.decision === 'APPROVED' ? 'Aprovar' : 'Rejeitar'}
+            {submitting ? 'Processando...' :
+              reviewDialog.decision === 'APPROVED' ? 'Aprovar' : 'Rejeitar'}
           </Button>
         </DialogActions>
       </Dialog>
     </>
   );
-} 
- 
- 
+}
+
+

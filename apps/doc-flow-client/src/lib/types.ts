@@ -125,12 +125,12 @@ export const createEventSchema = z
       })
       .max(255),
     description: z.string().max(500).optional(),
-    eventStartDate: z
+    start_at: z
       .string({
         message: "Data de início é obrigatória",
       })
       .date(),
-    eventEndDate: z
+    end_at: z
       .string({
         message: "Data de término é obrigatória",
       })
@@ -182,7 +182,7 @@ export const createEventSchema = z
   .superRefine((val, ctx) => {
     const now = new Date().toISOString();
 
-    const [year, month, day] = val.eventStartDate.split("-").map(Number);
+    const [year, month, day] = val.start_at.split("-").map(Number);
     const [hour, minute] = val.eventStartTime.split(":").map(Number);
     const zodEventStartDate = new Date(
       year,
@@ -198,7 +198,7 @@ export const createEventSchema = z
           message:
             "Evento próximo não pode possuir a data de inicio menor que agora",
           fatal: true,
-          path: ["eventStartDate"],
+          path: ["start_at"],
         });
 
         return z.NEVER;
@@ -206,7 +206,7 @@ export const createEventSchema = z
       return;
     }
 
-    const [endYear, endMonth, endDay] = val.eventEndDate.split("-").map(Number);
+    const [endYear, endMonth, endDay] = val.end_at.split("-").map(Number);
     const [endHour, endMinute] = val.eventEndTime.split(":").map(Number);
     const zodEventEndDate = new Date(
       endYear,
@@ -222,7 +222,7 @@ export const createEventSchema = z
           message:
             "Evento encerrado não pode possuir a data de inicio maior que a data de termino",
           fatal: true,
-          path: ["eventEndDate"],
+          path: ["end_at"],
         });
 
         return z.NEVER;
@@ -237,7 +237,7 @@ export const createEventSchema = z
           message:
             "Evento em andamento não pode possui uma data de inicio maior que agora",
           fatal: true,
-          path: ["eventStartDate"],
+          path: ["start_at"],
         });
       }
     }
@@ -246,8 +246,8 @@ export const createEventSchema = z
     ({
       name,
       status,
-      eventStartDate,
-      eventEndDate,
+      start_at,
+      end_at,
       eventStartTime,
       eventEndTime,
       description,
@@ -256,10 +256,10 @@ export const createEventSchema = z
       longitude,
       vacancies,
     }) => {
-      const [startYear, startMonth, startDay] = eventStartDate
+      const [startYear, startMonth, startDay] = start_at
         .split("-")
         .map(Number);
-      const [endYear, endMonth, endDay] = eventEndDate.split("-").map(Number);
+      const [endYear, endMonth, endDay] = end_at.split("-").map(Number);
       const [startHour, startMinute] = eventStartTime.split(":").map(Number);
       const [endHour, endMinute] = eventEndTime.split(":").map(Number);
       const start = new Date(
@@ -273,8 +273,8 @@ export const createEventSchema = z
       return {
         name,
         status,
-        eventStartDate: start.toISOString(),
-        eventEndDate: end.toISOString(),
+        start_at: start.toISOString(),
+        end_at: end.toISOString(),
         eventStartTime,
         eventEndTime,
         latitude,

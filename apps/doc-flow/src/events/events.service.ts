@@ -3,6 +3,8 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -15,22 +17,22 @@ export class EventsService {
   constructor(
     @Inject('IEventRepository')
     private readonly eventRepository: EventRepository,
-  ) {}
+  ) { }
 
   async create(createEventDto: CreateEventDto): Promise<null | Event> {
     const event = await this.eventRepository.findEventByName(
       createEventDto.name,
     );
     if (event) {
-      throw new ConflictException('Event already exists');
+      throw new ConflictException('Evento com este nome ja existe');
     }
 
     const eventEndDate =
-      createEventDto.eventEndDate !== undefined
-        ? new Date(createEventDto.eventEndDate)
+      createEventDto.end_at !== undefined
+        ? new Date(createEventDto.end_at)
         : null;
     const now = new Date();
-    const eventStartDate = new Date(createEventDto.eventStartDate);
+    const eventStartDate = new Date(createEventDto.start_at);
     if (createEventDto.status !== undefined) {
       const [result, message] = this.isValidEventStatusForEventDates(
         eventStartDate,
@@ -38,6 +40,7 @@ export class EventsService {
         now,
         createEventDto.status,
       );
+
       if (!result && message !== null) {
         throw new BadRequestException(message);
       }
@@ -45,8 +48,8 @@ export class EventsService {
 
     return await this.eventRepository.create({
       name: createEventDto.name,
-      eventStartDate: eventStartDate.toISOString(),
-      eventEndDate: eventEndDate?.toISOString() || null,
+      start_at: eventStartDate.toISOString(),
+      end_at: eventEndDate?.toISOString() || null,
       status: createEventDto.status,
       created_by_user_id: createEventDto.created_by_user_id,
       latitude: createEventDto.latitude,
@@ -64,8 +67,9 @@ export class EventsService {
   async findOne(id: string): Promise<[Event, boolean, boolean] | null> {
     const event = await this.eventRepository.findOne(id);
     if (!event) {
-      return null;
+      throw new NotFoundException("Evento nao encontrado")
     }
+
     const now = new Date();
     const isStarted: boolean = this.eventStarted(event.start_at, now);
     const isEnded: boolean =
@@ -76,9 +80,9 @@ export class EventsService {
   async update(id: string, updateEventDto: UpdateEventDto) {
     if (updateEventDto.status != null) {
       const [result, message] = this.isValidEventStatusForEventDates(
-        new Date(updateEventDto.eventStartDate),
-        updateEventDto.eventEndDate !== undefined
-          ? new Date(updateEventDto.eventEndDate)
+        new Date(updateEventDto.end_at),
+        updateEventDto.end_at !== undefined
+          ? new Date(updateEventDto.end_at)
           : null,
         new Date(),
         updateEventDto.status,
@@ -86,6 +90,8 @@ export class EventsService {
       if (!result && message !== null) {
         throw new BadRequestException(message);
       }
+
+      console.log(result)
     }
 
     return await this.eventRepository.update(id, updateEventDto);
@@ -145,21 +151,21 @@ export class EventsService {
         if (eventStartDate >= now) {
           return [
             false,
-            'Event start date is in the future, status must be upcoming',
+            'Data de inicio do evento e no futuro, status deve ser Proximo',
           ];
         }
         if (
           eventEndDate !== null &&
           !this.isValidEventEndDate(eventEndDate, now)
         ) {
-          return [false, 'Invalid event end date'];
+          return [false, 'Data de termino de evento deve ser maior que a atual'];
         }
         break;
       case EventStatus.STATUS_UPCOMING:
         if (eventStartDate <= now) {
           return [
             false,
-            'Event start date is in the past, status must be started',
+            'Data de inicio do evento e no passado, status deve ser Em andamento',
           ];
         }
         break;
@@ -167,7 +173,7 @@ export class EventsService {
         if (eventEndDate === null || eventEndDate >= now) {
           return [
             false,
-            'Event end date is in the future, status cannot be ended',
+            'Data de inicio do evento e no futuro, status nao pode ser Em andamento',
           ];
         }
         break;
@@ -183,5 +189,16 @@ export class EventsService {
 
   private eventEnded(end_at: Date, now: Date): boolean {
     return end_at < now;
+  }
+
+  async decreaseVacancies(id: string) {
+    const event = await this.findOne(id)
+
+    const actualVacancies = event[0].vacancies
+    if (actualVacancies <= 0) {
+      throw new UnprocessableEntityException("Nao a vagas disponiveis")
+    }
+
+    return await this.eventRepository.updateVacancies(id, actualVacancies - 1);
   }
 }

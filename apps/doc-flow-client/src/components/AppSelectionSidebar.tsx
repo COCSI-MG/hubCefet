@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { NavUser } from "./NavUser";
 import {
@@ -39,7 +37,7 @@ export function AppSelectionSidebar({
       </SidebarContent>
       <SidebarFooter>
         <Button
-          className="rounded-2xl bg-sky-900 text-white"
+          className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
           onClick={() => logout()}
         >
           Sair

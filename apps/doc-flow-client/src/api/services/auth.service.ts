@@ -43,3 +43,6 @@ export default class AuthService extends AbstractService {
     });
   }
 }
+
+
+export const authService = new AuthService()

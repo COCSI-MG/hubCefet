@@ -9,7 +9,7 @@ export class ApiResponseDto<T> {
   @ApiProperty({
     description: 'Response data',
   })
-  data: T | null;
+  data: T;
 
   @ApiProperty({
     description: 'Response success status',
@@ -19,13 +19,13 @@ export class ApiResponseDto<T> {
   @ApiProperty({
     description: 'Error',
   })
-  error: string[] | null | string;
+  error: string;
 
   constructor(
     status: number,
     success: boolean,
     data: T | null,
-    error: string[] | null | string,
+    error: string,
   ) {
     this.status = status;
     this.success = success;

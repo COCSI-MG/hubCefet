@@ -12,13 +12,15 @@ export class CreateUserDto {
   @IsEmail()
   @Matches(/(@cefet-rj\.br|@aluno\.cefet-rj\.br)$/, {
     message:
-      'Only emails from cefet-rj.br or aluno.cefet-rj.br domains are allowed',
+      'Apenas e-mails dos domínios cefet-rj.br ou aluno.cefet-rj.br são permitidos',
   })
   @IsNotEmpty()
   email: string;
 
   @ApiProperty()
-  @IsStrongPassword()
+  @IsStrongPassword({}, {
+    message: 'A senha deve ser forte e conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.'
+  })
   @IsNotEmpty()
   password: string;
 

@@ -1,37 +1,29 @@
-import { InjectModel } from '@nestjs/sequelize';
+import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { EventRepository } from './event.repository.interface';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventStatus } from '../enum/event-status.enum';
-import { Op } from 'sequelize';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { User } from 'src/users/entities/user.entity';
 
 export class EventRepositoryImpl implements EventRepository {
   constructor(
-    @InjectModel(Event)
-    private readonly eventModel: typeof Event,
-  ) {}
+    @InjectConnection() private readonly sequelize: Sequelize,
+    @InjectModel(Event) private readonly eventModel: typeof Event,
+  ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    return await this.eventModel.scope('withoutTimestamps').create({
-      name: createEventDto.name,
-      description: createEventDto.description,
-      radius: createEventDto.radius,
-      start_at: createEventDto.eventStartDate,
-      end_at: createEventDto.eventEndDate,
-      status: createEventDto.status,
-      created_by_user_id: createEventDto.created_by_user_id,
-      latitude: createEventDto?.latitude || 0,
-      longitude: createEventDto.longitude || 0,
-      vacancies: createEventDto.vacancies,
-    });
+    return await this.eventModel.scope('withoutTimestamps').create({ ...createEventDto });
   }
 
   async findAll(offset: number, limit: number): Promise<Event[]> {
     return await this.eventModel.scope('withoutTimestamps').findAll({
       offset,
       limit,
+      order: [
+        ['created_at', 'DESC']
+      ],
       include: [
         {
           model: User,
@@ -42,7 +34,16 @@ export class EventRepositoryImpl implements EventRepository {
   }
 
   async findOne(id: string): Promise<Event> {
-    return await this.eventModel.findByPk(id);
+    return await this.eventModel.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'full_name'],
+        },
+      ],
+
+    });
   }
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
@@ -134,13 +135,25 @@ export class EventRepositoryImpl implements EventRepository {
     offset: number;
     limit: number;
   }): Promise<Event[]> {
-    return await this.eventModel.scope('withoutTimestamps').findAll({
-      where: {
-        created_by_user_id: userId,
+    return await this.sequelize.query(
+      `
+    SELECT DISTINCT e.*
+    FROM events e
+    LEFT JOIN presences p ON e.id = p.event_id
+    WHERE e.created_by_user_id = :userId
+       OR p.user_id = :userId
+    ORDER BY e.created_at DESC
+    LIMIT :limit OFFSET :offset;
+  `,
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          userId,
+          limit,
+          offset,
+        },
       },
-      offset,
-      limit,
-    });
+    );
   }
 
   async search(q: string) {
@@ -150,6 +163,14 @@ export class EventRepositoryImpl implements EventRepository {
           [Op.iLike]: `%${q}%`,
         },
       },
+    });
+  }
+
+  async updateVacancies(id: string, vacancies: number): Promise<void> {
+    const event = await this.findOne(id);
+
+    await event.update({
+      vacancies
     });
   }
 }

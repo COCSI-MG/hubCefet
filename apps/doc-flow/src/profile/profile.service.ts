@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileRepository } from './repositories/profile.repository.interface';
@@ -9,17 +9,17 @@ export class ProfileService {
   constructor(
     @Inject(PROFILE_REPOSITORY)
     private readonly profileRepository: ProfileRepository,
-  ) {}
+  ) { }
 
   async create(createProfileDto: CreateProfileDto) {
     const profileAlreadyExists = await this.profileRepository.findByProfileName(
       createProfileDto.name,
     );
     if (profileAlreadyExists) {
-      return null;
+      throw new ConflictException('Perfil ja existe')
     }
-    const profile = await this.profileRepository.create(createProfileDto);
-    return profile;
+
+    return await this.profileRepository.create(createProfileDto);
   }
 
   async findAll() {
@@ -29,20 +29,26 @@ export class ProfileService {
   async findOne(id: string): Promise<null | Profile> {
     const profile = await this.profileRepository.findOne(id);
     if (!profile) {
-      return null;
+      throw new NotFoundException('Perfil nao encontrado')
     }
+
     return profile;
   }
 
   async update(id: string, updateProfileDto: UpdateProfileDto) {
-    return `This action updates a #${id} profile`;
+    return await this.profileRepository.update(id, updateProfileDto);
   }
 
   async remove(id: string) {
-    return `This action removes a #${id} profile`;
+    return await this.profileRepository.remove(id);
   }
 
   async findByProfileName(name: string): Promise<null | Profile> {
-    return await this.profileRepository.findByProfileName(name);
+    const profile = await this.profileRepository.findByProfileName(name);
+    if (!profile) {
+      throw new NotFoundException('Perfil nao encontrado')
+    }
+
+    return profile;
   }
 }

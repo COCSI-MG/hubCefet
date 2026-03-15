@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -12,14 +10,15 @@ import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
-import { deleteUsers, getAllUsers } from "@/api/data/users.data";
+import { userService } from "@/api/services/users.service";
 import { components } from "@/lib/schema";
 import { getUserColumns } from "./UserManagementTableColumns";
 import { toast } from "sonner";
 import { Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getProfiles } from "@/api/data/profile.data";
+import { profileService } from "@/api/services/profile.service";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
+import { ApiError } from "@/api/errors/ApiError";
 
 type User = components["schemas"]["User"];
 
@@ -33,22 +32,51 @@ export function UserManagementDataTable() {
 
   const fetchUsers = async () => {
     try {
-      const users = await getAllUsers();
+      const { users } = await userService.getAll({ limit: 10, offset: 0 });
+
       if (!users) {
         toast.error("Erro ao carregar usuários");
         return;
       }
+
       setData(users);
     } catch (err) {
-      console.error("Error fetching users:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao carregar usuários");
     }
   };
 
   const fetchProfiles = async () => {
-    const profiles = await getProfiles();
-    if (!profiles) return;
-    setProfiles(profiles);
+    try {
+      const { profiles } = await profileService.getAll({ limit: 100, offset: 0 });
+
+      if (!profiles) return;
+
+      setProfiles(profiles);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
+      toast.error("Erro ao carregar perfis");
+    }
+  };
+
+  const deleteUsers = async (ids: string[]): Promise<void> => {
+    try {
+      await Promise.all(ids.map((id) => userService.delete(id)));
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+      }
+
+      toast.error("Erro ao excluir usuários");
+    }
   };
 
   const handleDeleteSelected = async () => {
@@ -59,22 +87,23 @@ export function UserManagementDataTable() {
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${selectedRows.length} usuário(s)? Esta ação não pode ser desfeita.`
-    );
+    const confirmed = window.confirm(`Tem certeza que deseja excluir ${selectedRows.length} usuário(s)? Esta ação não pode ser desfeita.`);
 
-    if (!confirmDelete) return;
+    if (!confirmed) return;
 
     try {
       await deleteUsers(selectedRows.map((row) => row.id));
 
-      toast.success(
-        `${selectedRows.length} usuário(s) excluído(s) com sucesso`
-      );
+      toast.success(`${selectedRows.length} usuário(s) excluído(s) com sucesso.`);
+
       setRowSelection({});
       fetchUsers();
     } catch (err) {
-      console.error("Error deleting users:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao excluir usuários");
     }
   };

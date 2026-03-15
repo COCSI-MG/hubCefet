@@ -1,20 +1,25 @@
 import { DropdownMenuItem } from "./ui/dropdown-menu";
 import EllipsisDropdown from "./EllipsisDropdown";
 import { Edit } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router";
 
-export default function EventsEllipsisDropdown({
-  ...props
-}: {
+interface EventsEllipsisDropdownInterface {
   eventId: string;
-}) {
+}
+
+export default function EventsEllipsisDropdown({ eventId }: EventsEllipsisDropdownInterface) {
+  const navigate = useNavigate()
+  const navigationLink = `/events/${eventId}/edit`
+
   return (
     <EllipsisDropdown
       children={
         <>
-          <DropdownMenuItem className="hover:bg-sky-100">
+          <DropdownMenuItem
+            onSelect={() => navigate(navigationLink)}
+            className="hover:bg-sky-100 cursor-pointer">
             <Edit className="mr-2 h-4 w-4" />
-            <Link to={`/events/${props.eventId}/edit`}>Editar</Link>
+            Editar
           </DropdownMenuItem>
         </>
       }

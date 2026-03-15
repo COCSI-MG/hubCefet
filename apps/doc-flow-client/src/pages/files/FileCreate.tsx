@@ -1,4 +1,5 @@
-import { upload } from "@/api/data/file.data";
+import { ApiError } from "@/api/errors/ApiError";
+import { fileService } from "@/api/services/files.service";
 import FileForm from "@/components/files/FileForm";
 import FileUploader from "@/components/files/FileUploader";
 import PageHeader from "@/components/PageHeader";
@@ -42,34 +43,33 @@ export default function FileCreate() {
       toast.error("Nenhum arquivo selecionado");
       return;
     }
+
     if (!fileIsValid(file)) {
       return;
     }
+
     if (!createdFileId) {
       toast.error("Arquivo não criado, por favor preencha as informações");
       return;
     }
+
     const formData = new FormData();
     formData.append("file", file);
-    const data = await upload(createdFileId, formData, onProgress);
 
-    console.log("Upload response data:", data);
+    try {
+      await fileService.upload(createdFileId, formData, onProgress);
 
-    if (!data?.success) {
-      if (data?.status === 409) {
-        toast.error("Arquivo já existe");
+      setCanUpload(false);
+      toast.success("Upload feito com sucesso");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
         return;
       }
 
-      toast.error(data?.error || "Ocorreu um erro ao realizar upload", {
-        duration: 5000,
-      });
-      return;
+      toast.error("Erro inesperado ao realizar upload");
     }
-    setCanUpload(false);
-    toast.success("Upload feito com sucesso");
   };
-
   return (
     <>
       <PageHeader
@@ -77,25 +77,23 @@ export default function FileCreate() {
         description="Crie um arquivo para que possa ser compartilhado com os participantes"
       />
       <div className="ml-6 mr-6 mt-6 max-w-full p-6 border rounded-xl">
-        <div className="grid grid-cols-3 p-4 gap-x-2 gap-y-4  max-md:space-x-0 max-md:flex max-md:flex-col max-md:space-y-4">
-          <div className="p-4 flex flex-col space-y-3 border rounded-xl justify-center max-md:col-span-0 bg-neutral-50">
+        <div className="flex flex-col p-4 gap-x-2 gap-y-4  space-x-0 xl:grid-cols-[1.5fr_1fr_1fr] xl:grid xl:items-center">
+          <div className="p-4 flex flex-col space-y-3 border rounded-xl justify-center bg-neutral-50 h-full xl:py-0">
             <div>
               <span className="font-bold">Informações</span>
             </div>
-            <div>
-              <FileForm
-                onFileCreated={(fileId) => {
-                  setCreatedFileId(fileId);
-                  setCanUpload(true);
-                  setIsFileModified(false); // Reset modification flag when file is created
-                }}
-                onFileModified={() => {
-                  setIsFileModified(true);
-                  setCanUpload(false); // Block upload when file is modified
-                }}
-                disabled={canUpload && !isFileModified}
-              />
-            </div>
+            <FileForm
+              onFileCreated={(fileId) => {
+                setCreatedFileId(fileId);
+                setCanUpload(true);
+                setIsFileModified(false);
+              }}
+              onFileModified={() => {
+                setIsFileModified(true);
+                setCanUpload(false);
+              }}
+              disabled={canUpload && !isFileModified}
+            />
           </div>
           <FileUploader
             canUpload={canUpload}
