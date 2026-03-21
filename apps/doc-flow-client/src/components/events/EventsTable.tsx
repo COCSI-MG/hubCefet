@@ -14,7 +14,7 @@ import { Event } from "@/lib/schemas/event.schema";
 import { getColumns } from "./EventsTableColumns";
 import useAuth from "@/hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DeleteEventDialog } from "./DeleteEventDialog";
 import { Pagination as PaginationArgs } from "@/lib/types";
 import { Pagination } from "@/pages/events/AllEventsView";
