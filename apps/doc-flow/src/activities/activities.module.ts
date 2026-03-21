@@ -8,6 +8,7 @@ import { ProfessorSelectionService } from './services/professor-selection.servic
 import { FileUploadService } from './services/file-upload.service';
 import {
   Activity,
+  ActivityHistory,
   ActivityType,
   ActivityStatus,
   ActivityReviewer,
@@ -23,6 +24,7 @@ import { ActivitiesController } from './activities.controller';
   imports: [
     SequelizeModule.forFeature([
       Activity,
+      ActivityHistory,
       ActivityType,
       ActivityStatus,
       ActivityReviewer,
@@ -54,5 +56,4 @@ import { ActivitiesController } from './activities.controller';
   ],
 })
 export class ActivitiesModule { }
-
 

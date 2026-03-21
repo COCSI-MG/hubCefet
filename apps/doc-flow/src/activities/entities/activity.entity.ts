@@ -5,6 +5,7 @@ import { ActivityType } from './activity-type.entity';
 import { ActivityStatus } from './activity-status.entity';
 import { ActivityReviewer } from './activity-reviewer.entity';
 import { ActivityReview } from './activity-review.entity';
+import { ActivityHistory } from './activity-history.entity';
 import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
 
 @Table({
@@ -137,5 +138,7 @@ export class Activity extends Model {
 
   @HasMany(() => ActivityReview, 'activity_id')
   reviews: ActivityReview[];
-}
 
+  @HasMany(() => ActivityHistory, 'activity_id')
+  history: ActivityHistory[];
+}
