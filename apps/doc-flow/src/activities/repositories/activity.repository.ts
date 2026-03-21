@@ -136,17 +136,19 @@ export class ActivityRepository {
   async update(
     id: string,
     updateDto: UpdateActivityDto,
+    transaction?: any,
   ): Promise<[number, Activity[]]> {
     return this.activityModel.update(updateDto, {
       where: { id },
       returning: true,
+      transaction,
     });
   }
 
-  async updateStatus(id: string, statusId: number): Promise<void> {
+  async updateStatus(id: string, statusId: number, transaction?: any): Promise<void> {
     await this.activityModel.update(
       { status_id: statusId },
-      { where: { id } },
+      { where: { id }, transaction },
     );
   }
 

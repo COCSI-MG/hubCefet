@@ -7,14 +7,16 @@ import { ActivityRepository } from './repositories/activity.repository';
 import { ActivityTypeRepository } from './repositories/activity-type.repository';
 import { ActivityReviewRepository } from './repositories/activity-review.repository';
 import { ActivityReviewerRepository } from './repositories/activity-reviewer.repository';
+import { ActivityHistoryRepository } from './repositories/activity-history.repository';
 import { ReviewSettingRepository } from './repositories/review-setting.repository';
-import { ReviewActivityDto } from './dto/review-activity.dto';
+import { ReviewActivityDto, ReviewDecision } from './dto/review-activity.dto';
 import { UploadCertificateDto } from './dto/upload-certificate.dto';
 import { Activity, ActivityType } from './entities';
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ActivityHistoryType } from './enum/activity-history-type.enum';
 
 @Injectable()
 export class ActivitiesService {
@@ -23,6 +25,7 @@ export class ActivitiesService {
     private readonly activityTypeRepository: ActivityTypeRepository,
     private readonly activityReviewRepository: ActivityReviewRepository,
     private readonly activityReviewerRepository: ActivityReviewerRepository,
+    private readonly activityHistoryRepository: ActivityHistoryRepository,
     private readonly reviewSettingRepository: ReviewSettingRepository,
     private readonly professorSelectionService: ProfessorSelectionService,
     private readonly fileUploadService: FileUploadService,
@@ -69,6 +72,13 @@ export class ActivitiesService {
       const selectedProfessors = await this.professorSelectionService.selectRandomProfessors(requiredReviewers);
 
       await this.activityReviewerRepository.createMultipleWithTransaction(activity.id, selectedProfessors, transaction);
+      await this.createHistory(
+        activity.id,
+        userId,
+        ActivityHistoryType.CREATED,
+        'Atividade criada pelo usuário via upload de certificado',
+        transaction,
+      );
 
       await transaction.commit();
 
@@ -96,7 +106,26 @@ export class ActivitiesService {
       throw new NotFoundException('Tipo de atividade não encontrado');
     }
 
-    return this.activityRepository.create(createDto, userId);
+    const sequelize = this.activityRepository.getSequelize();
+    const transaction = await sequelize.transaction();
+
+    try {
+      const activity = await this.activityRepository.createWithTransaction(createDto, userId, transaction);
+
+      await this.createHistory(
+        activity.id,
+        userId,
+        ActivityHistoryType.CREATED,
+        'Atividade criada pelo aluno',
+        transaction,
+      );
+
+      await transaction.commit();
+      return activity;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async findAll(): Promise<Activity[]> {
@@ -141,8 +170,26 @@ export class ActivitiesService {
       }
     }
 
-    const [, [updatedActivity]] = await this.activityRepository.update(id, updateDto);
-    return updatedActivity;
+    const sequelize = this.activityRepository.getSequelize();
+    const transaction = await sequelize.transaction();
+
+    try {
+      const [, [updatedActivity]] = await this.activityRepository.update(id, updateDto, transaction);
+
+      await this.createHistory(
+        id,
+        userId,
+        ActivityHistoryType.EDITED,
+        'Atividade atualizada pelo aluno',
+        transaction,
+      );
+
+      await transaction.commit();
+      return updatedActivity;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async remove(id: string, userId: string): Promise<void> {
@@ -175,25 +222,41 @@ export class ActivitiesService {
       throw new BadRequestException('Você já avaliou esta atividade');
     }
 
-    await this.activityReviewRepository.create(id, reviewerId, reviewDto);
+    const sequelize = this.activityRepository.getSequelize();
+    const transaction = await sequelize.transaction();
 
-    await this.checkAndUpdateActivityStatus(id);
+    try {
+      await this.activityReviewRepository.create(id, reviewerId, reviewDto, transaction);
+      await this.createHistory(
+        id,
+        reviewerId,
+        ActivityHistoryType.REVIEWED,
+        this.getReviewHistoryDescription(reviewDto.decision),
+        transaction,
+      );
+
+      await this.checkAndUpdateActivityStatus(id, transaction);
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
-  private async checkAndUpdateActivityStatus(activityId: string): Promise<void> {
+  private async checkAndUpdateActivityStatus(activityId: string, transaction?: any): Promise<void> {
     const requiredReviewers = await this.reviewSettingRepository.getRequiredReviewers();
-    const totalReviews = await this.activityReviewRepository.countTotalByActivity(activityId);
-    const approvedCount = await this.activityReviewRepository.countApprovedByActivity(activityId);
-    const rejectedCount = await this.activityReviewRepository.countRejectedByActivity(activityId);
+    const totalReviews = await this.activityReviewRepository.countTotalByActivity(activityId, transaction);
+    const approvedCount = await this.activityReviewRepository.countApprovedByActivity(activityId, transaction);
+    const rejectedCount = await this.activityReviewRepository.countRejectedByActivity(activityId, transaction);
 
     if (rejectedCount > 0) {
-      await this.activityRepository.updateStatus(activityId, 3);
+      await this.activityRepository.updateStatus(activityId, 3, transaction);
       Logger.log(`[REVIEW] Atividade ${activityId} rejeitada por ${rejectedCount} professor(es)`);
       return;
     }
 
     if (totalReviews >= requiredReviewers && approvedCount === requiredReviewers) {
-      await this.activityRepository.updateStatus(activityId, 2);
+      await this.activityRepository.updateStatus(activityId, 2, transaction);
       Logger.log(`[REVIEW] Atividade ${activityId} aprovada por todos os ${requiredReviewers} revisores`);
       return;
     }
@@ -201,6 +264,35 @@ export class ActivitiesService {
     if (totalReviews < requiredReviewers) {
       Logger.log(`[REVIEW] Atividade ${activityId} ainda aguardando mais revisões (${totalReviews}/${requiredReviewers})`);
     }
+  }
+
+  private async createHistory(
+    activityId: string,
+    userId: string,
+    type: ActivityHistoryType,
+    description: string,
+    transaction?: any,
+  ): Promise<void> {
+    if (transaction) {
+      await this.activityHistoryRepository.createWithTransaction(
+        activityId,
+        userId,
+        type,
+        description,
+        transaction,
+      );
+      return;
+    }
+
+    await this.activityHistoryRepository.create(activityId, userId, type, description);
+  }
+
+  private getReviewHistoryDescription(decision: ReviewDecision): string {
+    if (decision === ReviewDecision.APPROVED) {
+      return 'Atividade revisada e aprovada pelo avaliador';
+    }
+
+    return 'Atividade revisada e rejeitada pelo avaliador';
   }
 
   async getActivityTypes(): Promise<ActivityType[]> {
@@ -271,5 +363,3 @@ export class ActivitiesService {
     fileStream.pipe(res);
   }
 }
-
-
