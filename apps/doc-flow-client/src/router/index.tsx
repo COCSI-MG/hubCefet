@@ -34,7 +34,7 @@ export default function Router() {
           <Route path="/" element={<Navigate to="/apps" replace />} />
 
           <Route path="/apps" element={<AppSelecionLayout />}>
-            <Route path="" element={<AppSelection />} />
+            <Route index element={<AppSelection />} />
           </Route>
 
           <Route path="/profile" element={<Profile />} />
@@ -55,7 +55,7 @@ export default function Router() {
               path="complementary"
               element={<ProfileRoute profile={["Admin"]} />}
             >
-              <Route path="" element={<ComplementaryActivityTypeManagement />} />
+              <Route index element={<ComplementaryActivityTypeManagement />} />
             </Route>
 
             <Route path="certificates">
