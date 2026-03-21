@@ -76,7 +76,7 @@ export class ActivitiesService {
         activity.id,
         userId,
         ActivityHistoryType.CREATED,
-        'Atividade criada pelo usuário via upload de certificado',
+        'Atividade criada pelo usuário',
         transaction,
       );
 
@@ -152,6 +152,7 @@ export class ActivitiesService {
     id: string,
     updateDto: UpdateActivityDto,
     userId: string,
+    file?: Express.Multer.File,
   ): Promise<Activity> {
     const activity = await this.findOne(id);
 
@@ -161,6 +162,10 @@ export class ActivitiesService {
 
     if (activity.status_id !== 1) {
       throw new BadRequestException('Não é possível editar uma atividade que já foi avaliada');
+    }
+
+    if (file && !this.fileUploadService.validatePdfFile(file)) {
+      throw new BadRequestException('Arquivo deve ser um PDF válido');
     }
 
     if (updateDto.activity_type_id) {
@@ -174,7 +179,34 @@ export class ActivitiesService {
     const transaction = await sequelize.transaction();
 
     try {
-      const [, [updatedActivity]] = await this.activityRepository.update(id, updateDto, transaction);
+      const updatePayload: Partial<Activity> = {};
+
+      if (typeof updateDto.course_name === 'string' && updateDto.course_name.trim() !== '') {
+        updatePayload.course_name = updateDto.course_name;
+      }
+
+      if (typeof updateDto.hours === 'number') {
+        updatePayload.hours = updateDto.hours;
+      }
+
+      if (typeof updateDto.activity_type_id === 'number') {
+        updatePayload.activity_type_id = updateDto.activity_type_id;
+      }
+
+      if (updateDto.complementary_activity_type_id !== undefined) {
+        updatePayload.complementary_activity_type_id = updateDto.complementary_activity_type_id;
+      }
+
+      if (file) {
+        const filePath = await this.fileUploadService.saveCertificate(file);
+        updatePayload.certificate_url = filePath;
+      }
+
+      if (Object.keys(updatePayload).length === 0) {
+        throw new BadRequestException('Nenhum dado foi informado para atualização');
+      }
+
+      await activity.update(updatePayload, { transaction });
 
       await this.createHistory(
         id,
@@ -185,7 +217,7 @@ export class ActivitiesService {
       );
 
       await transaction.commit();
-      return updatedActivity;
+      return this.findOne(id);
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -293,6 +325,23 @@ export class ActivitiesService {
     }
 
     return 'Atividade revisada e rejeitada pelo avaliador';
+  }
+
+  private parseOptionalNumber(value: unknown): number | undefined {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+
+    if (typeof value === 'number') {
+      return Number.isNaN(value) ? undefined : value;
+    }
+
+    if (typeof value === 'string') {
+      const parsedValue = Number(value);
+      return Number.isNaN(parsedValue) ? undefined : parsedValue;
+    }
+
+    return undefined;
   }
 
   async getActivityTypes(): Promise<ActivityType[]> {
