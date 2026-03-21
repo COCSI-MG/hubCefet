@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindOptions, WhereOptions, Op, literal, QueryTypes } from 'sequelize';
-import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview } from '../entities';
+import { FindOptions, Op, QueryTypes } from 'sequelize';
+import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview, ActivityHistory } from '../entities';
 import { User } from '../../users/entities/user.entity';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { UpdateActivityDto } from '../dto/update-activity.dto';
+import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
 
 @Injectable()
 export class ActivityRepository {
@@ -41,6 +42,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -66,7 +68,7 @@ export class ActivityRepository {
 
   async findByReviewer(reviewerId: string): Promise<Activity[]> {
     const reviewedActivityIds = await this.activityModel.sequelize.query(
-      `SELECT DISTINCT activity_id FROM activity_reviews WHERE reviewer_user_id = :reviewerId`,
+      `SELECT DISTINCT activity_id FROM activity_reviews WHERE reviewer_user_id = :reviewerId AND deleted_at IS NULL`,
       {
         replacements: { reviewerId },
         type: QueryTypes.SELECT,
@@ -91,6 +93,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -114,6 +117,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -121,9 +125,11 @@ export class ActivityRepository {
           include: [{ model: User, as: 'reviewer' }],
         },
         {
-          model: ActivityReview,
-          as: 'reviews',
-          include: [{ model: User, as: 'reviewer' }],
+          model: ActivityHistory,
+          as: 'history',
+          include: [{ model: User, as: 'user' }],
+          separate: true,
+          order: [['created_at', 'ASC']],
         },
       ],
     });
@@ -132,17 +138,19 @@ export class ActivityRepository {
   async update(
     id: string,
     updateDto: UpdateActivityDto,
+    transaction?: any,
   ): Promise<[number, Activity[]]> {
     return this.activityModel.update(updateDto, {
       where: { id },
       returning: true,
+      transaction,
     });
   }
 
-  async updateStatus(id: string, statusId: number): Promise<void> {
+  async updateStatus(id: string, statusId: number, transaction?: any): Promise<void> {
     await this.activityModel.update(
       { status_id: statusId },
-      { where: { id } },
+      { where: { id }, transaction },
     );
   }
 
@@ -175,4 +183,4 @@ export class ActivityRepository {
   getSequelize() {
     return this.activityModel.sequelize;
   }
-} 
+}

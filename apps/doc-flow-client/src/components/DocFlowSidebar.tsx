@@ -118,7 +118,7 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
               <NavMenuItem
                 text="Avaliar Certificados"
                 onClick={() => navigate("/docflow/certificates/review")}
-                activeNavItem={location.pathname === "/docflow/certificates/review"}
+                activeNavItem={location.pathname.startsWith("/docflow/certificates/review")}
                 icon={<RateReview />}
               />
             )}

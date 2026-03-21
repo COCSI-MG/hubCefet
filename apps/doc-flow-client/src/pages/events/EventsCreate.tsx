@@ -9,7 +9,7 @@ import { EventCreate, EventCreateSchema, createEventSchema } from "@/lib/types";
 import { eventService } from "@/api/services/event.service";
 import { ApiError } from "@/api/errors/ApiError";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 export default function EventsCreate() {
   const [error, setError] = useState<string | null>(null);

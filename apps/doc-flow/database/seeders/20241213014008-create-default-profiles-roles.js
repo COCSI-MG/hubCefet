@@ -3,15 +3,6 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-     */
     const profiles = await queryInterface.sequelize.query(
       "SELECT id, name FROM profiles WHERE name IN ('admin', 'user');",
     );
@@ -23,7 +14,9 @@ module.exports = {
         case 'admin':
           for (const role of roles[0]) {
             await queryInterface.sequelize.query(
-              `INSERT INTO profiles_roles (profile_id, role_id, created_at, updated_at) VALUES ('${profile.id}', '${role.id}', NOW(), NOW());`,
+              `INSERT INTO profiles_roles (profile_id, role_id, created_at, updated_at)
+               VALUES ('${profile.id}', '${role.id}', NOW(), NOW())
+               ON CONFLICT (profile_id, role_id) DO NOTHING;`,
             );
           }
           break;
@@ -35,7 +28,9 @@ module.exports = {
               role.name === 'VIEW_ANY'
             ) {
               await queryInterface.sequelize.query(
-                `INSERT INTO profiles_roles (profile_id, role_id, created_at, updated_at) VALUES ('${profile.id}', '${role.id}', NOW(), NOW());`,
+                `INSERT INTO profiles_roles (profile_id, role_id, created_at, updated_at)
+                 VALUES ('${profile.id}', '${role.id}', NOW(), NOW())
+                 ON CONFLICT (profile_id, role_id) DO NOTHING;`,
               );
             }
           }

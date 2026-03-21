@@ -5,7 +5,7 @@ import { InfoCard } from "@/components/InfoCard";
 import PageHeader from "@/components/PageHeader";
 import { Event } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export function EventView() {
