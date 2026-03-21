@@ -5,6 +5,7 @@ import { ActivityType } from './activity-type.entity';
 import { ActivityStatus } from './activity-status.entity';
 import { ActivityReviewer } from './activity-reviewer.entity';
 import { ActivityReview } from './activity-review.entity';
+import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
 
 @Table({
   tableName: 'activities',
@@ -110,9 +111,9 @@ export class Activity extends Model {
 
   @ApiProperty({
     example: 1,
-    description: 'Activity Type ID',
+    description: 'Complementary activity type ID',
   })
-  @ForeignKey(() => ActivityType)
+  @ForeignKey(() => ComplementaryActivityType)
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
@@ -128,11 +129,13 @@ export class Activity extends Model {
   @BelongsTo(() => ActivityStatus, 'status_id')
   status: ActivityStatus;
 
+  @BelongsTo(() => ComplementaryActivityType, 'complementary_activity_type_id')
+  complementaryActivityType: ComplementaryActivityType;
+
   @HasMany(() => ActivityReviewer, 'activity_id')
   reviewers: ActivityReviewer[];
 
   @HasMany(() => ActivityReview, 'activity_id')
   reviews: ActivityReview[];
 }
-
 

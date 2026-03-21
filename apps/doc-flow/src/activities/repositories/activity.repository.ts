@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FindOptions, WhereOptions, Op, literal, QueryTypes } from 'sequelize';
+import { FindOptions, Op, QueryTypes } from 'sequelize';
 import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview } from '../entities';
 import { User } from '../../users/entities/user.entity';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { UpdateActivityDto } from '../dto/update-activity.dto';
+import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
 
 @Injectable()
 export class ActivityRepository {
@@ -41,6 +42,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -91,6 +93,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -114,6 +117,7 @@ export class ActivityRepository {
       include: [
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
+        { model: ComplementaryActivityType, as: 'complementaryActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
