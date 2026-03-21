@@ -33,15 +33,18 @@ export interface CertificateReviewReviewer {
 
 export type CertificateReviewDecision = "APPROVED" | "REJECTED";
 
-export interface CertificateReviewHistoryItem {
+export type CertificateActivityHistoryType = "created" | "edited" | "reviewed";
+
+export interface CertificateActivityHistoryItem {
   id: string;
   activity_id: string;
-  reviewer_user_id: string;
-  decision: CertificateReviewDecision;
-  comments?: string;
+  user_id: string;
+  user_name?: string | null;
+  type: CertificateActivityHistoryType;
+  action: string;
+  description: string;
   created_at: string;
-  updated_at: string;
-  reviewer?: CertificateReviewUser;
+  user?: CertificateReviewUser;
 }
 
 export interface CertificateReviewListItem {
@@ -72,7 +75,7 @@ export interface CertificateReviewDetailsData {
   status?: CertificateReviewStatus;
   user: CertificateReviewUser;
   reviewers: CertificateReviewReviewer[];
-  reviews: CertificateReviewHistoryItem[];
+  history: CertificateActivityHistoryItem[];
 }
 
 export interface ReviewDialogState {

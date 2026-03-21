@@ -21,6 +21,7 @@ import { UploadCertificateDto } from './dto/upload-certificate.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
+import { GetActivityResponseDto } from './dto/get-activity-response.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { CertificateFileInterceptor } from './interceptors/certificate-file.interceptor';
 
@@ -124,7 +125,7 @@ export class ActivitiesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar atividade por ID' })
-  @ApiResponse({ status: 200, description: 'Dados da atividade' })
+  @ApiResponse({ status: 200, description: 'Dados da atividade', type: GetActivityResponseDto })
   @ApiResponse({ status: 404, description: 'Atividade não encontrada' })
   findOne(@Param('id') id: string) {
     return this.activitiesService.findOne(id);
@@ -145,7 +146,7 @@ export class ActivitiesController {
     description: 'Dados opcionais da atividade e arquivo PDF opcional',
     type: UpdateActivityDto,
   })
-  @ApiResponse({ status: 200, description: 'Atividade atualizada com sucesso' })
+  @ApiResponse({ status: 200, description: 'Atividade atualizada com sucesso', type: GetActivityResponseDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos ou atividade já avaliada' })
   @ApiResponse({ status: 403, description: 'Sem permissão para editar' })
   @ApiResponse({ status: 404, description: 'Atividade não encontrada' })

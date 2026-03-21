@@ -11,12 +11,13 @@ import { ActivityHistoryRepository } from './repositories/activity-history.repos
 import { ReviewSettingRepository } from './repositories/review-setting.repository';
 import { ReviewActivityDto, ReviewDecision } from './dto/review-activity.dto';
 import { UploadCertificateDto } from './dto/upload-certificate.dto';
-import { Activity, ActivityType } from './entities';
+import { Activity, ActivityHistory, ActivityType } from './entities';
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { ActivityHistoryType } from './enum/activity-history-type.enum';
+import { ActivityHistoryLogItemDto, GetActivityResponseDto } from './dto/get-activity-response.dto';
 
 @Injectable()
 export class ActivitiesService {
@@ -140,12 +141,13 @@ export class ActivitiesService {
     return this.activityRepository.findByReviewer(reviewerId);
   }
 
-  async findOne(id: string): Promise<Activity> {
+  async findOne(id: string): Promise<GetActivityResponseDto> {
     const activity = await this.activityRepository.findOne(id);
     if (!activity) {
       throw new NotFoundException('Atividade  não encontrada');
     }
-    return activity;
+
+    return this.mapActivityResponse(activity);
   }
 
   async update(
@@ -153,8 +155,11 @@ export class ActivitiesService {
     updateDto: UpdateActivityDto,
     userId: string,
     file?: Express.Multer.File,
-  ): Promise<Activity> {
-    const activity = await this.findOne(id);
+  ): Promise<GetActivityResponseDto> {
+    const activity = await this.activityRepository.findOne(id);
+    if (!activity) {
+      throw new NotFoundException('Atividade  não encontrada');
+    }
 
     if (activity.user_id !== userId) {
       throw new ForbiddenException('Você não tem permissão para editar esta atividade');
@@ -226,7 +231,10 @@ export class ActivitiesService {
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const activity = await this.findOne(id);
+    const activity = await this.activityRepository.findOne(id);
+    if (!activity) {
+      throw new NotFoundException('Atividade  não encontrada');
+    }
 
     if (activity.user_id !== userId) {
       throw new ForbiddenException('Você não tem permissão para excluir esta atividade');
@@ -244,7 +252,10 @@ export class ActivitiesService {
     reviewerId: string,
     reviewDto: ReviewActivityDto,
   ): Promise<void> {
-    const activity = await this.findOne(id);
+    const activity = await this.activityRepository.findOne(id);
+    if (!activity) {
+      throw new NotFoundException('Atividade  não encontrada');
+    }
 
     if (activity.status_id !== 1) {
       throw new BadRequestException('Esta atividade já foi avaliada');
@@ -328,6 +339,54 @@ export class ActivitiesService {
     return 'Atividade revisada e rejeitada pelo avaliador';
   }
 
+  private mapActivityResponse(activity: Activity): GetActivityResponseDto {
+    return {
+      id: activity.id,
+      course_name: activity.course_name,
+      hours: activity.hours,
+      certificate_url: activity.certificate_url,
+      user_id: activity.user_id,
+      activity_type_id: activity.activity_type_id,
+      status_id: activity.status_id,
+      created_at: activity.created_at,
+      updated_at: activity.updated_at,
+      complementary_activity_type_id: activity.complementary_activity_type_id,
+      user: activity.user,
+      activityType: activity.activityType,
+      status: activity.status,
+      complementaryActivityType: activity.complementaryActivityType,
+      reviewers: activity.reviewers ?? [],
+      history: this.mapActivityHistory(activity.history ?? []),
+    };
+  }
+
+  private mapActivityHistory(history: ActivityHistory[]): ActivityHistoryLogItemDto[] {
+    return history.map((entry) => ({
+      id: entry.id,
+      activity_id: entry.activity_id,
+      user_id: entry.user_id,
+      user_name: entry.user?.full_name ?? null,
+      type: entry.type,
+      action: this.getHistoryActionLabel(entry.type),
+      description: entry.description,
+      created_at: entry.created_at,
+      user: entry.user,
+    }));
+  }
+
+  private getHistoryActionLabel(type: ActivityHistoryType): string {
+    switch (type) {
+      case ActivityHistoryType.CREATED:
+        return 'CREATE';
+      case ActivityHistoryType.EDITED:
+        return 'UPDATE';
+      case ActivityHistoryType.REVIEWED:
+        return 'REVIEW';
+      default:
+        return 'EVENT';
+    }
+  }
+
   private parseOptionalNumber(value: unknown): number | undefined {
     if (value === undefined || value === null || value === '') {
       return undefined;
@@ -383,7 +442,10 @@ export class ActivitiesService {
     res: Response,
     userId: string,
   ): Promise<void> {
-    const activity = await this.findOne(id);
+    const activity = await this.activityRepository.findOne(id);
+    if (!activity) {
+      throw new NotFoundException('Atividade  não encontrada');
+    }
 
     const isOwner = activity.user_id === userId;
     const isReviewer = await this.activityReviewerRepository.findByActivity(id);

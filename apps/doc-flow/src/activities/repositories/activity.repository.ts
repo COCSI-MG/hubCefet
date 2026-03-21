@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindOptions, Op, QueryTypes } from 'sequelize';
-import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview } from '../entities';
+import { Activity, ActivityType, ActivityStatus, ActivityReviewer, ActivityReview, ActivityHistory } from '../entities';
 import { User } from '../../users/entities/user.entity';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { UpdateActivityDto } from '../dto/update-activity.dto';
@@ -125,9 +125,11 @@ export class ActivityRepository {
           include: [{ model: User, as: 'reviewer' }],
         },
         {
-          model: ActivityReview,
-          as: 'reviews',
-          include: [{ model: User, as: 'reviewer' }],
+          model: ActivityHistory,
+          as: 'history',
+          include: [{ model: User, as: 'user' }],
+          separate: true,
+          order: [['created_at', 'ASC']],
         },
       ],
     });
@@ -181,4 +183,4 @@ export class ActivityRepository {
   getSequelize() {
     return this.activityModel.sequelize;
   }
-} 
+}

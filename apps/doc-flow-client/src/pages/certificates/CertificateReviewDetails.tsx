@@ -70,7 +70,7 @@ export default function CertificateReviewDetails() {
       setActivity({
         ...response,
         reviewers: response.reviewers || [],
-        reviews: response.reviews || [],
+        history: response.history || [],
       });
     } catch (error) {
       if (error instanceof ApiError) {
@@ -179,9 +179,6 @@ export default function CertificateReviewDetails() {
     statusColorMap[activityStatusName as keyof typeof statusColorMap] || "default";
   const activityStatusLabel =
     statusLabelMap[activityStatusName as keyof typeof statusLabelMap] || activityStatusName;
-  const getDecisionLabel = (decision: CertificateReviewDecision) =>
-    statusLabelMap[decision as keyof typeof statusLabelMap] || decision;
-
   return (
     <>
       <PageHeader
@@ -227,10 +224,9 @@ export default function CertificateReviewDetails() {
         />
 
         <CertificateReviewHistorySection
-          reviews={activity.reviews}
+          history={activity.history}
           getUserName={getUserName}
           formatDateTime={formatDateTime}
-          getDecisionLabel={getDecisionLabel}
         />
 
         <CertificateReviewDecisionSection
