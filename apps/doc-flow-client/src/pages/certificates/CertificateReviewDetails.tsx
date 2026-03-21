@@ -3,9 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -14,17 +11,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  ArrowBack as ArrowBackIcon,
-  Download as DownloadIcon,
-} from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { CertificateDetailsHeaderInfo } from "@/components/certificates/CertificateDetailsHeaderInfo";
 import PageHeader from "@/components/PageHeader";
 import { CertificateReviewDecisionSection } from "@/components/certificates/CertificateReviewDecisionSection";
 import { CertificateReviewHistorySection } from "@/components/certificates/CertificateReviewHistorySection";
 import { CertificateReviewersSection } from "@/components/certificates/CertificateReviewersSection";
-import { InfoCard } from "@/components/InfoCard";
 import { CertificateDocumentDataSection } from "@/components/certificates/CertificateDocumentDataSection";
 import { CertificateStudentDataSection } from "@/components/certificates/CertificateStudentDataSection";
 import { certificateService } from "@/api/services/certificate.service";
@@ -197,66 +190,20 @@ export default function CertificateReviewDetails() {
       />
 
       <Box className="ml-6 mr-6 mt-6 max-w-full space-y-6">
-        <Card className="border rounded-xl">
-          <CardContent>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems={{ xs: "flex-start", md: "center" }}
-              flexDirection={{ xs: "column", md: "row" }}
-              gap={2}
-              mb={3}
-            >
-              <Box>
-                <Button
-                  variant="text"
-                  startIcon={<ArrowBackIcon />}
-                  onClick={() => navigate("/docflow/certificates/review")}
-                  sx={{ mb: 1, px: 0 }}
-                >
-                  Voltar para lista
-                </Button>
-                <Typography variant="h6" className="font-semibold">
-                  {activity.course_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ID do certificado: {activity.id}
-                </Typography>
-              </Box>
-
-              <Box display="flex" gap={1.5} alignItems="center" flexWrap="wrap">
-                <Chip
-                  label={activityStatusLabel}
-                  color={statusColor}
-                  variant="outlined"
-                />
-                <Button
-                  variant="outlined"
-                  startIcon={<DownloadIcon />}
-                  onClick={handleDownloadCertificate}
-                >
-                  Baixar certificado
-                </Button>
-              </Box>
-            </Box>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-              <InfoCard
-                label="Tipo do Certificado"
-                data={activity.activityType?.name || "Não informado"}
-              />
-              <InfoCard label="Horas" data={`${activity.hours}h`} />
-              <InfoCard
-                label="Criada em"
-                data={formatDateTime(activity.created_at)}
-              />
-              <InfoCard
-                label="Atualizada em"
-                data={formatDateTime(activity.updated_at)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <CertificateDetailsHeaderInfo
+          backLabel="Voltar para lista"
+          backTo="/docflow/certificates/review"
+          onNavigate={navigate}
+          onDownload={handleDownloadCertificate}
+          title={activity.course_name}
+          certificateId={activity.id}
+          statusLabel={activityStatusLabel}
+          statusColor={statusColor}
+          certificateType={activity.activityType?.name || "Não informado"}
+          hours={activity.hours}
+          createdAt={formatDateTime(activity.created_at)}
+          updatedAt={formatDateTime(activity.updated_at)}
+        />
 
         <div className="space-y-6">
           <CertificateStudentDataSection

@@ -19,7 +19,7 @@ import FileCreate from "@/pages/files/FileCreate";
 import { AppSelection } from "@/pages/AppSelection";
 import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
-import { CertificateReview, CertificateReviewDetails } from "@/pages/certificates";
+import { CertificateDetails, CertificateReview, CertificateReviewDetails } from "@/pages/certificates";
 import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
 import AppSelecionLayout from "@/layouts/AppSelectionLayout";
 import AllEventsView from "@/pages/events/AllEventsView";
@@ -62,6 +62,7 @@ export default function Router() {
               <Route element={<ProfileRoute profile={["Student"]} />}>
                 <Route path="create" element={<CertificateCreate />} />
                 <Route path="dashboard" element={<CertificateDashboard />} />
+                <Route path=":activityId" element={<CertificateDetails />} />
               </Route>
               <Route element={<ProfileRoute profile={["Professor"]} />}>
                 <Route path="review" element={<CertificateReview />} />
