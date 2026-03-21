@@ -38,7 +38,7 @@ export class CertificateService {
     return await this.apiService.get('/activities/my-stats');
   }
 
-  async getActivity(id: number): Promise<any> {
+  async getActivity(id: string): Promise<any> {
     return await this.apiService.get(`/activities/${id}`);
   }
 
@@ -99,5 +99,4 @@ export class CertificateService {
 }
 
 export const certificateService = new CertificateService();
-
 
