@@ -207,6 +207,7 @@ export class ActivitiesService {
       }
 
       await activity.update(updatePayload, { transaction });
+      await this.activityReviewRepository.softDeleteByActivity(id, transaction);
 
       await this.createHistory(
         id,

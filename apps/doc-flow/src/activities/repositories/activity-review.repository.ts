@@ -82,6 +82,13 @@ export class ActivityReviewRepository {
       transaction,
     });
   }
+
+  async softDeleteByActivity(activityId: string, transaction?: any): Promise<number> {
+    return this.activityReviewModel.destroy({
+      where: { activity_id: activityId },
+      transaction,
+    });
+  }
 }
  
  

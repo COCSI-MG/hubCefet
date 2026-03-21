@@ -5,7 +5,11 @@ import { Activity } from './activity.entity';
 
 @Table({
   tableName: 'activity_reviews',
-  timestamps: false,
+  timestamps: true,
+  createdAt: false,
+  updatedAt: false,
+  deletedAt: 'deleted_at',
+  paranoid: true,
 })
 export class ActivityReview extends Model {
   @ApiProperty({
@@ -74,11 +78,21 @@ export class ActivityReview extends Model {
   })
   reviewed_at: Date;
 
+  @ApiProperty({
+    example: '2024-01-01T00:00:00.000Z',
+    description: 'Date and time when review was soft deleted',
+    required: false,
+  })
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  deleted_at?: Date | null;
+
   @BelongsTo(() => Activity)
   activity: Activity;
 
   @BelongsTo(() => User)
   reviewer: User;
 }
-
 

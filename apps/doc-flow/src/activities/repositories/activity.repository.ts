@@ -68,7 +68,7 @@ export class ActivityRepository {
 
   async findByReviewer(reviewerId: string): Promise<Activity[]> {
     const reviewedActivityIds = await this.activityModel.sequelize.query(
-      `SELECT DISTINCT activity_id FROM activity_reviews WHERE reviewer_user_id = :reviewerId`,
+      `SELECT DISTINCT activity_id FROM activity_reviews WHERE reviewer_user_id = :reviewerId AND deleted_at IS NULL`,
       {
         replacements: { reviewerId },
         type: QueryTypes.SELECT,
