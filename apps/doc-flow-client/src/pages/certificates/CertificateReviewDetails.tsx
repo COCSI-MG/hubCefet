@@ -11,26 +11,27 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   TextField,
   Typography,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
-  CheckCircle as ApproveIcon,
-  Cancel as RejectIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
+import { CertificateReviewDecisionSection } from "@/components/certificates/CertificateReviewDecisionSection";
+import { CertificateReviewHistorySection } from "@/components/certificates/CertificateReviewHistorySection";
+import { CertificateReviewersSection } from "@/components/certificates/CertificateReviewersSection";
 import { InfoCard } from "@/components/InfoCard";
+import { CertificateDocumentDataSection } from "@/components/certificates/CertificateDocumentDataSection";
+import { CertificateStudentDataSection } from "@/components/certificates/CertificateStudentDataSection";
 import { certificateService } from "@/api/services/certificate.service";
 import { ApiError } from "@/api/errors/ApiError";
 import {
   CertificateReviewDecision,
   CertificateReviewDetailsData,
-  CertificateReviewHistoryItem,
   CertificateReviewUser,
   ReviewDialogState,
 } from "@/lib/types/certificate-review.types";
@@ -185,6 +186,8 @@ export default function CertificateReviewDetails() {
     statusColorMap[activityStatusName as keyof typeof statusColorMap] || "default";
   const activityStatusLabel =
     statusLabelMap[activityStatusName as keyof typeof statusLabelMap] || activityStatusName;
+  const getDecisionLabel = (decision: CertificateReviewDecision) =>
+    statusLabelMap[decision as keyof typeof statusLabelMap] || decision;
 
   return (
     <>
@@ -256,162 +259,36 @@ export default function CertificateReviewDetails() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="border rounded-xl">
-            <CardContent>
-              <Typography variant="h6" className="font-semibold" gutterBottom>
-                Dados do Aluno
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoCard label="Nome" data={getUserName(activity.user)} />
-                <InfoCard label="Email" data={activity.user.email || "Não informado"} />
-                <InfoCard
-                  label="Matrícula"
-                  data={activity.user.enrollment || "Não informado"}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <CertificateStudentDataSection
+            user={activity.user}
+            studentName={getUserName(activity.user)}
+          />
 
-          <Card className="border rounded-xl">
-            <CardContent>
-              <Typography variant="h6" className="font-semibold" gutterBottom>
-                Dados do Documento
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoCard
-                  label="Status"
-                  data={activityStatusLabel}
-                />
-                <InfoCard
-                  label="Descrição do Status"
-                  data={activityStatusDescription}
-                />
-
-                <InfoCard
-                  label="Descrição do Tipo Complementar"
-                  data={
-                    activity.complementaryActivityType?.description ||
-                    "Não se aplica"
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <CertificateDocumentDataSection
+            statusLabel={activityStatusLabel}
+            statusDescription={activityStatusDescription}
+            complementaryTypeDescription={
+              activity.complementaryActivityType?.description
+            }
+          />
         </div>
 
-        <Card className="border rounded-xl">
-          <CardContent>
-            <Typography variant="h6" className="font-semibold" gutterBottom>
-              Revisores Designados
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+        <CertificateReviewersSection
+          reviewers={activity.reviewers}
+          getUserName={getUserName}
+          formatDateTime={formatDateTime}
+        />
 
-            {activity.reviewers.length === 0 ? (
-              <Alert severity="info">
-                Nenhum revisor foi encontrado para este certificado.
-              </Alert>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {activity.reviewers.map((reviewerAssignment) => (
-                  <div
-                    key={reviewerAssignment.id}
-                    className="rounded-xl border bg-sky-50 border-neutral-200 p-4 space-y-2"
-                  >
-                    <Typography className="font-semibold text-sky-900">
-                      {getUserName(reviewerAssignment.reviewer)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {reviewerAssignment.reviewer.email}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Matrícula: {reviewerAssignment.reviewer.enrollment || "Não informado"}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Designado em {formatDateTime(reviewerAssignment.assigned_at)}
-                    </Typography>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <CertificateReviewHistorySection
+          reviews={activity.reviews}
+          getUserName={getUserName}
+          formatDateTime={formatDateTime}
+          getDecisionLabel={getDecisionLabel}
+        />
 
-        <Card className="border rounded-xl">
-          <CardContent>
-            <Typography variant="h6" className="font-semibold" gutterBottom>
-              Histórico de Avaliações
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            {activity.reviews.length === 0 ? (
-              <Alert severity="info">
-                Nenhuma avaliação foi registrada até o momento.
-              </Alert>
-            ) : (
-              <div className="space-y-4">
-                {activity.reviews.map((review: CertificateReviewHistoryItem) => (
-                  <div
-                    key={review.id}
-                    className="rounded-xl border border-neutral-200 p-4 space-y-2"
-                  >
-                    <Box display="flex" justifyContent="space-between" gap={2} flexWrap="wrap">
-                      <Typography className="font-semibold">
-                        {getUserName(review.reviewer)}
-                      </Typography>
-                      <Chip
-                        label={statusLabelMap[review.decision as keyof typeof statusLabelMap] || review.decision}
-                        color={review.decision === "APPROVED" ? "success" : "error"}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {review.reviewer?.email || "Email não informado"}
-                    </Typography>
-                    <Typography variant="body2">
-                      {review.comments || "Sem comentários informados."}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Avaliado em {formatDateTime(review.created_at)}
-                    </Typography>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border rounded-xl">
-          <CardContent>
-            <Typography variant="h6" className="font-semibold" gutterBottom>
-              Decisão da Revisão
-            </Typography>
-            <Typography variant="body2" color="text.secondary" mb={3}>
-              Após conferir os dados do aluno, os revisores e o documento, escolha a decisão para este certificado.
-            </Typography>
-
-            <Box display="flex" gap={2} flexWrap="wrap">
-              <Button
-                variant="contained"
-                color="success"
-                startIcon={<ApproveIcon />}
-                onClick={() => openReviewDialog("APPROVED")}
-              >
-                Aprovar certificado
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<RejectIcon />}
-                onClick={() => openReviewDialog("REJECTED")}
-              >
-                Rejeitar certificado
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
+        <CertificateReviewDecisionSection
+          onDecision={openReviewDialog}
+        />
       </Box>
 
       <Dialog
