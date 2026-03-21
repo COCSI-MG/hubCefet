@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { CertificateDetailsHeaderInfo } from "@/components/certificates/CertificateDetailsHeaderInfo";
 import PageHeader from "@/components/PageHeader";
 import { CertificateDocumentDataSection } from "@/components/certificates/CertificateDocumentDataSection";
+import { CertificatePendingEditForm } from "@/components/certificates/CertificatePendingEditForm";
 import { certificateService } from "@/api/services/certificate.service";
 import { ApiError } from "@/api/errors/ApiError";
 import { CertificateReviewDetailsData } from "@/lib/types/certificate-review.types";
@@ -103,6 +104,7 @@ export default function CertificateDetails() {
     statusColorMap[certificateStatusName as keyof typeof statusColorMap] || "default";
   const certificateStatusLabel =
     statusLabelMap[certificateStatusName as keyof typeof statusLabelMap] || certificateStatusName;
+  const isPendingCertificate = certificate.status_id === 1;
 
   return (
     <>
@@ -134,6 +136,13 @@ export default function CertificateDetails() {
             certificate.complementaryActivityType?.description
           }
         />
+
+        {isPendingCertificate && (
+          <CertificatePendingEditForm
+            certificate={certificate}
+            onUpdated={() => loadCertificate(certificate.id)}
+          />
+        )}
       </Box>
     </>
   );
