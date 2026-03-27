@@ -50,7 +50,7 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 <FormItemField
                   field={field}
                   error={form.formState.errors.description?.message}
-                  type="textarea" // ← Now supported!
+                  type="textarea"
                   placeholder="Insira uma descrição detalhada..."
                 />
               )}
@@ -99,6 +99,33 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                               Em andamento
                             </SelectItem>
                             <SelectItem value="ended">Finalizado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="presence_option"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Opção de Presença</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={event?.presence_option || "qrcode"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Defina a opção de presença" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="qrcode">QR Code</SelectItem>
+                            <SelectItem value="geo">Manual / Confirmação</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -267,6 +294,7 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                     longitude: event.longitude,
                     radius: event.radius,
                     vacancies: event.vacancies,
+                    presence_option: event.presence_option,
                   })
                 } else {
                   form.reset()
