@@ -21,6 +21,7 @@ import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
 import { CertificateDetails, CertificateReview, CertificateReviewDetails } from "@/pages/certificates";
 import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
+import { ExtensionActivityTypeManagement } from "@/pages/extensionActivityType/ExtensionActivityType";
 import AppSelecionLayout from "@/layouts/AppSelectionLayout";
 import AllEventsView from "@/pages/events/AllEventsView";
 import UserEventsView from "@/pages/events/UserEventsView";
@@ -56,6 +57,13 @@ export default function Router() {
               element={<ProfileRoute profile={["Admin"]} />}
             >
               <Route index element={<ComplementaryActivityTypeManagement />} />
+            </Route>
+
+            <Route
+              path="extension"
+              element={<ProfileRoute profile={["Admin"]} />}
+            >
+              <Route index element={<ExtensionActivityTypeManagement />} />
             </Route>
 
             <Route path="certificates">
