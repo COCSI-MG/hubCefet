@@ -8,13 +8,13 @@ import { EventsActionButtons } from "./EventsActionButtons";
 import { EventScannerModal } from "./EventScannerModal";
 
 export function getColumns(
-  { navigate }: { navigate: (path: string) => void },
-  openDeleteModal: (item: Event) => void,
-  tableType: tableEventType,
-  isAdmin: boolean,
-  isProfessor: boolean,
-  userId: string,
-  isMyEventsPage: boolean
+	{ navigate }: { navigate: (path: string) => void },
+	openDeleteModal: (item: Event) => void,
+	tableType: tableEventType,
+	isAdmin: boolean,
+	isProfessor: boolean,
+	userId: string,
+	isMyEventsPage: boolean
 ): ColumnDef<Event>[] {
 
   const columns: ColumnDef<Event>[] = [
@@ -159,6 +159,7 @@ export function getColumns(
                   variant="secondary"
                   size="sm"
                   onClick={() => navigate(`/events/${item.id}/edit`)}
+                  disabled={new Date(item.end_at) < new Date()}
                 >
                   Editar
                 </Button>
@@ -167,11 +168,15 @@ export function getColumns(
                   className="rounded-2xl"
                   size="sm"
                   onClick={() => openDeleteModal(item)}
+                  disabled={new Date(item.start_at) < new Date()}
                 >
                   Excluir
                 </Button>
 
-                <EventScannerModal eventId={item.id} eventStatus={item.status} eventAlreadyStarted={eventAlreadyStarted} />
+
+                {item.presence_option === 'qrcode' && (
+                  <EventScannerModal eventId={item.id} eventStatus={item.status} eventAlreadyStarted={eventAlreadyStarted} />
+                )}
               </>
             )}
 
