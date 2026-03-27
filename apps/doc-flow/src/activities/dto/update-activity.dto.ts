@@ -54,6 +54,26 @@ export class UpdateActivityDto {
   complementary_activity_type_id?: number | null;
 
   @ApiPropertyOptional({
+    example: 1,
+    description: 'ID do tipo de atividade de extensão',
+    nullable: true,
+  })
+  @Transform(({ value }) => {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (value === '') {
+      return null;
+    }
+
+    return parseInt(value, 10);
+  })
+  @IsOptional()
+  @IsNumber()
+  extension_activity_type_id?: number | null;
+
+  @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
     description: 'Arquivo PDF do certificado',

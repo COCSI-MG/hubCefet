@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
+import { ExtensionActivityType } from '../../extension-activity-type/entities/extension-activity-type.entity';
 import { User } from '../../users/entities/user.entity';
 import { ActivityHistoryType } from '../enum/activity-history-type.enum';
 import { ActivityReviewer } from '../entities/activity-reviewer.entity';
@@ -153,6 +154,20 @@ export class GetActivityResponseDto {
     nullable: true,
   })
   complementaryActivityType?: ComplementaryActivityType | null;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID do tipo de extensão',
+    nullable: true,
+  })
+  extension_activity_type_id?: number | null;
+
+  @ApiProperty({
+    type: () => ExtensionActivityType,
+    description: 'Tipo de extensão da atividade',
+    nullable: true,
+  })
+  extensionActivityType?: ExtensionActivityType | null;
 
   @ApiProperty({
     type: () => ActivityReviewer,

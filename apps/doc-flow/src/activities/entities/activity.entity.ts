@@ -7,6 +7,7 @@ import { ActivityReviewer } from './activity-reviewer.entity';
 import { ActivityReview } from './activity-review.entity';
 import { ActivityHistory } from './activity-history.entity';
 import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
+import { ExtensionActivityType } from '../../extension-activity-type/entities/extension-activity-type.entity';
 
 @Table({
   tableName: 'activities',
@@ -121,6 +122,17 @@ export class Activity extends Model {
   })
   complementary_activity_type_id: number;
 
+  @ApiProperty({
+    example: 1,
+    description: 'Extension activity type ID',
+  })
+  @ForeignKey(() => ExtensionActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  extension_activity_type_id: number;
+
   @BelongsTo(() => User, 'user_id')
   user: User;
 
@@ -132,6 +144,9 @@ export class Activity extends Model {
 
   @BelongsTo(() => ComplementaryActivityType, 'complementary_activity_type_id')
   complementaryActivityType: ComplementaryActivityType;
+
+  @BelongsTo(() => ExtensionActivityType, 'extension_activity_type_id')
+  extensionActivityType: ExtensionActivityType;
 
   @HasMany(() => ActivityReviewer, 'activity_id')
   reviewers: ActivityReviewer[];

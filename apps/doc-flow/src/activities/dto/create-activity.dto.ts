@@ -40,6 +40,15 @@ export class CreateActivityDto {
   complementary_activity_type_id: number
 
   @ApiProperty({
+    example: 1,
+    description: 'ID do tipo de atividade de extensão',
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  extension_activity_type_id: number
+
+  @ApiProperty({
     example: 'certificate.pdf',
     description: 'Caminho do arquivo do certificado',
     required: false,
