@@ -6,11 +6,13 @@ import { Event } from './entities/event.entity';
 import { EventRepositoryImpl } from './repositories/event.repository';
 import { EventCronService } from './events-cron.service';
 import { PresencesModule } from 'src/presences/presences.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([Event]),
     forwardRef(() => PresencesModule),
+    UsersModule
   ],
   controllers: [EventsController],
   providers: [

@@ -1,11 +1,11 @@
 import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { EventRepository } from './event.repository.interface';
 import { CreateEventDto } from '../dto/create-event.dto';
-import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventStatus } from '../enum/event-status.enum';
 import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { User } from 'src/users/entities/user.entity';
+import { UpdateEventDto } from '../dto/update-event.dto';
 
 export class EventRepositoryImpl implements EventRepository {
   constructor(

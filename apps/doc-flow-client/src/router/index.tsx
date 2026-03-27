@@ -90,7 +90,7 @@ export default function Router() {
               <Route path="create" element={<EventsCreate />} />
             </Route>
 
-            <Route element={<ProfileRoute profile={["Admin"]} />}>
+            <Route element={<ProfileRoute profile={["Admin", "Professor"]} />}>
               <Route path=":eventId/edit" element={<EventsEdit />} />
             </Route>
 
