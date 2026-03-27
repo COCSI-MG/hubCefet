@@ -17,262 +17,319 @@ import CertificateFileUpload from "./CertificateFileUpload";
 import HoursInput from "./HoursInput";
 import { useActivityTypes } from "@/hooks/useActivityTypes";
 import { ComplementaryActivityType, complementaryActivityTypeService } from "@/api/services/complementary-activity-type.service";
+import { ExtensionActivityType, extensionActivityTypeService } from "@/api/services/extension-activity-type.service";
 import { ApiError } from "@/api/errors/ApiError";
 
 const certificateFormSchema = z.object({
-  activityType: z.string().min(1, "Selecione o tipo de atividade"),
-  hours: z.number().min(1, "Quantidade de horas deve ser maior que 0").max(999, "Quantidade máxima é 999 horas"),
-  courseName: z.string().min(2, "Nome do curso deve ter pelo menos 2 caracteres").max(100, "Nome muito longo"),
-  complementaryHoursType: z.string().min(1, "Selecione o tipo de atividade complementar").optional(),
+	activityType: z.string().min(1, "Selecione o tipo de atividade"),
+	hours: z.number().min(1, "Quantidade de horas deve ser maior que 0").max(999, "Quantidade máxima é 999 horas"),
+	courseName: z.string().min(2, "Nome do curso deve ter pelo menos 2 caracteres").max(100, "Nome muito longo"),
+	complementaryHoursType: z.string().min(1, "Selecione o tipo de atividade complementar").optional(),
+	extensionHoursType: z.string().min(1, "Selecione o tipo de atividade de extensão").optional(),
 
 });
 
 type CertificateFormSchema = z.infer<typeof certificateFormSchema>;
 
 interface CertificateFormProps {
-  onSubmit: (data: CertificateFormData) => Promise<void>;
-  disabled?: boolean;
+	onSubmit: (data: CertificateFormData) => Promise<void>;
+	disabled?: boolean;
 }
 
 export default function CertificateForm({ onSubmit, disabled = false }: CertificateFormProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<ComplementaryActivityType[]>()
-  const [loaded, setLoaded] = useState(false)
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<ComplementaryActivityType[]>()
+	const [extensionActivityTypes, setExtensionActivityTypes] = useState<ExtensionActivityType[]>()
+	const [loaded, setLoaded] = useState(false)
+	const [extensionLoaded, setExtensionLoaded] = useState(false)
 
-  const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
-
-
-  const form = useForm<CertificateFormSchema>({
-    resolver: zodResolver(certificateFormSchema),
-    defaultValues: {
-      activityType: undefined,
-      hours: 1,
-      courseName: "",
-      complementaryHoursType: undefined
-    },
-  });
-
-  const handleFormSubmit = async (data: CertificateFormSchema) => {
-    if (!selectedFile) {
-      toast.error("Por favor, selecione um arquivo de certificado");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      const formData: CertificateFormData = {
-        ...data,
-        certificateFile: selectedFile,
-      };
-
-      await onSubmit(formData);
-
-      form.reset();
-      setSelectedFile(null);
-
-      toast.success("Certificado enviado com sucesso!");
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(err.message);
-        return;
-      }
-
-      toast.error("Não foi possível enviar o certificado");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  async function fetchComplementaryActivityTypes() {
-    try {
-      const response = await complementaryActivityTypeService.findAll()
-      setComplementaryActivityTypes(response.rows)
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(err.message);
-        return;
-      }
-
-      toast.error("Erro interno no servidor, tente novamente depois");
-    }
-  }
-
-  const handleHoursChange = (value: number) => {
-    form.setValue("hours", value, { shouldValidate: true });
-  };
-
-  const isFormDisabled = disabled || isSubmitting || typesLoading;
-
-  const activityTypeValue = form.watch('activityType')
-
-  useEffect(() => {
-    if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && !loaded) {
-      fetchComplementaryActivityTypes().then(() => setLoaded(true))
-    } else {
-      setComplementaryActivityTypes(undefined)
-      setLoaded(false)
-    }
-  }, [activityTypeValue])
-
-  if (typesError) {
-    return (
-      <Box className="text-center p-8 space-y-4">
-        <Typography variant="body1" color="error">
-          Erro ao carregar tipos de atividades
-        </Typography>
-        <Button onClick={refetch} variant="outline">
-          Tentar novamente
-        </Button>
-      </Box>
-    );
-  }
-
-  return (
-    <Box className="space-y-6">
-      <Box className="flex items-center space-x-3 mb-6">
-        <Award className="h-6 w-6 text-sky-700" />
-        <Typography variant="h5" className="text-xl font-semibold text-sky-900">
-          Cadastro de Certificado
-        </Typography>
-      </Box>
-
-      <Form {...form}>
-        <Box component="form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="activityType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Atividade</FormLabel>
-                <FormControl>
-                  <SearchableSelect
-                    options={activityTypes.map(type => ({
-                      value: type.id,
-                      label: type.name,
-                    }))}
-                    value={field.value ?? ""}
-                    onValueChange={field.onChange}
-                    placeholder="Selecione o tipo de atividade"
-                    searchPlaceholder="Buscar tipos de atividade..."
-                    emptyText="Nenhum tipo encontrado"
-                    disabled={isFormDisabled}
-                    className={cn(
-                      form.formState.errors.activityType && "border-destructive"
-                    )}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && complementaryActivityTypes && (
-            <FormField
-              control={form.control}
-              name="complementaryHoursType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Atividade Complementar</FormLabel>
-                  <FormControl>
-                    <SearchableSelect
-                      options={complementaryActivityTypes.map(type => ({
-                        value: type.id.toString(),
-                        label: type.name,
-                      }))}
-                      value={field.value ?? ""}
-                      onValueChange={field.onChange}
-                      placeholder="Selecione o tipo de atividade complementar"
-                      searchPlaceholder="Buscar tipos de atividades complementares..."
-                      emptyText="Nenhum tipo encontrado"
-                      disabled={isFormDisabled}
-                      className={cn(
-                        form.formState.errors.complementaryHoursType && "border-destructive"
-                      )}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+	const { activityTypes, loading: typesLoading, error: typesError, refetch } = useActivityTypes();
 
 
-          <FormField
-            control={form.control}
-            name="hours"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantidade de Horas</FormLabel>
-                <FormControl>
-                  <HoursInput
-                    value={field.value}
-                    onChange={handleHoursChange}
-                    disabled={isFormDisabled}
-                    error={form.formState.errors.hours?.message}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+	const form = useForm<CertificateFormSchema>({
+		resolver: zodResolver(certificateFormSchema),
+		defaultValues: {
+			activityType: undefined,
+			hours: 1,
+			courseName: "",
+			complementaryHoursType: undefined,
+			extensionHoursType: undefined
+		},
+	});
 
-          <FormField
-            control={form.control}
-            name="courseName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome do Curso</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Ex: Curso de React Avançado"
-                    disabled={isFormDisabled}
-                    className={cn(
-                      "rounded-2xl bg-white bg-opacity-60",
-                      form.formState.errors.courseName && "border-destructive"
-                    )}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+	const handleFormSubmit = async (data: CertificateFormSchema) => {
+		if (!selectedFile) {
+			toast.error("Por favor, selecione um arquivo de certificado");
+			return;
+		}
 
-          <Box className="space-y-2">
-            <Typography
-              component="label"
-              variant="body2"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Certificado (PDF)
-            </Typography>
-            <CertificateFileUpload
-              onFileSelect={setSelectedFile}
-              selectedFile={selectedFile}
-              disabled={isFormDisabled}
-            />
-          </Box>
+		try {
+			setIsSubmitting(true);
 
-          <Button
-            type="submit"
-            disabled={isFormDisabled || !selectedFile}
-            className="w-full rounded-2xl bg-sky-700 hover:bg-sky-800"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enviando...
-              </>
-            ) : (
-              "Cadastrar Certificado"
-            )}
-          </Button>
-        </Box>
-      </Form>
-    </Box>
-  );
+			const formData: CertificateFormData = {
+				...data,
+				certificateFile: selectedFile,
+			};
+
+			await onSubmit(formData);
+
+			form.reset();
+			setSelectedFile(null);
+
+			toast.success("Certificado enviado com sucesso!");
+		} catch (err) {
+			if (err instanceof ApiError) {
+				toast.error(err.message);
+				return;
+			}
+
+			toast.error("Não foi possível enviar o certificado");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	async function fetchComplementaryActivityTypes() {
+		try {
+			const response = await complementaryActivityTypeService.findAll()
+			setComplementaryActivityTypes(response.rows)
+		} catch (err) {
+			if (err instanceof ApiError) {
+				toast.error(err.message);
+				return;
+			}
+
+			toast.error("Erro interno no servidor, tente novamente depois");
+		}
+	}
+
+
+	async function fetchExtensionActivityTypes() {
+		try {
+			const response = await extensionActivityTypeService.findAll()
+			setExtensionActivityTypes(response.rows)
+		} catch (err) {
+			if (err instanceof ApiError) {
+				toast.error(err.message);
+				return;
+			}
+
+			toast.error("Erro interno no servidor, tente novamente depois");
+		}
+	}
+
+	const handleHoursChange = (value: number) => {
+		form.setValue("hours", value, { shouldValidate: true });
+	};
+
+	const isFormDisabled = disabled || isSubmitting || typesLoading;
+
+	const activityTypeValue = form.watch('activityType')
+
+	useEffect(() => {
+		if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && !loaded) {
+			fetchComplementaryActivityTypes().then(() => setLoaded(true))
+		} else {
+			setComplementaryActivityTypes(undefined)
+			setLoaded(false)
+		}
+
+		if (activityTypeValue === ActivityTypeEnum.EXTENSION.toString() && !extensionLoaded) {
+			fetchExtensionActivityTypes().then(() => setExtensionLoaded(true))
+		} else {
+			setExtensionActivityTypes(undefined)
+			setExtensionLoaded(false)
+		}
+	}, [activityTypeValue])
+
+	if (typesError) {
+		return (
+			<Box className="text-center p-8 space-y-4">
+				<Typography variant="body1" color="error">
+					Erro ao carregar tipos de atividades
+				</Typography>
+				<Button onClick={refetch} variant="outline">
+					Tentar novamente
+				</Button>
+			</Box>
+		);
+	}
+
+	return (
+		<Box className="space-y-6">
+			<Box className="flex items-center space-x-3 mb-6">
+				<Award className="h-6 w-6 text-sky-700" />
+				<Typography variant="h5" className="text-xl font-semibold text-sky-900">
+					Cadastro de Certificado
+				</Typography>
+			</Box>
+
+			<Form {...form}>
+				<Box component="form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+					<FormField
+						control={form.control}
+						name="activityType"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Tipo de Atividade</FormLabel>
+								<FormControl>
+									<SearchableSelect
+										options={activityTypes.map(type => ({
+											value: type.id,
+											label: type.name,
+										}))}
+										value={field.value ?? ""}
+										onValueChange={field.onChange}
+										placeholder="Selecione o tipo de atividade"
+										searchPlaceholder="Buscar tipos de atividade..."
+										emptyText="Nenhum tipo encontrado"
+										disabled={isFormDisabled}
+										className={cn(
+											form.formState.errors.activityType && "border-destructive"
+										)}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					{activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && complementaryActivityTypes && (
+						<FormField
+							control={form.control}
+							name="complementaryHoursType"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Tipo de Atividade Complementar</FormLabel>
+									<FormControl>
+										<SearchableSelect
+											options={complementaryActivityTypes.map(type => ({
+												value: type.id.toString(),
+												label: type.name,
+											}))}
+											value={field.value ?? ""}
+											onValueChange={field.onChange}
+											placeholder="Selecione o tipo de atividade complementar"
+											searchPlaceholder="Buscar tipos de atividades complementares..."
+											emptyText="Nenhum tipo encontrado"
+											disabled={isFormDisabled}
+											className={cn(
+												form.formState.errors.complementaryHoursType && "border-destructive"
+											)}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					)}
+
+					{activityTypeValue === ActivityTypeEnum.EXTENSION.toString() && extensionActivityTypes && (
+						<FormField
+							control={form.control}
+							name="extensionHoursType"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Tipo de Atividade de Extensão</FormLabel>
+									<FormControl>
+										<SearchableSelect
+											options={extensionActivityTypes.map(type => ({
+												value: type.id.toString(),
+												label: type.name,
+											}))}
+											value={field.value ?? ""}
+											onValueChange={field.onChange}
+											placeholder="Selecione o tipo de atividade de extensão"
+											searchPlaceholder="Buscar tipos de atividades de extensão..."
+											emptyText="Nenhum tipo encontrado"
+											disabled={isFormDisabled}
+											className={cn(
+												form.formState.errors.extensionHoursType && "border-destructive"
+											)}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					)}
+
+
+					<FormField
+						control={form.control}
+						name="hours"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Quantidade de Horas</FormLabel>
+								<FormControl>
+									<HoursInput
+										value={field.value}
+										onChange={handleHoursChange}
+										disabled={isFormDisabled}
+										error={form.formState.errors.hours?.message}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="courseName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Nome do Curso</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="Ex: Curso de React Avançado"
+										disabled={isFormDisabled}
+										className={cn(
+											"rounded-2xl bg-white bg-opacity-60",
+											form.formState.errors.courseName && "border-destructive"
+										)}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<Box className="space-y-2">
+						<Typography
+							component="label"
+							variant="body2"
+							className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+						>
+							Certificado (PDF)
+						</Typography>
+						<CertificateFileUpload
+							onFileSelect={setSelectedFile}
+							selectedFile={selectedFile}
+							disabled={isFormDisabled}
+						/>
+					</Box>
+
+					<Button
+						type="submit"
+						disabled={isFormDisabled || !selectedFile}
+						className="w-full rounded-2xl bg-sky-700 hover:bg-sky-800"
+					>
+						{isSubmitting ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Enviando...
+							</>
+						) : (
+							"Cadastrar Certificado"
+						)}
+					</Button>
+				</Box>
+			</Form>
+		</Box>
+	);
 }
 
 
