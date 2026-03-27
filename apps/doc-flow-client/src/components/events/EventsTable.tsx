@@ -112,7 +112,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       isAdmin,
       isProfessor,
       user!.sub,
-      isMyEventsPage
+      isMyEventsPage,
     ),
     [openDeleteModal, tableType, isAdmin, isProfessor, user, isMyEventsPage]
   );

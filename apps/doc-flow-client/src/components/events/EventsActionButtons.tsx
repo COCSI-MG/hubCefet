@@ -2,6 +2,7 @@ import { EventsSubscribeButton } from './EventsSubscribeButton';
 import { Row } from '@tanstack/react-table';
 import { Event } from '@/lib/types';
 import { QRCodeGeneratorModal } from '../QRCodeGeneratorModal';
+import { ManualCheckinModal } from './ManualCheckinModal';
 import { useEffect, useState } from 'react';
 import { presenceService } from '@/api/services/presence.service';
 import { ApiError } from '@/api/errors/ApiError';
@@ -59,18 +60,39 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
     <div className="flex flex-col gap-1 md:flex-row min-h-[32px]">
       {isMyEventsPage ? (
         <div className='flex gap-2'>
-          <QRCodeGeneratorModal
-            eventId={event.id}
-            modalType='Check-In'
-            userId={userId}
-            disabled={userHasCheckedIn || !eventAlreadyStarted}
-          />
-          <QRCodeGeneratorModal
-            eventId={event.id}
-            modalType='Check-Out'
-            userId={userId}
-            disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
-          />
+          {event.presence_option === 'qrcode' ? (
+            <>
+              <QRCodeGeneratorModal
+                eventId={event.id}
+                modalType='Check-In'
+                userId={userId}
+                disabled={userHasCheckedIn || !eventAlreadyStarted}
+              />
+              <QRCodeGeneratorModal
+                eventId={event.id}
+                modalType='Check-Out'
+                userId={userId}
+                disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+              />
+            </>
+          ) : (
+            <>
+              <ManualCheckinModal
+                eventId={event.id}
+                userId={userId}
+                modalType='Check-In'
+                disabled={userHasCheckedIn || !eventAlreadyStarted}
+                onSuccess={fetchPresenceStatus}
+              />
+              <ManualCheckinModal
+                eventId={event.id}
+                userId={userId}
+                modalType='Check-Out'
+                disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+                onSuccess={fetchPresenceStatus}
+              />
+            </>
+          )}
         </div>
 
       ) : (
