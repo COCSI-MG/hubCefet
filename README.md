@@ -40,8 +40,8 @@ A full-stack application for managing document flows at CEFET, built with NestJS
    ```
 
 3. **Access the application**:
-   - Frontend: http://localhost
-   - API: http://localhost/api
+   - Frontend: http://localhost:4330
+   - API: http://localhost:4330/api
    - Database Admin: http://localhost:8080
 
 ### Development Setup
@@ -50,7 +50,7 @@ For local development, you can run services individually:
 
 ```bash
 # Start database and cache services
-docker-compose up postgres redis -d
+docker compose up postgres redis -d
 
 # Run backend (from apps/doc-flow)
 cd apps/doc-flow
@@ -100,28 +100,28 @@ nginx handles all routing:
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Build and start
-docker-compose up --build -d
+docker compose up --build -d
 
 # View logs
-docker-compose logs -f [service-name]
+docker compose logs -f [service-name]
 
 # Stop services
-docker-compose down
+docker compose down
 
 # Restart a service
-docker-compose restart [service-name]
+docker compose restart [service-name]
 
 # Run migrations manually
-docker-compose run --rm migrate
+docker compose run --rm migrate
 
 # Run seeds manually
-docker-compose run --rm seed
+docker compose run --rm seed
 
 # Access database
-docker-compose exec postgres psql -U $POSTGRES_USER -d $POSTGRES_DATABASE
+docker compose exec postgres psql -U $POSTGRES_USER -d $POSTGRES_DATABASE
 ```
 
 ## Troubleshooting

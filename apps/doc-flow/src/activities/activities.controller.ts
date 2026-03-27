@@ -15,15 +15,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
 import { Response } from 'express';
 import { ReviewActivityDto } from './dto/review-activity.dto';
 import { UploadCertificateDto } from './dto/upload-certificate.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
+import { GetActivityResponseDto } from './dto/get-activity-response.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { CertificateFileInterceptor } from './interceptors/certificate-file.interceptor';
 
 @ApiTags('Activities')
 @Controller('activities')
@@ -44,21 +44,7 @@ export class ActivitiesController {
   @ApiResponse({ status: 201, description: 'Certificado enviado e 3 professores selecionados para avaliação' })
   @ApiResponse({ status: 400, description: 'Arquivo inválido ou dados incorretos' })
   @ApiResponse({ status: 404, description: 'Tipo de atividade não encontrado' })
-  @UseInterceptors(
-    FileInterceptor('certificate', {
-      storage: memoryStorage(),
-      limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.pdf$/i)) {
-          return cb(new BadRequestException('Apenas arquivos PDF são permitidos'), false);
-        }
-        if (file.mimetype !== 'application/pdf') {
-          return cb(new BadRequestException('Apenas arquivos PDF são permitidos'), false);
-        }
-        cb(null, true);
-      },
-    }),
-  )
+  @UseInterceptors(CertificateFileInterceptor())
 
   uploadCertificate(
     @UploadedFile() file: Express.Multer.File,
@@ -139,7 +125,7 @@ export class ActivitiesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar atividade por ID' })
-  @ApiResponse({ status: 200, description: 'Dados da atividade' })
+  @ApiResponse({ status: 200, description: 'Dados da atividade', type: GetActivityResponseDto })
   @ApiResponse({ status: 404, description: 'Atividade não encontrada' })
   findOne(@Param('id') id: string) {
     return this.activitiesService.findOne(id);
@@ -155,16 +141,23 @@ export class ActivitiesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar atividade' })
-  @ApiResponse({ status: 200, description: 'Atividade atualizada com sucesso' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Dados opcionais da atividade e arquivo PDF opcional',
+    type: UpdateActivityDto,
+  })
+  @ApiResponse({ status: 200, description: 'Atividade atualizada com sucesso', type: GetActivityResponseDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos ou atividade já avaliada' })
   @ApiResponse({ status: 403, description: 'Sem permissão para editar' })
   @ApiResponse({ status: 404, description: 'Atividade não encontrada' })
+  @UseInterceptors(CertificateFileInterceptor())
   update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateDto: UpdateActivityDto,
     @Request() req: any,
   ) {
-    return this.activitiesService.update(id, updateDto, req.user.sub);
+    return this.activitiesService.update(id, updateDto, req.user.sub, file);
   }
 
   @Post(':id/review')
@@ -207,5 +200,3 @@ export class ActivitiesController {
     return this.activitiesService.downloadCertificate(id, res, req.user.sub);
   }
 }
-
-

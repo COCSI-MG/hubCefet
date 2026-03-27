@@ -1,5 +1,9 @@
-node_modules;
-npm - debug.log.git.gitignore;
-README.md.env.nyc_output;
-coverage.dist;
-dist;
+node_modules
+dist
+coverage
+.nyc_output
+npm-debug.log
+.git
+.gitignore
+README.md
+.env

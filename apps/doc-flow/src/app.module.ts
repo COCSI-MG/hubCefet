@@ -20,6 +20,7 @@ import { EmailModule } from './email/email.module';
 import { QueuesModule } from './queues/queues.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { ComplementaryActivityTypeModule } from './complementary-activity-type/complementary-activity-type.module';
+import { ExtensionActivityTypeModule } from './extension-activity-type/extension-activity-type.module';
 import { LoggerModule } from 'nestjs-pino';
 import { GeneralExceptionFilter } from './lib/filters/general.filter';
 
@@ -81,6 +82,7 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
     QueuesModule,
     ActivitiesModule,
     ComplementaryActivityTypeModule,
+    ExtensionActivityTypeModule,
   ],
   controllers: [],
   providers: [

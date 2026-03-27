@@ -1,6 +1,6 @@
 import { ApiError } from '../errors/ApiError';
 import ApiService from './api-service';
-import { CertificateFormData } from '@/lib/types/certificate.types';
+import { CertificateFormData, UpdateCertificateData } from '@/lib/types/certificate.types';
 
 export class CertificateService {
   private apiService: ApiService;
@@ -25,6 +25,10 @@ export class CertificateService {
       formData.append('complementary_activity_type_id', data.complementaryHoursType)
     }
 
+    if (data.extensionHoursType) {
+      formData.append('extension_activity_type_id', data.extensionHoursType)
+    }
+
     return await this.apiService.post('/activities/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -38,18 +42,46 @@ export class CertificateService {
     return await this.apiService.get('/activities/my-stats');
   }
 
-  async getActivity(id: number): Promise<any> {
+  async getActivity(id: string): Promise<any> {
     return await this.apiService.get(`/activities/${id}`);
   }
 
-  async updateActivity(id: number, data: Partial<CertificateFormData>): Promise<any> {
-    const updateData = {
-      course_name: data.courseName,
-      hours: data.hours,
-      activity_type_id: data.activityType,
-    };
+  async updateActivity(id: string, data: UpdateCertificateData): Promise<any> {
+    const formData = new FormData();
 
-    return await this.apiService.patch(`/activities/${id}`, updateData);
+    if (data.courseName) {
+      formData.append('course_name', data.courseName);
+    }
+
+    if (typeof data.hours === 'number') {
+      formData.append('hours', data.hours.toString());
+    }
+
+    if (data.activityType) {
+      formData.append('activity_type_id', data.activityType);
+    }
+
+    if (data.complementaryHoursType) {
+      formData.append(
+        'complementary_activity_type_id',
+        data.complementaryHoursType ?? '',
+      );
+    }
+
+    if (data.extensionHoursType) {
+      formData.append(
+        'extension_activity_type_id',
+        data.extensionHoursType ?? '',
+      );
+    }
+
+    if (data.certificateFile) {
+      formData.append('certificate', data.certificateFile);
+    }
+
+    return await this.apiService.patch(`/activities/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   }
 
   async getActivityTypes(): Promise<any> {
@@ -99,5 +131,3 @@ export class CertificateService {
 }
 
 export const certificateService = new CertificateService();
-
-
