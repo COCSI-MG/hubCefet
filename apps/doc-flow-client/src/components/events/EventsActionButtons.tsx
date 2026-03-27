@@ -2,7 +2,7 @@ import { EventsSubscribeButton } from './EventsSubscribeButton';
 import { Row } from '@tanstack/react-table';
 import { Event } from '@/lib/types';
 import { QRCodeGeneratorModal } from '../QRCodeGeneratorModal';
-import { ManualCheckinModal } from './ManualCheckinModal';
+import { ManualPresenceModal } from './ManualPresenceModal';
 import { useEffect, useState } from 'react';
 import { presenceService } from '@/api/services/presence.service';
 import { ApiError } from '@/api/errors/ApiError';
@@ -77,14 +77,14 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
             </>
           ) : (
             <>
-              <ManualCheckinModal
+              <ManualPresenceModal
                 eventId={event.id}
                 userId={userId}
                 modalType='Check-In'
                 disabled={userHasCheckedIn || !eventAlreadyStarted}
                 onSuccess={fetchPresenceStatus}
               />
-              <ManualCheckinModal
+              <ManualPresenceModal
                 eventId={event.id}
                 userId={userId}
                 modalType='Check-Out'
