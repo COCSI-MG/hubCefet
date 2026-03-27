@@ -26,6 +26,7 @@ export default function EventsCreate() {
       latitude: 0,
       longitude: 0,
       radius: 10,
+      presence_option: "qrcode",
     },
   });
 

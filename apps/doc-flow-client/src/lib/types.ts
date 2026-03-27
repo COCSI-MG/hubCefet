@@ -178,6 +178,7 @@ export const createEventSchema = z
         .int({ message: "O número de vagas deve ser um inteiro" })
         .min(1, { message: "O número de vagas deve ser pelo menos 1" })
     ),
+    presence_option: z.enum(["qrcode", "geo"]),
   })
   .superRefine((val, ctx) => {
     const now = new Date().toISOString();
@@ -255,6 +256,7 @@ export const createEventSchema = z
       latitude,
       longitude,
       vacancies,
+      presence_option,
     }) => {
       const [startYear, startMonth, startDay] = start_at
         .split("-")
@@ -282,6 +284,7 @@ export const createEventSchema = z
         vacancies,
         description,
         radius,
+        presence_option,
       };
     }
   );
