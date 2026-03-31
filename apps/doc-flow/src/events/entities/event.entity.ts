@@ -42,8 +42,7 @@ export class Event extends Model {
   @ApiProperty({
     example: '2021-01-01 00:00:00',
     description: 'Date of the event',
-  })
-  @Column({
+  }) @Column({
     type: DataType.DATE,
     allowNull: false,
   })

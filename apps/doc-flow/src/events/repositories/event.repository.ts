@@ -173,4 +173,16 @@ export class EventRepositoryImpl implements EventRepository {
       vacancies
     });
   }
+
+  async getActiveEvents(limit: number, offset: number): Promise<Event[]> {
+    return await this.eventModel.findAll({
+      offset,
+      limit,
+      where: {
+        status: {
+          [Op.or]: [EventStatus.STATUS_UPCOMING, EventStatus.STATUS_STARTED]
+        }
+      }
+    })
+  }
 }

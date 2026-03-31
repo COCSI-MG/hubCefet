@@ -22,4 +22,5 @@ export interface EventRepository {
   getEventsByUserId(args: GetEventsByUserIdParams): Promise<Event[]>;
   search(query: string): Promise<Event[]>;
   updateVacancies(id: string, vacancies: number): Promise<void>;
+  getActiveEvents(limit: number, offset: number): Promise<Event[]>
 }

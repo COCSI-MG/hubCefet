@@ -120,7 +120,7 @@ export class EventsController {
     return await this.eventsService.endEvent(id);
   }
 
-  @Get('user-events/:id')
+  @Get('user/:id')
   async getUserEvents(
     @Param('id') id: string,
     @Query('offset') offset: number,
@@ -142,4 +142,14 @@ export class EventsController {
   ) {
     return await this.eventsService.decreaseVacancies(id);
   }
+
+
+  @Get('active')
+  async getActiveEvents(
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ): Promise<Event[]> {
+    return await this.eventsService.getActiveEvents(limit, offset)
+  }
 }
+

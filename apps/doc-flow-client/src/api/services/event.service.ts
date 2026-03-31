@@ -32,7 +32,7 @@ export default class EventService extends AbstractService {
   }): Promise<GetAllEventsResponseDto> {
     return await this.api.get(
       this.basePath +
-      `/user-events/${data.id}` +
+      `/user/${data.id}` +
       `?offset=${data.offset}&limit=${data.limit}`,
     );
   }
@@ -63,6 +63,15 @@ export default class EventService extends AbstractService {
     id: string,
   ): Promise<void> {
     return await this.api.patch(this.basePath + `/${id}/vacancies`, {});
+  }
+
+  async getActiveEvents(data: {
+    offset: number;
+    limit: number;
+  }): Promise<Event[]> {
+    return await this.api.get(
+      this.basePath + `/active/?offset=${data.offset}&limit=${data.limit}`,
+    );
   }
 }
 

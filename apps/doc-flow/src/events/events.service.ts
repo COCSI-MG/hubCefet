@@ -245,5 +245,9 @@ export class EventsService {
       throw new UnprocessableEntityException('Sem permissão para alterar este evento');
     }
   }
+
+  async getActiveEvents(limit: number, offset: number): Promise<Event[]> {
+    return await this.eventRepository.getActiveEvents(limit, offset)
+  }
 }
 
