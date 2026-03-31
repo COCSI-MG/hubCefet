@@ -52,7 +52,7 @@ export class FilesService {
   async findAll() {
     const files = await this.fileRepository.findAll();
     if (!files || files.length === 0) {
-      throw new NotFoundException('Files not found');
+      return [];
     }
 
     return files

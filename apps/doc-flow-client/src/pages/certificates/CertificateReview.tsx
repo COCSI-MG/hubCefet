@@ -13,69 +13,30 @@ import {
   Paper,
   Button,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   TablePagination,
-  IconButton,
-  Tooltip,
   CircularProgress,
   Alert
 } from '@mui/material';
 import {
-  CheckCircle as ApproveIcon,
-  Cancel as RejectIcon,
-  Download as DownloadIcon,
+  ArrowForward as ReviewIcon,
 } from '@mui/icons-material';
 import PageHeader from '@/components/PageHeader';
 import { certificateService } from '@/api/services/certificate.service';
 import { toast } from 'sonner';
 import { ApiError } from '@/api/errors/ApiError';
-
-interface Activity {
-  id: string;
-  course_name: string;
-  hours: number;
-  certificate_url: string;
-  activity_type_id: number;
-  status_id: number;
-  created_at: string;
-  user: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  activityType: {
-    id: number;
-    name: string;
-  };
-}
-
-interface ReviewDialogData {
-  open: boolean;
-  activity: Activity | null;
-  decision: 'APPROVED' | 'REJECTED' | null;
-}
+import { useNavigate } from 'react-router-dom';
+import { CertificateReviewListItem } from '@/lib/types/certificate-review.types';
 
 export default function CertificateReview() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const navigate = useNavigate();
+  const [activities, setActivities] = useState<CertificateReviewListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [reviewDialog, setReviewDialog] = useState<ReviewDialogData>({
-    open: false,
-    activity: null,
-    decision: null
-  });
-  const [comments, setComments] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadActivities();
   }, []);
-
 
   const loadActivities = async () => {
     try {
@@ -95,74 +56,12 @@ export default function CertificateReview() {
     }
   };
 
-
-  const handleOpenReviewDialog = (activity: Activity, decision: 'APPROVED' | 'REJECTED') => {
-    setReviewDialog({
-      open: true,
-      activity,
-      decision
-    });
-    setComments('');
-  };
-
-  const handleCloseReviewDialog = () => {
-    setReviewDialog({
-      open: false,
-      activity: null,
-      decision: null
-    });
-    setComments('');
-  };
-
-
-  const handleSubmitReview = async () => {
-    if (!reviewDialog.activity || !reviewDialog.decision) return;
-
-    try {
-      setSubmitting(true);
-
-      await certificateService.reviewActivity(
-        reviewDialog.activity.id,
-        reviewDialog.decision,
-        comments
-      );
-
-      toast.success(
-        reviewDialog.decision === "APPROVED"
-          ? "Certificado aprovado com sucesso!"
-          : "Certificado rejeitado!"
-      );
-
-      handleCloseReviewDialog();
-      loadActivities();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.error("Erro ao avaliar certificado");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDownloadCertificate = async (activity: Activity) => {
-    try {
-      await certificateService.downloadCertificate(activity.id);
-      toast.success("Download iniciado!");
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.error("Erro ao baixar certificado");
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const getStudentName = (activity: CertificateReviewListItem) => {
+    return activity.user.full_name || activity.user.fullName || 'Aluno não encontrado';
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -191,7 +90,7 @@ export default function CertificateReview() {
     <>
       <PageHeader
         title="Avaliação de Certificados"
-        description="Analise e aprove/rejeite os certificados de atividades"
+        description="Selecione um certificado para abrir os detalhes completos antes de avaliar o certificado"
       />
 
       <Box className="ml-6 mr-6 mt-6 max-w-full">
@@ -232,7 +131,7 @@ export default function CertificateReview() {
                           <TableCell>
                             <Box>
                               <Typography variant="body2" className="font-semibold">
-                                {activity.user.fullName}
+                                {getStudentName(activity)}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
                                 {activity.user.email}
@@ -260,37 +159,14 @@ export default function CertificateReview() {
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
-                            <Box display="flex" gap={1} justifyContent="center">
-                              <Tooltip title="Baixar Certificado">
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={() => handleDownloadCertificate(activity)}
-                                >
-                                  <DownloadIcon />
-                                </IconButton>
-                              </Tooltip>
-
-                              <Tooltip title="Aprovar">
-                                <IconButton
-                                  size="small"
-                                  color="success"
-                                  onClick={() => handleOpenReviewDialog(activity, 'APPROVED')}
-                                >
-                                  <ApproveIcon />
-                                </IconButton>
-                              </Tooltip>
-
-                              <Tooltip title="Rejeitar">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => handleOpenReviewDialog(activity, 'REJECTED')}
-                                >
-                                  <RejectIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              endIcon={<ReviewIcon />}
+                              onClick={() => navigate(`/docflow/certificates/review/${activity.id}`)}
+                            >
+                              Avaliar
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -316,67 +192,6 @@ export default function CertificateReview() {
           </CardContent>
         </Card>
       </Box>
-
-      {/* Dialog de Avaliação */}
-      <Dialog
-        open={reviewDialog.open}
-        onClose={handleCloseReviewDialog}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          {reviewDialog.decision === 'APPROVED' ? 'Aprovar Certificado' : 'Rejeitar Certificado'}
-        </DialogTitle>
-        <DialogContent>
-          {reviewDialog.activity && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" className="font-semibold">
-                {reviewDialog.activity.course_name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Aluno: {reviewDialog.activity.user.fullName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Horas: {reviewDialog.activity.hours}h
-              </Typography>
-            </Box>
-          )}
-
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Comentários (opcional)"
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            value={comments}
-            onChange={(e) => setComments(e.target.value)}
-            placeholder={
-              reviewDialog.decision === 'APPROVED'
-                ? 'Adicione comentários sobre a aprovação...'
-                : 'Explique o motivo da rejeição...'
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseReviewDialog}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmitReview}
-            variant="contained"
-            color={reviewDialog.decision === 'APPROVED' ? 'success' : 'error'}
-            disabled={submitting}
-            startIcon={submitting ? <CircularProgress size={20} /> : null}
-          >
-            {submitting ? 'Processando...' :
-              reviewDialog.decision === 'APPROVED' ? 'Aprovar' : 'Rejeitar'}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }
-
-

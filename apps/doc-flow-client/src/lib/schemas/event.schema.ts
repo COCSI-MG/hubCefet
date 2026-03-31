@@ -26,6 +26,7 @@ export const createEventSchema = z
     longitude: z.number().min(-180).max(180),
     radius: z.number().min(1).max(10000),
     vacancies: z.number().min(1),
+    presence_option: z.enum(["qrcode", "geo"]),
   })
   .superRefine((val, ctx) => {
     const now = new Date().toISOString();
@@ -103,6 +104,7 @@ export const createEventSchema = z
       radius,
       vacancies,
       description,
+      presence_option,
     }) => {
       const [startYear, startMonth, startDay] = start_at
         .split("-")
@@ -130,6 +132,7 @@ export const createEventSchema = z
         radius,
         vacancies,
         description,
+        presence_option,
       };
     }
   );

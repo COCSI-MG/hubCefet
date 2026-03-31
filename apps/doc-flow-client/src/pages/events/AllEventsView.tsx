@@ -50,7 +50,13 @@ export default function AllEventsView() {
       />
       <div className="container max-w-full flex flex-col space-y-2 p-6 h-fit">
         <div className="p-1">
-          <EventsDataTable events={events} fetchEvents={fetchEvents} setPagination={setPagination} pagination={pagination} tableType="all" />
+          <EventsDataTable
+            events={events}
+            fetchEvents={fetchEvents}
+            setPagination={setPagination}
+            pagination={pagination}
+            tableType="all"
+          />
         </div>
       </div>
     </div>

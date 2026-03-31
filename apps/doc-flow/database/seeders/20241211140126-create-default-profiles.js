@@ -3,37 +3,18 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-     */
-    return await queryInterface.bulkInsert(
-      'profiles',
-      [
-        {
-          id: '514c5e8d-d430-40e2-b878-f263c3f9d796',
-          name: 'admin',
-        },
-        {
-          id: '718c2e4d-a241-4db9-9c55-e8b1f3d7c849',
-          name: 'user',
-        },
-        {
-          id: 'a92d5f6e-c342-4fb7-8e11-d6a9c7b4e582',
-          name: 'professor',
-        },
-        {
-          id: 'b84f7a2e-f153-4c8a-9b66-c2d8e9a7f341',
-          name: 'student',
-        },
-      ],
-      {},
-    );
+    return await queryInterface.sequelize.query(`
+      INSERT INTO profiles (id, name, created_at, updated_at)
+      VALUES
+        ('514c5e8d-d430-40e2-b878-f263c3f9d796', 'admin', NOW(), NOW()),
+        ('718c2e4d-a241-4db9-9c55-e8b1f3d7c849', 'user', NOW(), NOW()),
+        ('a92d5f6e-c342-4fb7-8e11-d6a9c7b4e582', 'professor', NOW(), NOW()),
+        ('b84f7a2e-f153-4c8a-9b66-c2d8e9a7f341', 'student', NOW(), NOW())
+      ON CONFLICT (id) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        updated_at = NOW();
+    `);
   },
 
   async down(queryInterface, Sequelize) {

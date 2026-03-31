@@ -26,7 +26,7 @@ module.exports = {
       type: 'foreign key',
       name: 'activity_reviewers_activity_id_fkey',
       references: {
-        table: 'complementary_activities',
+        table: 'activities',
         field: 'id',
       },
       onDelete: 'CASCADE',

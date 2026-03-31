@@ -40,6 +40,15 @@ export class UploadCertificateDto {
   complementary_activity_type_id: number;
 
   @ApiProperty({
+    example: 1,
+    description: 'ID do tipo de atividade de extensão',
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  extension_activity_type_id: number;
+
+  @ApiProperty({
     type: 'string',
     format: 'binary',
     description: 'Arquivo PDF do certificado',

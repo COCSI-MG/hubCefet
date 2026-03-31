@@ -3,11 +3,13 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ActivityTypeRepository } from './repositories/activity-type.repository';
 import { ActivityReviewRepository } from './repositories/activity-review.repository';
 import { ActivityReviewerRepository } from './repositories/activity-reviewer.repository';
+import { ActivityHistoryRepository } from './repositories/activity-history.repository';
 import { ReviewSettingRepository } from './repositories/review-setting.repository';
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
 import {
   Activity,
+  ActivityHistory,
   ActivityType,
   ActivityStatus,
   ActivityReviewer,
@@ -23,6 +25,7 @@ import { ActivitiesController } from './activities.controller';
   imports: [
     SequelizeModule.forFeature([
       Activity,
+      ActivityHistory,
       ActivityType,
       ActivityStatus,
       ActivityReviewer,
@@ -38,6 +41,7 @@ import { ActivitiesController } from './activities.controller';
     ActivityTypeRepository,
     ActivityReviewRepository,
     ActivityReviewerRepository,
+    ActivityHistoryRepository,
     ReviewSettingRepository,
     ProfessorSelectionService,
     FileUploadService,
@@ -48,11 +52,10 @@ import { ActivitiesController } from './activities.controller';
     ActivityTypeRepository,
     ActivityReviewRepository,
     ActivityReviewerRepository,
+    ActivityHistoryRepository,
     ReviewSettingRepository,
     ProfessorSelectionService,
     FileUploadService,
   ],
 })
 export class ActivitiesModule { }
-
-

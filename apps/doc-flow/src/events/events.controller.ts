@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
 import { Profiles } from 'src/profile/decorators/profile.decorator';
 import { Profile } from 'src/profile/enum/profile.enum';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -22,6 +21,7 @@ import { GetAllEventsResponseDto } from './dto/get-all-events-response.dto';
 import { GetEventResponseDto } from './dto/get-event-response.dto';
 import { EndEventResponseDto } from './dto/end-event-response.dto';
 import { UserRequest } from 'src';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -86,19 +86,27 @@ export class EventsController {
     return { event, isStarted, isEnded };
   }
 
-  @Profiles(Profile.Admin)
+  @Profiles(Profile.Admin, Profile.Professor)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateEventDto: UpdateEventDto,
+    @Req() req: UserRequest,
   ) {
-    return await this.eventsService.update(id, updateEventDto);
+    const userId = req.user?.sub;
+
+    return await this.eventsService.update(id, updateEventDto, userId);
   }
 
-  @Profiles(Profile.Admin)
+  @Profiles(Profile.Admin, Profile.Professor)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.eventsService.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @Req() req: UserRequest,
+  ) {
+    const userId = req.user?.sub;
+
+    return await this.eventsService.remove(id, userId);
   }
 
   @ApiOperation({ summary: 'End an event' })
@@ -112,7 +120,7 @@ export class EventsController {
     return await this.eventsService.endEvent(id);
   }
 
-  @Get('user-events/:id')
+  @Get('user/:id')
   async getUserEvents(
     @Param('id') id: string,
     @Query('offset') offset: number,
@@ -134,4 +142,14 @@ export class EventsController {
   ) {
     return await this.eventsService.decreaseVacancies(id);
   }
+
+
+  @Get('active')
+  async getActiveEvents(
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ): Promise<Event[]> {
+    return await this.eventsService.getActiveEvents(limit, offset)
+  }
 }
+

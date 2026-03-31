@@ -19,8 +19,9 @@ import FileCreate from "@/pages/files/FileCreate";
 import { AppSelection } from "@/pages/AppSelection";
 import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
-import { CertificateReview } from "@/pages/certificates";
+import { CertificateDetails, CertificateReview, CertificateReviewDetails } from "@/pages/certificates";
 import { ComplementaryActivityTypeManagement } from "@/pages/complementaryActivityType/ComplementaryActivityType";
+import { ExtensionActivityTypeManagement } from "@/pages/extensionActivityType/ExtensionActivityType";
 import AppSelecionLayout from "@/layouts/AppSelectionLayout";
 import AllEventsView from "@/pages/events/AllEventsView";
 import UserEventsView from "@/pages/events/UserEventsView";
@@ -34,7 +35,7 @@ export default function Router() {
           <Route path="/" element={<Navigate to="/apps" replace />} />
 
           <Route path="/apps" element={<AppSelecionLayout />}>
-            <Route path="" element={<AppSelection />} />
+            <Route index element={<AppSelection />} />
           </Route>
 
           <Route path="/profile" element={<Profile />} />
@@ -55,16 +56,25 @@ export default function Router() {
               path="complementary"
               element={<ProfileRoute profile={["Admin"]} />}
             >
-              <Route path="" element={<ComplementaryActivityTypeManagement />} />
+              <Route index element={<ComplementaryActivityTypeManagement />} />
+            </Route>
+
+            <Route
+              path="extension"
+              element={<ProfileRoute profile={["Admin"]} />}
+            >
+              <Route index element={<ExtensionActivityTypeManagement />} />
             </Route>
 
             <Route path="certificates">
               <Route element={<ProfileRoute profile={["Student"]} />}>
                 <Route path="create" element={<CertificateCreate />} />
                 <Route path="dashboard" element={<CertificateDashboard />} />
+                <Route path=":activityId" element={<CertificateDetails />} />
               </Route>
               <Route element={<ProfileRoute profile={["Professor"]} />}>
                 <Route path="review" element={<CertificateReview />} />
+                <Route path="review/:activityId" element={<CertificateReviewDetails />} />
               </Route>
             </Route>
           </Route>
@@ -80,7 +90,7 @@ export default function Router() {
               <Route path="create" element={<EventsCreate />} />
             </Route>
 
-            <Route element={<ProfileRoute profile={["Admin"]} />}>
+            <Route element={<ProfileRoute profile={["Admin", "Professor"]} />}>
               <Route path=":eventId/edit" element={<EventsEdit />} />
             </Route>
 
