@@ -4,6 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.removeColumn('presences', 'status');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_presences_status";');
 
     await queryInterface.addColumn('presences', 'status', {
       type: Sequelize.ENUM('registred', 'present', 'finalized'),

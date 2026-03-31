@@ -11,7 +11,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('events', 'event_presence_option')
+    await queryInterface.removeColumn('events', 'presence_option')
     await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_events_presence_option";');
   }
 };
