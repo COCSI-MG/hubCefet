@@ -6,6 +6,7 @@ import { User } from '../../users/entities/user.entity';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { UpdateActivityDto } from '../dto/update-activity.dto';
 import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
+import { ExtensionActivityType } from '../../extension-activity-type/entities/extension-activity-type.entity';
 
 @Injectable()
 export class ActivityRepository {
@@ -43,6 +44,7 @@ export class ActivityRepository {
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
         { model: ComplementaryActivityType, as: 'complementaryActivityType' },
+        { model: ExtensionActivityType, as: 'extensionActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -94,6 +96,7 @@ export class ActivityRepository {
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
         { model: ComplementaryActivityType, as: 'complementaryActivityType' },
+        { model: ExtensionActivityType, as: 'extensionActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,
@@ -118,6 +121,7 @@ export class ActivityRepository {
         { model: ActivityType, as: 'activityType' },
         { model: ActivityStatus, as: 'status' },
         { model: ComplementaryActivityType, as: 'complementaryActivityType' },
+        { model: ExtensionActivityType, as: 'extensionActivityType' },
         { model: User, as: 'user' },
         {
           model: ActivityReviewer,

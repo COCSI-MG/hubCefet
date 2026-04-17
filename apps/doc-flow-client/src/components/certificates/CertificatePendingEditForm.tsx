@@ -12,6 +12,10 @@ import {
   ComplementaryActivityType,
   complementaryActivityTypeService,
 } from "@/api/services/complementary-activity-type.service";
+import {
+  ExtensionActivityType,
+  extensionActivityTypeService,
+} from "@/api/services/extension-activity-type.service";
 import { certificateService } from "@/api/services/certificate.service";
 import { ApiError } from "@/api/errors/ApiError";
 import { ActivityTypeEnum, UpdateCertificateData } from "@/lib/types/certificate.types";
@@ -27,6 +31,7 @@ interface CertificatePendingEditFormProps {
 interface PendingEditFormState {
   activityType: string;
   complementaryHoursType: string;
+  extensionHoursType: string;
   hours: string;
   courseName: string;
 }
@@ -34,6 +39,7 @@ interface PendingEditFormState {
 const initialFormState: PendingEditFormState = {
   activityType: "",
   complementaryHoursType: "",
+  extensionHoursType: "",
   hours: "",
   courseName: "",
 };
@@ -49,6 +55,9 @@ export function CertificatePendingEditForm({
   const [complementaryActivityTypes, setComplementaryActivityTypes] = useState<
     ComplementaryActivityType[]
   >([]);
+  const [extensionActivityTypes, setExtensionActivityTypes] = useState<
+    ExtensionActivityType[]
+  >([]);
 
   const {
     activityTypes,
@@ -60,10 +69,16 @@ export function CertificatePendingEditForm({
   const effectiveActivityType = formData.activityType || certificate.activity_type_id.toString();
   const shouldShowComplementaryType =
     effectiveActivityType === ActivityTypeEnum.COMPLEMENTARY.toString();
+  const shouldShowExtensionType =
+    effectiveActivityType === ActivityTypeEnum.EXTENSION.toString();
 
   const currentComplementaryTypeName = useMemo(() => {
     return certificate.complementaryActivityType?.name || "Não informado";
   }, [certificate.complementaryActivityType?.name]);
+
+  const currentExtensionTypeName = useMemo(() => {
+    return certificate.extensionActivityType?.name || "Não informado";
+  }, [certificate.extensionActivityType?.name]);
 
   useEffect(() => {
     if (!shouldShowComplementaryType || complementaryActivityTypes.length > 0) {
@@ -90,12 +105,37 @@ export function CertificatePendingEditForm({
     void loadComplementaryTypes();
   }, [complementaryActivityTypes.length, shouldShowComplementaryType]);
 
+  useEffect(() => {
+    if (!shouldShowExtensionType || extensionActivityTypes.length > 0) {
+      return;
+    }
+
+    const loadExtensionTypes = async () => {
+      try {
+        const response = await extensionActivityTypeService.findAll();
+        setExtensionActivityTypes(response.rows);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          toast.error(error.message);
+          return;
+        }
+
+        toast.error("Erro ao carregar tipos de atividades de extensão.");
+      }
+    };
+
+    void loadExtensionTypes();
+  }, [extensionActivityTypes.length, shouldShowExtensionType]);
+
   const handleChange = (field: keyof PendingEditFormState, value: string) => {
     setFormData((current) => ({
       ...current,
       [field]: value,
       ...(field === "activityType" && value !== ActivityTypeEnum.COMPLEMENTARY.toString()
         ? { complementaryHoursType: "" }
+        : {}),
+      ...(field === "activityType" && value !== ActivityTypeEnum.EXTENSION.toString()
+        ? { extensionHoursType: "" }
         : {}),
     }));
   };
@@ -135,6 +175,10 @@ export function CertificatePendingEditForm({
 
     if (formData.complementaryHoursType) {
       payload.complementaryHoursType = formData.complementaryHoursType;
+    }
+
+    if (formData.extensionHoursType) {
+      payload.extensionHoursType = formData.extensionHoursType;
     }
 
     if (selectedFile) {
@@ -254,6 +298,28 @@ export function CertificatePendingEditForm({
                     searchPlaceholder="Buscar tipos complementares..."
                     emptyText="Nenhum tipo encontrado"
                     disabled={loadingComplementaryTypes || isSubmitting}
+                    className={cn("rounded-2xl bg-white bg-opacity-60")}
+                  />
+                </Box>
+              )}
+
+              {shouldShowExtensionType && (
+                <Box className="space-y-2">
+                  <Typography variant="body2" className="font-medium">
+                    Tipo de Atividade de Extensão
+                  </Typography>
+                  <SearchableSelect
+                    options={extensionActivityTypes.map((type) => ({
+                      value: type.id.toString(),
+                      label: type.name,
+                      description: type.description,
+                    }))}
+                    value={formData.extensionHoursType}
+                    onValueChange={(value) => handleChange("extensionHoursType", value)}
+                    placeholder={`Atual: ${currentExtensionTypeName}`}
+                    searchPlaceholder="Buscar tipos de extensão..."
+                    emptyText="Nenhum tipo encontrado"
+                    disabled={isSubmitting}
                     className={cn("rounded-2xl bg-white bg-opacity-60")}
                   />
                 </Box>

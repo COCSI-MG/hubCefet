@@ -9,6 +9,7 @@ export interface CertificateFormData {
   courseName: string;
   certificateFile: File | null;
   complementaryHoursType?: string | undefined;
+  extensionHoursType?: string | undefined;
 }
 
 export interface UpdateCertificateData {
@@ -16,6 +17,7 @@ export interface UpdateCertificateData {
   hours?: number;
   courseName?: string;
   complementaryHoursType?: string | null;
+  extensionHoursType?: string | null;
   certificateFile?: File | null;
 }
 

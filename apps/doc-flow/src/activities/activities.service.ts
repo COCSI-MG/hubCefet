@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, UnprocessableEntityException } from '@nestjs/common';
 import { Response } from 'express';
 import { createReadStream, existsSync } from 'fs';
 import { join } from 'path';
@@ -18,6 +18,7 @@ import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { ActivityHistoryType } from './enum/activity-history-type.enum';
 import { ActivityHistoryLogItemDto, GetActivityResponseDto } from './dto/get-activity-response.dto';
+import { ActivityTypeEnum } from './enum/activity-type.enum';
 
 @Injectable()
 export class ActivitiesService {
@@ -46,6 +47,23 @@ export class ActivitiesService {
       throw new NotFoundException('Tipo de atividade não encontrado');
     }
 
+    if (uploadDto.activity_type_id === ActivityTypeEnum.COMPLEMENTARY && !uploadDto.complementary_activity_type_id) {
+      throw new UnprocessableEntityException('E necessario selecionar um tipo de atividade complementar')
+    }
+
+
+    if (uploadDto.activity_type_id === ActivityTypeEnum.EXTENSION && !uploadDto.extension_activity_type_id) {
+      throw new UnprocessableEntityException('E necessario selecionar um tipo de atividade de extensao')
+    }
+
+    if (uploadDto.activity_type_id === ActivityTypeEnum.COMPLEMENTARY && uploadDto.extension_activity_type_id) {
+      throw new UnprocessableEntityException('Nao e possivel selecionar um subtipo de extensão enviado para uma atividade complementar');
+    }
+
+    if (uploadDto.activity_type_id === ActivityTypeEnum.EXTENSION && uploadDto.complementary_activity_type_id) {
+      throw new UnprocessableEntityException('Nao e possivel selecionar um subtipo complementar enviado para uma atividade de extensão')
+    }
+
     const requiredReviewers = await this.reviewSettingRepository.getRequiredReviewers();
 
     try {
@@ -67,7 +85,8 @@ export class ActivitiesService {
         hours: uploadDto.hours,
         activity_type_id: uploadDto.activity_type_id,
         certificate_url: filePath,
-        complementary_activity_type_id: uploadDto.complementary_activity_type_id
+        complementary_activity_type_id: uploadDto.complementary_activity_type_id,
+        extension_activity_type_id: uploadDto.extension_activity_type_id
       }, userId, transaction);
 
       const selectedProfessors = await this.professorSelectionService.selectRandomProfessors(requiredReviewers);
@@ -83,14 +102,22 @@ export class ActivitiesService {
 
       await transaction.commit();
 
-      return {
+      const activityResponse = {
         id: activity.id,
         course_name: activity.course_name,
         hours: activity.hours,
         certificate_url: activity.certificate_url,
         activity_type_id: activity.activity_type_id,
         created_at: activity.created_at,
+        ...(activity.activity_type_id === ActivityTypeEnum.EXTENSION && {
+          extension_activity_type_id: activity.extension_activity_type_id
+        }),
+        ...(activity.activity_type_id === ActivityTypeEnum.COMPLEMENTARY && {
+          complementary_activity_type_id: activity.complementary_activity_type_id
+        }),
       } as Activity;
+
+      return activityResponse
 
     } catch (error) {
       await transaction.rollback();
@@ -200,6 +227,10 @@ export class ActivitiesService {
 
       if (updateDto.complementary_activity_type_id !== undefined) {
         updatePayload.complementary_activity_type_id = updateDto.complementary_activity_type_id;
+      }
+
+      if (updateDto.extension_activity_type_id !== undefined) {
+        updatePayload.extension_activity_type_id = updateDto.extension_activity_type_id;
       }
 
       if (file) {
@@ -351,10 +382,12 @@ export class ActivitiesService {
       created_at: activity.created_at,
       updated_at: activity.updated_at,
       complementary_activity_type_id: activity.complementary_activity_type_id,
+      extension_activity_type_id: activity.extension_activity_type_id,
       user: activity.user,
       activityType: activity.activityType,
       status: activity.status,
       complementaryActivityType: activity.complementaryActivityType,
+      extensionActivityType: activity.extensionActivityType,
       reviewers: activity.reviewers ?? [],
       history: this.mapActivityHistory(activity.history ?? []),
     };

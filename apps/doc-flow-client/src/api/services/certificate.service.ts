@@ -25,6 +25,10 @@ export class CertificateService {
       formData.append('complementary_activity_type_id', data.complementaryHoursType)
     }
 
+    if (data.extensionHoursType) {
+      formData.append('extension_activity_type_id', data.extensionHoursType)
+    }
+
     return await this.apiService.post('/activities/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -57,10 +61,17 @@ export class CertificateService {
       formData.append('activity_type_id', data.activityType);
     }
 
-    if (Object.prototype.hasOwnProperty.call(data, 'complementaryHoursType')) {
+    if (data.complementaryHoursType) {
       formData.append(
         'complementary_activity_type_id',
         data.complementaryHoursType ?? '',
+      );
+    }
+
+    if (data.extensionHoursType) {
+      formData.append(
+        'extension_activity_type_id',
+        data.extensionHoursType ?? '',
       );
     }
 

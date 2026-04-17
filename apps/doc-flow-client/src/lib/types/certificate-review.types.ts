@@ -71,6 +71,8 @@ export interface CertificateReviewDetailsData {
   updated_at: string;
   complementary_activity_type_id?: number | null;
   complementaryActivityType?: CertificateReviewComplementaryType | null;
+  extension_activity_type_id?: number | null;
+  extensionActivityType?: CertificateReviewComplementaryType | null;
   activityType?: CertificateReviewActivityType;
   status?: CertificateReviewStatus;
   user: CertificateReviewUser;
