@@ -3,19 +3,19 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('review_settings', [
-      {
-        key: 'required_reviewers',
-        required_approvals: 3,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ], {});
+    await queryInterface.sequelize.query(`
+      INSERT INTO review_settings (key, required_approvals, created_at, updated_at)
+      VALUES ('required_reviewers', 3, NOW(), NOW())
+      ON CONFLICT (key) DO UPDATE
+      SET
+        required_approvals = EXCLUDED.required_approvals,
+        updated_at = NOW();
+    `);
   },
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('review_settings', null, {});
   }
-}; 
+};
  
  

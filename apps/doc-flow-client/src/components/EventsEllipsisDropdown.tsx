@@ -1,7 +1,7 @@
 import { DropdownMenuItem } from "./ui/dropdown-menu";
 import EllipsisDropdown from "./EllipsisDropdown";
 import { Edit } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 interface EventsEllipsisDropdownInterface {
   eventId: string;

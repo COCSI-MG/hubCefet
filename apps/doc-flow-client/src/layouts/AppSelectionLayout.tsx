@@ -2,7 +2,7 @@ import { AppSelectionMobileMenu } from "@/components/AppSelectionMobileMenu";
 import { AppSelectionSidebar } from "@/components/AppSelectionSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 
 export default function AppSelecionLayout() {
