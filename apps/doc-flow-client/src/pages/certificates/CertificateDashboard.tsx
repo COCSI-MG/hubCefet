@@ -37,9 +37,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import CancelIcon from '@mui/icons-material/Cancel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import DownloadIcon from '@mui/icons-material/Download';
+import EditIcon from '@mui/icons-material/Edit';
 import { IconButton } from '@mui/material';
 import { ApiError } from '@/api/errors/ApiError';
+import { useNavigate } from 'react-router-dom';
 
 interface Activity {
   id: string;
@@ -75,6 +76,7 @@ const statusMap = {
 };
 
 export default function CertificateDashboard() {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
@@ -124,23 +126,6 @@ export default function CertificateDashboard() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pt-BR");
-  };
-
-  const handleDownloadCertificate = async (
-    activityId: string,
-    courseName: string
-  ) => {
-    try {
-      await certificateService.downloadCertificate(activityId);
-      toast.success(`Arquivo do curso "${courseName}" baixado com sucesso!`);
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(err.message);
-        return;
-      }
-
-      toast.error("Erro ao baixar arquivo. Tente novamente.");
-    }
   };
 
   const pieData = stats ? [
@@ -421,20 +406,14 @@ export default function CertificateDashboard() {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          {activity.certificate_url ? (
-                            <IconButton
-                              onClick={() => handleDownloadCertificate(activity.id, activity.course_name)}
-                              color="primary"
-                              title="Baixar Arquivo"
-                              size="small"
-                            >
-                              <DownloadIcon />
-                            </IconButton>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">
-                              N/A
-                            </Typography>
-                          )}
+                          <IconButton
+                            onClick={() => navigate(`/docflow/certificates/${activity.id}`)}
+                            color="primary"
+                            title="Abrir certificado"
+                            size="small"
+                          >
+                            <EditIcon />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -454,5 +433,4 @@ export default function CertificateDashboard() {
     </>
   );
 }
-
 

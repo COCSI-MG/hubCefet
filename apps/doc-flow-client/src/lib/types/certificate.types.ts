@@ -11,9 +11,15 @@ export interface CertificateFormData {
   complementaryHoursType?: string | undefined;
 }
 
+export interface UpdateCertificateData {
+  activityType?: string;
+  hours?: number;
+  courseName?: string;
+  complementaryHoursType?: string | null;
+  certificateFile?: File | null;
+}
+
 export enum ActivityTypeEnum {
   COMPLEMENTARY = 1,
   EXTENSION = 2
 }
-
-

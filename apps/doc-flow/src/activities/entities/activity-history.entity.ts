@@ -1,20 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { User } from '../../users/entities/user.entity';
+import { ActivityHistoryType } from '../enum/activity-history-type.enum';
 import { Activity } from './activity.entity';
 
 @Table({
-  tableName: 'activity_reviews',
-  timestamps: true,
-  createdAt: false,
-  updatedAt: false,
-  deletedAt: 'deleted_at',
-  paranoid: true,
+  tableName: 'activity_histories',
+  timestamps: false,
 })
-export class ActivityReview extends Model {
+export class ActivityHistory extends Model {
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
-    description: 'Activity Review ID',
+    description: 'Activity history ID',
   })
   @Column({
     type: DataType.UUID,
@@ -37,62 +34,50 @@ export class ActivityReview extends Model {
 
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
-    description: 'Reviewer User ID',
+    description: 'User ID responsible for the action',
   })
   @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,
   })
-  reviewer_user_id: string;
+  user_id: string;
 
   @ApiProperty({
-    example: 'APPROVED',
-    description: 'Review decision',
-    enum: ['APPROVED', 'REJECTED'],
+    example: ActivityHistoryType.CREATED,
+    description: 'History type',
+    enum: ActivityHistoryType,
   })
   @Column({
-    type: DataType.ENUM('APPROVED', 'REJECTED'),
+    type: DataType.ENUM(...Object.values(ActivityHistoryType)),
     allowNull: false,
   })
-  decision: 'APPROVED' | 'REJECTED';
+  type: ActivityHistoryType;
 
   @ApiProperty({
-    example: 'Certificado válido e atividade comprovada',
-    description: 'Review comments',
+    example: 'Atividade criada pelo aluno',
+    description: 'Description of the action',
   })
   @Column({
     type: DataType.TEXT,
-    allowNull: true,
+    allowNull: false,
   })
-  comments: string;
+  description: string;
 
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
-    description: 'Date and time when review was made',
+    description: 'Date and time when the action happened',
   })
   @Column({
     type: DataType.DATE,
     allowNull: false,
     defaultValue: DataType.NOW,
   })
-  reviewed_at: Date;
+  created_at: Date;
 
-  @ApiProperty({
-    example: '2024-01-01T00:00:00.000Z',
-    description: 'Date and time when review was soft deleted',
-    required: false,
-  })
-  @Column({
-    type: DataType.DATE,
-    allowNull: true,
-  })
-  deleted_at?: Date | null;
-
-  @BelongsTo(() => Activity)
+  @BelongsTo(() => Activity, 'activity_id')
   activity: Activity;
 
-  @BelongsTo(() => User)
-  reviewer: User;
+  @BelongsTo(() => User, 'user_id')
+  user: User;
 }
-

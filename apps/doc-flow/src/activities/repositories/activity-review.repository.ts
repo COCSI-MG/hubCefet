@@ -15,14 +15,18 @@ export class ActivityReviewRepository {
     activityId: string,
     reviewerId: string,
     reviewData: ReviewActivityDto,
+    transaction?: any,
   ): Promise<ActivityReview> {
-    return this.activityReviewModel.create({
-      activity_id: activityId,
-      reviewer_user_id: reviewerId,
-      decision: reviewData.decision,
-      comments: reviewData.comments,
-      reviewed_at: new Date(),
-    });
+    return this.activityReviewModel.create(
+      {
+        activity_id: activityId,
+        reviewer_user_id: reviewerId,
+        decision: reviewData.decision,
+        comments: reviewData.comments,
+        reviewed_at: new Date(),
+      },
+      { transaction },
+    );
   }
 
   async findByActivity(activityId: string): Promise<ActivityReview[]> {
@@ -41,37 +45,48 @@ export class ActivityReviewRepository {
     });
   }
 
-  async findOne(activityId: string, reviewerId: string): Promise<ActivityReview | null> {
+  async findOne(activityId: string, reviewerId: string, transaction?: any): Promise<ActivityReview | null> {
     return this.activityReviewModel.findOne({
       where: {
         activity_id: activityId,
         reviewer_user_id: reviewerId,
       },
       include: [{ model: User, as: 'reviewer' }],
+      transaction,
     });
   }
 
-  async countApprovedByActivity(activityId: string): Promise<number> {
+  async countApprovedByActivity(activityId: string, transaction?: any): Promise<number> {
     return this.activityReviewModel.count({
       where: {
         activity_id: activityId,
         decision: 'APPROVED',
       },
+      transaction,
     });
   }
 
-  async countRejectedByActivity(activityId: string): Promise<number> {
+  async countRejectedByActivity(activityId: string, transaction?: any): Promise<number> {
     return this.activityReviewModel.count({
       where: {
         activity_id: activityId,
         decision: 'REJECTED',
       },
+      transaction,
     });
   }
 
-  async countTotalByActivity(activityId: string): Promise<number> {
+  async countTotalByActivity(activityId: string, transaction?: any): Promise<number> {
     return this.activityReviewModel.count({
       where: { activity_id: activityId },
+      transaction,
+    });
+  }
+
+  async softDeleteByActivity(activityId: string, transaction?: any): Promise<number> {
+    return this.activityReviewModel.destroy({
+      where: { activity_id: activityId },
+      transaction,
     });
   }
 }
