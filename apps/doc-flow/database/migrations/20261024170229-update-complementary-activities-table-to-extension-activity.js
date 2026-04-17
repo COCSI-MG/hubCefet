@@ -16,7 +16,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('activities', 'complementary_activities_type');
+    await queryInterface.removeColumn('activities', 'complementary_activity_type_id');
 
     await queryInterface.renameTable('activities', 'complementary_activities');
   }

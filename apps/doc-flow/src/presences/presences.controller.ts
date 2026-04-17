@@ -80,7 +80,6 @@ export class PresencesController {
     return await this.presencesService.findOne(id);
   }
 
-  @Profiles(Profile.Admin, Profile.Professor)
   @Patch(':id')
   async update(
     @Param('id') id: string,

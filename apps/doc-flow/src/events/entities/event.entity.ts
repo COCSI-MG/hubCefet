@@ -1,16 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   BelongsTo,
-  Column,
-  DataType,
-  HasMany,
-  Model,
-  Scopes,
+  Column, DataType, HasMany, Model, Scopes,
   Table,
 } from 'sequelize-typescript';
 import { Presence } from 'src/presences/entities/presence.entity';
 import { EventStatus } from '../enum/event-status.enum';
 import { User } from 'src/users/entities/user.entity';
+import { EventPresenceOptionEnum } from '../enum/event-presence-option.enum';
 @Scopes(() => ({
   withoutTimestamps: {
     attributes: {
@@ -45,8 +42,7 @@ export class Event extends Model {
   @ApiProperty({
     example: '2021-01-01 00:00:00',
     description: 'Date of the event',
-  })
-  @Column({
+  }) @Column({
     type: DataType.DATE,
     allowNull: false,
   })
@@ -124,6 +120,12 @@ export class Event extends Model {
     allowNull: true,
   })
   radius: number;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(EventPresenceOptionEnum)),
+    allowNull: false,
+  })
+  presence_option: string;
 
   @HasMany(() => Presence, 'event_id')
   presences: Presence[];

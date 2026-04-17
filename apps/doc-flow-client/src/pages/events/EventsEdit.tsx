@@ -28,6 +28,7 @@ export default function EventsEdit() {
         longitude: event.longitude,
         radius: event.radius,
         vacancies: event.vacancies,
+        presence_option: event.presence_option,
       }
       : undefined,
   });
@@ -86,6 +87,7 @@ export default function EventsEdit() {
         longitude: event.longitude,
         radius: event.radius,
         vacancies: event.vacancies,
+        presence_option: event.presence_option,
       })
     }
   }, [event])

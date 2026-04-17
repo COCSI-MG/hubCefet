@@ -8,6 +8,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { EventStatus } from '../enum/event-status.enum';
+import { EventPresenceOptionEnum } from '../enum/event-presence-option.enum';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -86,4 +87,11 @@ export class CreateEventDto {
   })
   @IsNumber()
   vacancies: number;
+
+  @ApiProperty({
+    example: 'qrcode',
+    description: '',
+  })
+  @IsEnum(EventPresenceOptionEnum)
+  presence_option: EventPresenceOptionEnum;
 }

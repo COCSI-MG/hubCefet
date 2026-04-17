@@ -7,16 +7,19 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
 import { EventRepository } from './repositories/event.repository.interface';
 import { Event } from './entities/event.entity';
 import { EventStatus } from './enum/event-status.enum';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { UsersService } from 'src/users/users.service';
+import { Profile } from 'src/profile/enum/profile.enum';
 
 @Injectable()
 export class EventsService {
   constructor(
     @Inject('IEventRepository')
     private readonly eventRepository: EventRepository,
+    private readonly userService: UsersService,
   ) { }
 
   async create(createEventDto: CreateEventDto): Promise<null | Event> {
@@ -31,6 +34,7 @@ export class EventsService {
       createEventDto.end_at !== undefined
         ? new Date(createEventDto.end_at)
         : null;
+
     const now = new Date();
     const eventStartDate = new Date(createEventDto.start_at);
     if (createEventDto.status !== undefined) {
@@ -57,6 +61,7 @@ export class EventsService {
       vacancies: createEventDto.vacancies,
       radius: createEventDto.radius,
       description: createEventDto.description,
+      presence_option: createEventDto.presence_option,
     });
   }
 
@@ -77,31 +82,60 @@ export class EventsService {
     return [event, isStarted, isEnded];
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto) {
+  async update(id: string, updateEventDto: UpdateEventDto, userId: string) {
+    const event = await this.eventRepository.findOne(id);
+    if (!event) throw new NotFoundException('Evento não encontrado');
+
+    const now = new Date();
+    if (event.end_at < now) {
+      throw new UnprocessableEntityException('Não é possível editar eventos já finalizados');
+    }
+
+    await this.validatePermission(event, userId);
+
     if (updateEventDto.status != null) {
       const [result, message] = this.isValidEventStatusForEventDates(
-        new Date(updateEventDto.end_at),
-        updateEventDto.end_at !== undefined
-          ? new Date(updateEventDto.end_at)
-          : null,
-        new Date(),
+        new Date(updateEventDto.start_at || event.start_at),
+        updateEventDto.end_at ? new Date(updateEventDto.end_at) : new Date(event.end_at),
+        now,
         updateEventDto.status,
       );
-      if (!result && message !== null) {
-        throw new BadRequestException(message);
-      }
 
-      console.log(result)
+      if (!result && message) throw new BadRequestException(message);
     }
 
     return await this.eventRepository.update(id, updateEventDto);
   }
 
-  async remove(id: string): Promise<void> {
-    return await this.eventRepository.remove(id);
+  async remove(id: string, userId: string): Promise<void> {
+    const event = await this.eventRepository.findOne(id);
+    if (!event) throw new NotFoundException('Evento não encontrado');
+
+    const now = new Date();
+    if (event.end_at < now) {
+      throw new UnprocessableEntityException('Não é possível excluir eventos já finalizados');
+    }
+
+    if (event.start_at <= now) {
+      throw new UnprocessableEntityException('Não é possível excluir eventos já em andamento ou iniciados');
+    }
+
+    await this.validatePermission(event, userId);
+
+    await this.eventRepository.remove(id);
   }
 
   async endEvent(id: string): Promise<Event> {
+    const event = await this.eventRepository.findOne(id)
+    if (!event) {
+      throw new NotFoundException('Evento nao encontrado')
+    }
+
+    const now = new Date();
+    if (event.end_at < now) {
+      throw new UnprocessableEntityException('Não é possível finalizar eventos já finalizados');
+    }
+
     return await this.eventRepository.endEvent(id);
   }
 
@@ -201,4 +235,19 @@ export class EventsService {
 
     return await this.eventRepository.updateVacancies(id, actualVacancies - 1);
   }
+
+  private async validatePermission(event: any, userId: string) {
+    const { data } = await this.userService.findOne(userId);
+    const isAdmin = data.user.profile_id === Profile.Admin;
+    const isOwner = event.user.id === userId;
+
+    if (!isAdmin && !isOwner) {
+      throw new UnprocessableEntityException('Sem permissão para alterar este evento');
+    }
+  }
+
+  async getActiveEvents(limit: number, offset: number): Promise<Event[]> {
+    return await this.eventRepository.getActiveEvents(limit, offset)
+  }
 }
+

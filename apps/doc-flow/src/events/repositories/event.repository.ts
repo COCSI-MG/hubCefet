@@ -1,11 +1,11 @@
 import { InjectConnection, InjectModel } from '@nestjs/sequelize';
 import { EventRepository } from './event.repository.interface';
 import { CreateEventDto } from '../dto/create-event.dto';
-import { UpdateEventDto } from '../dto/update-event.dto';
 import { Event } from '../entities/event.entity';
 import { EventStatus } from '../enum/event-status.enum';
 import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { User } from 'src/users/entities/user.entity';
+import { UpdateEventDto } from '../dto/update-event.dto';
 
 export class EventRepositoryImpl implements EventRepository {
   constructor(
@@ -172,5 +172,17 @@ export class EventRepositoryImpl implements EventRepository {
     await event.update({
       vacancies
     });
+  }
+
+  async getActiveEvents(limit: number, offset: number): Promise<Event[]> {
+    return await this.eventModel.findAll({
+      offset,
+      limit,
+      where: {
+        status: {
+          [Op.or]: [EventStatus.STATUS_UPCOMING, EventStatus.STATUS_STARTED]
+        }
+      }
+    })
   }
 }

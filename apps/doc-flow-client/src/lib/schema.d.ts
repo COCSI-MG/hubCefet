@@ -686,6 +686,8 @@ export interface components {
 
       radius: number;
 
+      presence_option: 'qrcode' | geo;
+
       user: {
         id: string;
         full_name: string;
@@ -697,7 +699,7 @@ export interface components {
       description: string;
       start_at: string;
       end_at: string;
-      status: string;
+      status: "upcoming" | "started" | "ended";
       created_at: string;
       updated_at: string;
       created_by_user_id: string;
@@ -705,6 +707,7 @@ export interface components {
       longitude: number;
       vacancies: number;
       radius: number;
+      presence_option: 'qrcode' | 'geo';
 
       user: {
         id: string;
