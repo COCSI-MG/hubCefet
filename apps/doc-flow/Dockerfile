@@ -8,8 +8,6 @@ COPY ./package*.json ./
 
 RUN npm install
 
-COPY .env ./
-
 COPY . .
 
 EXPOSE 3000
@@ -24,8 +22,6 @@ RUN npm i -g sequelize-cli; \
     npm i pg pg-hstore sequelize dotenv
 
 COPY ./database ./
-
-COPY .env ./
 
 COPY ./scripts/database-actions.sh ./
 

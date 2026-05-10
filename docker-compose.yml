@@ -18,6 +18,8 @@ services:
     build:
       context: ./apps/doc-flow-client
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
     restart: unless-stopped
     expose:
       - "80"
@@ -38,6 +40,9 @@ services:
       - postgres
     env_file:
       - ./.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
 
   postgres:
     container_name: doc-flow-postgres
@@ -48,8 +53,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DATABASE}
     ports:
       - "5432:5432"
-    env_file:
-      - ./.env
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./apps/doc-flow/scripts:/docker-entrypoint-initdb.d
@@ -82,6 +85,8 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
+    environment:
+      POSTGRES_HOST: postgres
     command: ["bash", "/scripts/database-actions.sh", "migrate"]
     volumes:
       - ./apps/doc-flow/scripts:/scripts
@@ -99,6 +104,8 @@ services:
         condition: service_completed_successfully
     env_file:
       - ./.env
+    environment:
+      POSTGRES_HOST: postgres
     command: ["bash", "/scripts/database-actions.sh", "seed"]
     volumes:
       - ./apps/doc-flow/scripts:/scripts
