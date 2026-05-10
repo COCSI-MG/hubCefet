@@ -6,18 +6,9 @@ module.exports = {
     await queryInterface.removeColumn('activity_types', 'description')
     await queryInterface.removeColumn('activity_types', 'created_at')
     await queryInterface.removeColumn('activity_types', 'updated_at')
-
-    await queryInterface.bulkInsert('activity_types', [
-      { name: 'Atividade Complementar' },
-      { name: 'Atividade de Extensão' },
-    ])
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('complementary_activities_types', {
-      name: ['Atividades Complementares', 'Atividades de Extensão'],
-    });
-
     await queryInterface.addColumn('activity_types', 'description', {
       type: Sequelize.TEXT,
       allowNull: true,
