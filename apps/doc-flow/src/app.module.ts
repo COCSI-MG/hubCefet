@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { join } from 'path';
 import { AppService } from './app.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
@@ -28,6 +29,7 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: join(__dirname, '../../../.env'),
     }),
     BullModule.forRoot({
       redis: {
@@ -40,7 +42,7 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSGRES_PORT || '5432'),
+      port: parseInt(process.env.POSTGRES_PORT || '5432'),
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,

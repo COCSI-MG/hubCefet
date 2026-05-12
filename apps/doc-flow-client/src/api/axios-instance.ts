@@ -2,7 +2,7 @@ import axios from "axios";
 import { ApiError } from "./errors/ApiError";
 import { ErrorProcessor } from "@/lib/utils/errorProcessor";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export const publicAxiosInstance = axios.create({
   baseURL: API_URL,

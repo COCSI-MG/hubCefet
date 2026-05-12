@@ -65,15 +65,10 @@ npm run dev
 
 ## API Configuration
 
-The frontend is configured to use different API URLs based on the environment:
+All projects read configuration from the root `.env` file.
 
-- **Production**: `/api` (same domain, proxied by nginx)
-- **Development**: `http://localhost:3000` (direct backend connection)
-
-This is handled automatically through environment files:
-
-- `.env.production` - Used in Docker builds
-- `.env.development` - Used in local development
+- `VITE_API_URL=/api` works in Docker through nginx.
+- In local frontend development, Vite proxies `/api` to `VITE_PROXY_API_TARGET` (default: `http://localhost:3000`).
 
 ## Docker Services
 
