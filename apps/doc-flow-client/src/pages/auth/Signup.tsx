@@ -11,7 +11,7 @@ import { ApiError } from "@/api/errors/ApiError";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { setToken, setIsAuthenticated } = useAuth();
+  const { checkAuthentication } = useAuth();
   const { setError } = useAuthError();
 
   const form = useForm<SignupFormSchema>({
@@ -33,9 +33,7 @@ export default function Signup() {
       );
 
       localStorage.setItem("accessToken", response.access_token);
-      setToken(response.access_token);
-
-      setIsAuthenticated(true);
+      await checkAuthentication();
 
       navigate("/events");
       return;
