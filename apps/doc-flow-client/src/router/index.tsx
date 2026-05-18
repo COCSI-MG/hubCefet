@@ -109,6 +109,9 @@ export default function Router() {
 
         <Route path="/auth/magic-login" element={<MagicLogin />} />
 
+        <Route path="/user">
+          <Route path="changePassword" element={<ChangePassword />} />
+        </Route>
         <Route path="/forbidden" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

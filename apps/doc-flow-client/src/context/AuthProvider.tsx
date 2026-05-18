@@ -98,6 +98,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     if (!isAuthenticated) {
       if (location.pathname === "/login" || location.pathname === "/signup") {
+        "/user/changePassword"
         return;
       }
       navigate("/login", { replace: true });
