@@ -18,16 +18,7 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const location = useLocation();
 
-  const handleConfirmPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value !== form.getValues("password")) {
-      form.setError("password", {
-        type: "manual",
-        message: "As senhas não coincidem",
-      });
-      return;
-    }
-    form.clearErrors("password");
-  };
+
 
   useEffect(() => {
     if (location.pathname === "/signup") {
@@ -105,7 +96,18 @@ export default function SignupAuthForm({ form, onSubmit }: AuthFormProps) {
           </button>
         </div>
 
-        <ConfirmPassword onchange={handleConfirmPassword} showPassword={showPassword} setShowPassword={() => setShowPassword} />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <ConfirmPassword
+              field={field}
+              error={form.formState.errors.confirmPassword?.message}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+            />
+          )}
+        />
         <Button
           className="w-full bg-sky-900 text-white hover:bg-sky-700 rounded-2xl"
           type="submit"
