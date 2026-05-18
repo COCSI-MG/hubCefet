@@ -14,12 +14,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProfileSchema } from "@/lib/schemas/profile.schema";
 import { profileService } from "@/api/services/profile.service";
+import { userService } from "@/api/services/users.service";
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
+  FormControl, FormField, FormItem, FormLabel,
   FormMessage,
 } from "../ui/form";
 import FormItemField from "../FormItemField";
@@ -65,10 +63,10 @@ export default function UserEditDialogAdmin({
     try {
       const response = await profileService.getAll({ limit: 100, offset: 0 });
 
-      const { profiles } = response.data;
+      const profiles = response;
       if (!profiles) return;
 
-      setProfiles(profiles);
+      setProfiles(profiles.filter(profile => profile.name.toLowerCase() === "student" || profile.name.toLowerCase() === "professor"));
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);
@@ -95,15 +93,17 @@ export default function UserEditDialogAdmin({
   const handleSubmit = async (data: CreateUser) => {
     setIsSubmitting(true);
     try {
-      // Here you would call your update user API
-      // const updatedUser = await updateUser(user.id, data);
-      console.log("Updating user:", user.id, data);
+      await userService.patch(user.id, data);
 
       toast.success("Usuário atualizado com sucesso");
       setIsOpen(false);
       onSuccess?.();
     } catch (err) {
-      console.error("Error updating user:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao atualizar usuário");
     } finally {
       setIsSubmitting(false);

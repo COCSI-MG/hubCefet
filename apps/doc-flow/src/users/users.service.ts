@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserByAdminDto } from './dto/create-user-by-admin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './repositories/user.repository.interface';
 import { USER_REPOSITORY } from './repositories/user-repository.token';
@@ -7,12 +8,15 @@ import { ProfileService } from '../profile/profile.service';
 import { ServiceLayerDto } from 'src/lib/dto/service-layer.dto';
 import { User } from './entities/user.entity';
 import { hash } from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(USER_REPOSITORY)
     private userRepository: UserRepository,
     private readonly profileService: ProfileService,
+    private configService: ConfigService
   ) { }
 
   async create(
@@ -25,6 +29,43 @@ export class UsersService {
 
     const user = await this.userRepository.create(createUserDto, profile.id);
     return new ServiceLayerDto<{ user: User }>({ user }, true);
+  }
+
+  async createByAdmin(
+    dto: CreateUserByAdminDto,
+  ): Promise<ServiceLayerDto<{ user: User }>> {
+    const profile = await this.profileService.findOne(dto.profileId);
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const defaultPassword = this.configService.get<string>('DEFAULT_USER_PASSWORD');
+    if (!defaultPassword) {
+      throw new Error('DEFAULT_USER_PASSWORD not defined in environment variables');
+    }
+    const hashedPassword = await hash(defaultPassword, 10);
+
+    const user = await this.userRepository.create(
+      { ...dto, password: hashedPassword },
+      profile.id,
+    );
+    return new ServiceLayerDto<{ user: User }>({ user }, true);
+  }
+
+  async resetPassword(id: string): Promise<void> {
+    const userExists = await this.userRepository.findOne(id);
+    if (!userExists) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
+    const defaultPassword = this.configService.get<string>('DEFAULT_USER_PASSWORD');
+    if (!defaultPassword) {
+      throw new Error('DEFAULT_USER_PASSWORD not defined in environment variables');
+    }
+
+    const hashedPassword = await hash(defaultPassword, 10);
+
+    await this.userRepository.update(id, { password: hashedPassword });
   }
 
   async findAll(

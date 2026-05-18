@@ -1,8 +1,7 @@
 import { components } from "@/lib/schema";
 import AbstractService from "./abstract.service";
 
-type GetAllProfilesResponseDto =
-  components["schemas"]["GetAllProfilesResponseDto"];
+type Profile = components["schemas"]["Profile"];
 
 export default class ProfileService extends AbstractService {
   constructor() {
@@ -12,7 +11,7 @@ export default class ProfileService extends AbstractService {
   async getAll(args: {
     limit: number;
     offset: number;
-  }): Promise<GetAllProfilesResponseDto> {
+  }): Promise<Profile[]> {
     return await this.api.get(
       this.basePath + `?limit=${args.limit}&offset=${args.offset}`,
     );
