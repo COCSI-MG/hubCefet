@@ -94,8 +94,14 @@ export const singupFormSchema = authFormSchema.merge(
     fullName: z.string().max(255, {
       message: "Nome muito longo.",
     }),
+    confirmPassword: z.string().min(2, {
+      message: "A senha deve ter no mínimo 8 caracteres.",
+    }),
   })
-);
+).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
 
 export const presenceSchema = z.object({
   event_id: z.string().min(1, { message: "O ID do evento é obrigatório." }),
