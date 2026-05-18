@@ -7,6 +7,13 @@ import AuthForm from "@/components/AuthForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { authFormSchema, type AuthFormSchema } from "@/lib/types";
 import useAuthError from "@/hooks/useAuthError";
 import AuthService from "@/api/services/auth.service";
@@ -26,6 +33,9 @@ export default function Login() {
   const [magicMessage, setMagicMessage] = useState("");
   const [magicError, setMagicError] = useState("");
 
+  const [showDefaultPasswordDialog, setShowDefaultPasswordDialog] = useState(false);
+  const [tempToken, setTempToken] = useState("");
+
   const form = useForm<AuthFormSchema>({
     resolver: zodResolver(authFormSchema),
     defaultValues: {
@@ -36,6 +46,12 @@ export default function Login() {
   const handleSubmit = async (data: AuthFormSchema) => {
     try {
       const response = await authService.signin(data.email, data.password);
+
+      if (response.isDefaultPassword) {
+        setTempToken(response.access_token);
+        setShowDefaultPasswordDialog(true);
+        return;
+      }
 
       localStorage.setItem("accessToken", response.access_token);
 
@@ -168,6 +184,26 @@ export default function Login() {
           </Button>
         </>
       )}
+
+      <Dialog open={showDefaultPasswordDialog} onOpenChange={setShowDefaultPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Aviso de Segurança</DialogTitle>
+            <DialogDescription className="pt-4">
+              Você está utilizando a senha padrão do sistema. Por questões de segurança, 
+              é obrigatório alterar sua senha antes de continuar o acesso.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={() => navigate("/user/changePassword", { state: { tempToken } })}
+              className="bg-sky-900 text-white hover:bg-sky-800"
+            >
+              Alterar Senha
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
