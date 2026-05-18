@@ -97,8 +97,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     if (!isAuthenticated) {
-      if (location.pathname === "/login" || location.pathname === "/signup") {
+      const publicRoutes = [
+        "/login",
+        "/signup",
+        "/auth/magic-login",
         "/user/changePassword"
+      ];
+      
+      if (publicRoutes.includes(location.pathname)) {
         return;
       }
       navigate("/login", { replace: true });
