@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { hash, compare } from 'bcrypt';
@@ -9,6 +9,8 @@ import { MagicLoginService } from './magic-login.service';
 import { MagicLoginRequestDto } from './dto/magic-login-request.dto';
 import { MagicLoginVerifyDto } from './dto/magic-login-verify.dto';
 import { ProfileService } from 'src/profile/profile.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ConfigService } from '@nestjs/config';
 
 const UNAUTHED_SIGNUP_PROFILE = 'student';
 
@@ -19,6 +21,7 @@ export class AuthService {
     private jwtService: JwtService,
     private magicLoginService: MagicLoginService,
     private profileService: ProfileService,
+    private configService: ConfigService
   ) { }
 
   private async authenticate(email: string, password: string): Promise<User> {
@@ -50,16 +53,20 @@ export class AuthService {
     return await hash(password, 10);
   }
 
-  async signIn(signInDto: SignInAuthDto): Promise<{ access_token: string }> {
+  async signIn(signInDto: SignInAuthDto): Promise<{ access_token: string; isDefaultPassword: boolean }> {
     const authenticateUser = await this.authenticate(
       signInDto.email,
       signInDto.password,
     );
 
+    const defaultPassword = this.configService.get<string>('DEFAULT_USER_PASSWORD');
+    const isDefaultPassword = signInDto.password === defaultPassword;
+
     const accessToken = await this.generateJwtPayloadAndGetAccessToken(authenticateUser);
 
     return {
       access_token: accessToken,
+      isDefaultPassword,
     };
   }
 
@@ -107,5 +114,14 @@ export class AuthService {
     return {
       access_token: accessToken,
     };
+  }
+
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+    const userResult = await this.usersService.findOne(userId);
+    if (!userResult) {
+      throw new NotFoundException('Usuario nao encontrado')
+    }
+
+    await this.usersService.update(userId, { password: changePasswordDto.newPassword });
   }
 }

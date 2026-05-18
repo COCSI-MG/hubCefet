@@ -24,11 +24,18 @@ export default class AuthService extends AbstractService {
     });
   }
 
-  async changePassword({ oldPassword, newPassword }: ChangePasswordDto) {
-    return await this.api.post(this.basePath + "/change-password", {
-      oldPassword,
-      newPassword,
-    });
+  async changePassword(
+    { newPassword }: ChangePasswordDto,
+    token?: string
+  ) {
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : undefined;
+    return await this.api.post(
+      this.basePath + "/change-password",
+      {
+        newPassword,
+      },
+      config
+    );
   }
 
   async requestMagicLogin(email: string) {
