@@ -3,6 +3,7 @@ import { ComplementaryActivityType } from '../../complementary-activity-type/ent
 import { ExtensionActivityType } from '../../extension-activity-type/entities/extension-activity-type.entity';
 import { User } from '../../users/entities/user.entity';
 import { ActivityHistoryType } from '../enum/activity-history-type.enum';
+import { ActivityReview } from '../entities/activity-review.entity';
 import { ActivityReviewer } from '../entities/activity-reviewer.entity';
 import { ActivityStatus } from '../entities/activity-status.entity';
 import { ActivityType } from '../entities/activity-type.entity';
@@ -175,6 +176,13 @@ export class GetActivityResponseDto {
     description: 'Revisores vinculados à atividade',
   })
   reviewers: ActivityReviewer[];
+
+  @ApiProperty({
+    type: () => ActivityReview,
+    isArray: true,
+    description: 'Reviews da atividade',
+  })
+  reviews: ActivityReview[];
 
   @ApiProperty({
     type: () => ActivityHistoryLogItemDto,

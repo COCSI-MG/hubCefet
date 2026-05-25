@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  AlertTitle,
   Box,
   CircularProgress,
+  Divider,
+  Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,12 +21,14 @@ const statusColorMap = {
   PENDING: "warning",
   APPROVED: "success",
   REJECTED: "error",
+  REQUEST_CHANGES: "warning",
 } as const;
 
 const statusLabelMap = {
   PENDING: "Pendente",
   APPROVED: "Aprovado",
   REJECTED: "Rejeitado",
+  REQUEST_CHANGES: "Alterações solicitadas",
 } as const;
 
 export default function CertificateDetails() {
@@ -105,6 +110,10 @@ export default function CertificateDetails() {
   const certificateStatusLabel =
     statusLabelMap[certificateStatusName as keyof typeof statusLabelMap] || certificateStatusName;
   const isPendingCertificate = certificate.status_id === 1;
+  const requestChangesReviews = (certificate.reviews ?? []).filter(
+    (r) => r.decision === "REQUEST_CHANGES",
+  );
+  const hasRequestChanges = isPendingCertificate && requestChangesReviews.length > 0;
 
   return (
     <>
@@ -114,6 +123,28 @@ export default function CertificateDetails() {
       />
 
       <Box className="ml-6 mr-6 mt-6 max-w-full space-y-6">
+        {hasRequestChanges && (
+          <Alert severity="warning" variant="outlined">
+            <AlertTitle>Alterações solicitadas pelos revisores</AlertTitle>
+            <Typography variant="body2" mb={requestChangesReviews.length > 1 ? 1 : 0}>
+              Um ou mais revisores solicitaram alterações neste certificado. Corrija os pontos indicados e envie novamente.
+            </Typography>
+            {requestChangesReviews.map((review, index) => (
+              review.comments && (
+                <Box key={review.id}>
+                  {index > 0 && <Divider sx={{ my: 1 }} />}
+                  <Typography variant="body2" fontWeight="medium">
+                    {review.reviewer?.full_name ?? "Revisor"}:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {review.comments}
+                  </Typography>
+                </Box>
+              )
+            ))}
+          </Alert>
+        )}
+
         <CertificateDetailsHeaderInfo
           backLabel="Voltar para dashboard"
           backTo="/docflow/certificates/dashboard"

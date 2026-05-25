@@ -92,7 +92,7 @@ export class CertificateService {
     return await this.apiService.get('/activities/for-review');
   }
 
-  async reviewActivity(id: string, decision: 'APPROVED' | 'REJECTED', comments?: string): Promise<any> {
+  async reviewActivity(id: string, decision: 'APPROVED' | 'REJECTED' | 'REQUEST_CHANGES', comments?: string): Promise<any> {
     const data = {
       decision,
       comments: comments || ''
