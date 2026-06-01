@@ -33,12 +33,14 @@ const statusColorMap = {
   PENDING: "warning",
   APPROVED: "success",
   REJECTED: "error",
+  REQUEST_CHANGES: "warning",
 } as const;
 
 const statusLabelMap = {
   PENDING: "Pendente",
   APPROVED: "Aprovado",
   REJECTED: "Rejeitado",
+  REQUEST_CHANGES: "Alterações solicitadas",
 } as const;
 
 export default function CertificateReviewDetails() {
@@ -135,11 +137,12 @@ export default function CertificateReviewDetails() {
         comments,
       );
 
-      toast.success(
-        reviewDialog.decision === "APPROVED"
-          ? "Certificado aprovado com sucesso!"
-          : "Certificado rejeitado com sucesso!",
-      );
+      const successMessages: Record<string, string> = {
+        APPROVED: "Certificado aprovado com sucesso!",
+        REJECTED: "Certificado rejeitado com sucesso!",
+        REQUEST_CHANGES: "Alterações solicitadas com sucesso!",
+      };
+      toast.success(successMessages[reviewDialog.decision] ?? "Avaliação enviada com sucesso!");
 
       navigate("/docflow/certificates/review", { replace: true });
     } catch (error) {
@@ -243,7 +246,9 @@ export default function CertificateReviewDetails() {
         <DialogTitle>
           {reviewDialog.decision === "APPROVED"
             ? "Confirmar aprovação"
-            : "Confirmar rejeição"}
+            : reviewDialog.decision === "REQUEST_CHANGES"
+              ? "Solicitar alterações"
+              : "Confirmar rejeição"}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mb: 2 }}>
@@ -271,7 +276,9 @@ export default function CertificateReviewDetails() {
             placeholder={
               reviewDialog.decision === "APPROVED"
                 ? "Adicione observações sobre a aprovação..."
-                : "Explique o motivo da rejeição..."
+                : reviewDialog.decision === "REQUEST_CHANGES"
+                  ? "Descreva as alterações necessárias..."
+                  : "Explique o motivo da rejeição..."
             }
           />
         </DialogContent>
@@ -280,7 +287,13 @@ export default function CertificateReviewDetails() {
           <Button
             onClick={handleSubmitReview}
             variant="contained"
-            color={reviewDialog.decision === "APPROVED" ? "success" : "error"}
+            color={
+              reviewDialog.decision === "APPROVED"
+                ? "success"
+                : reviewDialog.decision === "REQUEST_CHANGES"
+                  ? "warning"
+                  : "error"
+            }
             disabled={submitting}
             startIcon={submitting ? <CircularProgress size={20} /> : null}
           >
@@ -288,7 +301,9 @@ export default function CertificateReviewDetails() {
               ? "Processando..."
               : reviewDialog.decision === "APPROVED"
                 ? "Aprovar"
-                : "Rejeitar"}
+                : reviewDialog.decision === "REQUEST_CHANGES"
+                  ? "Solicitar alterações"
+                  : "Rejeitar"}
           </Button>
         </DialogActions>
       </Dialog>

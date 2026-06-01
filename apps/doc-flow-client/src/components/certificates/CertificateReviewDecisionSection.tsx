@@ -2,6 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import {
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
+  EditNote as RequestChangesIcon,
 } from "@mui/icons-material";
 import { CertificateReviewDecision } from "@/lib/types/certificate-review.types";
 import { CertificateDetailsSectionCard } from "./CertificateDetailsSectionCard";
@@ -35,6 +36,14 @@ export function CertificateReviewDecisionSection({
           onClick={() => onDecision("REJECTED")}
         >
           Rejeitar certificado
+        </Button>
+        <Button
+          variant="contained"
+          color="warning"
+          startIcon={<RequestChangesIcon />}
+          onClick={() => onDecision("REQUEST_CHANGES")}
+        >
+          Solicitar alterações
         </Button>
       </Box>
     </CertificateDetailsSectionCard>
