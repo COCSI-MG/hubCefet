@@ -30,8 +30,6 @@ export const menuRoutes = [
   "/docflow/events/create",
   "/docflow/events/all",
   "/docflow/profile",
-  "/docflow/files",
-  "/docflow/files/create",
 ];
 
 export const superUsersProfiles = Object.keys(Profile).filter(

@@ -17,6 +17,7 @@ import ChangePassword from "@/pages/user/ChangePassword";
 import Forbidden from "@/pages/Forbidden";
 import FileCreate from "@/pages/files/FileCreate";
 import { AppSelection } from "@/pages/AppSelection";
+import DocFlowIndexRedirect from "@/components/DocFlowIndexRedirect";
 import { CertificateCreate } from "@/pages/certificates";
 import CertificateDashboard from "@/pages/certificates/CertificateDashboard";
 import { CertificateDetails, CertificateReview, CertificateReviewDetails } from "@/pages/certificates";
@@ -41,7 +42,7 @@ export default function Router() {
           <Route path="/profile" element={<Profile />} />
 
           <Route path="/docflow" element={<DocFlowLayout />}>
-            <Route index element={<Navigate to="/docflow/files" replace />} />
+            <Route index element={<DocFlowIndexRedirect />} />
 
             <Route path="files">
               <Route index element={<File />} />
