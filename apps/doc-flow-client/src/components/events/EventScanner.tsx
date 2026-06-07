@@ -4,10 +4,12 @@ import { PresenceUpdate } from '@/lib/types';
 import { IDetectedBarcode, Scanner } from '@yudiel/react-qr-scanner';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { isEventOngoing } from '@/lib/utils';
 
 interface EventScannerProps {
   eventId: string;
-  eventStatus: 'upcoming' | 'started' | 'ended';
+  startAt: string;
+  endAt?: string | null;
 }
 
 interface QrContent {
@@ -16,7 +18,7 @@ interface QrContent {
   qrType: 'Check-In' | 'Check-Out'
 }
 
-export const EventScanner = ({ eventId, eventStatus }: EventScannerProps) => {
+export const EventScanner = ({ eventId, startAt, endAt }: EventScannerProps) => {
   const [loading, setLoading] = useState(false);
   const isProcessing = useRef(false);
 
@@ -37,7 +39,7 @@ export const EventScanner = ({ eventId, eventStatus }: EventScannerProps) => {
         return
       }
 
-      if (eventStatus !== 'started') {
+      if (!isEventOngoing(startAt, endAt)) {
         toast.error("O evento não está em andamento.");
         return
       }

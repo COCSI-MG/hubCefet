@@ -5,11 +5,12 @@ import { useState } from 'react';
 
 interface EventScannerProps {
   eventId: string;
-  eventStatus: 'upcoming' | 'started' | 'ended';
+  startAt: string;
+  endAt?: string | null;
   eventAlreadyStarted: boolean;
 }
 
-export function EventScannerModal({ eventId, eventStatus, eventAlreadyStarted }: EventScannerProps) {
+export function EventScannerModal({ eventId, startAt, endAt, eventAlreadyStarted }: EventScannerProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -36,7 +37,7 @@ export function EventScannerModal({ eventId, eventStatus, eventAlreadyStarted }:
           </Dialog.Description>
 
           <div className="flex justify-center">
-            <EventScanner eventId={eventId} eventStatus={eventStatus} />
+            <EventScanner eventId={eventId} startAt={startAt} endAt={endAt} />
           </div>
 
           <Dialog.Close asChild>
