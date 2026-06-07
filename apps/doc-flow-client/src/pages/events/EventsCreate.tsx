@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import EventsForm from "@/components/events/EventsForm";
-import { EventCreate, EventCreateSchema, createEventSchema } from "@/lib/types";
+import { EventCreateSchema, createEventSchema } from "@/lib/types";
 import { eventService } from "@/api/services/event.service";
 import { ApiError } from "@/api/errors/ApiError";
 import { toast } from "sonner";
@@ -20,7 +20,6 @@ export default function EventsCreate() {
     defaultValues: {
       name: "",
       description: "",
-      status: "upcoming",
       start_at: "",
       end_at: "",
       latitude: 0,
@@ -30,7 +29,7 @@ export default function EventsCreate() {
     },
   });
 
-  async function onSubmit(data: EventCreate) {
+  async function onSubmit(data: EventCreateSchema) {
     try {
       await eventService.create({ ...data });
 
