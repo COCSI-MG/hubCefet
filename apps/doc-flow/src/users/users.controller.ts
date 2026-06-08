@@ -30,25 +30,6 @@ import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @ApiOperation({ summary: 'Create a user' })
-  @ApiResponse({
-    status: 201,
-    description: 'The record created',
-    type: CreateUserResponseDto,
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error',
-    type: ApiResponseDto,
-  })
-  @Profiles(Profile.Admin, Profile.Professor)
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    const userCreateResult = await this.usersService.create(createUserDto);
-
-    return userCreateResult.data
-  }
-
   @ApiOperation({ summary: 'Admin creates any user (except admin) with default password' })
   @ApiResponse({
     status: 201,
@@ -63,7 +44,7 @@ export class UsersController {
   @Profiles(Profile.Admin)
   @Post('admin-create')
   async adminCreate(@Body() createUserByAdminDto: CreateUserByAdminDto) {
-    const result = await this.usersService.createByAdmin(createUserByAdminDto);
+    const result = await this.usersService.createUserByAdmin(createUserByAdminDto);
     return result.data;
   }
 
