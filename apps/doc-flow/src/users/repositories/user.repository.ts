@@ -4,7 +4,6 @@ import { UserRepository } from './user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { Role } from 'src/roles/entities/role.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import { Op } from 'sequelize';
 
@@ -70,15 +69,6 @@ export class UserRepositoryImpl implements UserRepository {
         {
           model: Profile,
           attributes: ['id', 'name'],
-          include: [
-            {
-              model: Role,
-              attributes: ['id', 'name'],
-              through: {
-                attributes: ['profile_id', 'role_id']
-              }
-            },
-          ],
         },
       ],
     });
@@ -94,15 +84,6 @@ export class UserRepositoryImpl implements UserRepository {
         {
           model: Profile,
           attributes: ['id', 'name'],
-          include: [
-            {
-              model: Role,
-              attributes: ['id', 'name'],
-              through: {
-                attributes: ['profile_id', 'role_id', 'created_at', 'updated_at']
-              }
-            },
-          ],
         },
       ],
     });
@@ -122,15 +103,6 @@ export class UserRepositoryImpl implements UserRepository {
         {
           model: Profile,
           attributes: ['id', 'name'],
-          include: [
-            {
-              model: Role,
-              attributes: ['id', 'name'],
-              through: {
-                attributes: ['profile_id', 'role_id', 'created_at', 'updated_at']
-              }
-            },
-          ],
         },
       ],
     });

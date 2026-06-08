@@ -7,7 +7,6 @@ import {
   BelongsToMany,
   HasMany,
 } from 'sequelize-typescript';
-import { Role } from 'src/roles/entities/role.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Table({
@@ -56,9 +55,6 @@ export class Profile extends Model {
     defaultValue: DataType.NOW(),
   })
   updated_at: Date;
-
-  @BelongsToMany(() => Role, 'profiles_roles', 'profile_id', 'role_id')
-  roles: Role[];
 
   @HasMany(() => User, 'profile_id')
   users: User[];

@@ -158,39 +158,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/roles": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Return all roles */
-    get: operations["RolesController_findAll"];
-    put?: never;
-    post: operations["RolesController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/roles/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["RolesController_findOne"];
-    put?: never;
-    post?: never;
-    delete: operations["RolesController_remove"];
-    options?: never;
-    head?: never;
-    patch: operations["RolesController_update"];
-    trace?: never;
-  };
   "/files": {
     parameters: {
       query?: never;
@@ -728,13 +695,6 @@ export interface components {
     EndEventResponseDto: {
       message?: string;
     };
-    CreateRoleDto: {
-      name: string;
-    };
-    GetAllRolesResponseDto: {
-      roles?: components["schemas"]["Role"][];
-    };
-    UpdateRoleDto: Record<string, never>;
     CreateFileDto: {
       name: string;
       type: string;
@@ -879,59 +839,6 @@ export interface components {
     ChangePasswordDto: {
       oldPassword: string;
       newPassword: string;
-    };
-    Role: {
-      /**
-       * @description Unique identifier
-       * @example d290f1ee-6c54-4b01-90e6-d701748f0851
-       */
-      id: string;
-      /**
-       * @description Role name
-       * @example VIEW_ANY
-       */
-      name: string;
-      /**
-       * Format: date-time
-       * @description Date of creation
-       * @example 2021-09-01T00:00:00.000Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Date of last update
-       * @example 2021-09-01T00:00:00.000Z
-       */
-      updated_at: string;
-    };
-    Tcc: {
-      /**
-       * @description TCC ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      id: string;
-      /**
-       * @description TCC title
-       * @example Title
-       */
-      theme: string;
-      /**
-       * @description Advisor ID
-       * @example 550e8400-e29b-41d4-a716-446655440000
-       */
-      advisor_id: string;
-      /**
-       * Format: date-time
-       * @description Created at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Updated at
-       * @example 2021-01-01T00:00:00.000Z
-       */
-      updated_at: string;
     };
     File: {
       /** @example f6a6c5b2-4b9b-4f8f-8f5f-5d5f5f5f5f5f */
@@ -1355,108 +1262,6 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_findAll: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Return all roles */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["GetAllRolesResponseDto"];
-        };
-      };
-    };
-  };
-  RolesController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateRoleDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateRoleDto"];
-      };
-    };
     responses: {
       200: {
         headers: {
