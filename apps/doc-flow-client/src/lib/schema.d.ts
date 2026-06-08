@@ -837,7 +837,6 @@ export interface components {
       profileId?: string;
     };
     ChangePasswordDto: {
-      oldPassword: string;
       newPassword: string;
     };
     File: {

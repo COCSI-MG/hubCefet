@@ -3,17 +3,13 @@ import ChangePasswordForm from "@/components/user/ChangePasswordForm";
 
 export default function ChangePassword() {
   return (
-    <div>
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       <PageHeader
         title="Trocar senha"
         description="Mantenha sua senha segura"
       />
-      <div className="p-6 space-y-4">
-        <div className="space-x-4 p-6 border rounded-xl w-full bg-slate-200">
-          <div className="flex justify-center">
-            <ChangePasswordForm />
-          </div>
-        </div>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <ChangePasswordForm />
       </div>
     </div>
   );

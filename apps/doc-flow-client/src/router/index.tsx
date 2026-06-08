@@ -27,6 +27,8 @@ import AppSelecionLayout from "@/layouts/AppSelectionLayout";
 import AllEventsView from "@/pages/events/AllEventsView";
 import UserEventsView from "@/pages/events/UserEventsView";
 import { EventView } from "@/pages/events/EventView";
+import UsersLayout from "@/layouts/UsersLayout";
+import { UserManagement } from "@/pages/user/UserManagement";
 
 export default function Router() {
   return (
@@ -95,9 +97,13 @@ export default function Router() {
               <Route path=":eventId/edit" element={<EventsEdit />} />
             </Route>
 
-            <Route path="user">
-              <Route path="changePassword" element={<ChangePassword />} />
+          </Route>
+
+          <Route path="/users" element={<UsersLayout />}>
+            <Route element={<ProfileRoute profile={["Admin"]} />}>
+              <Route index element={<UserManagement />} />
             </Route>
+
           </Route>
 
         </Route>
@@ -108,6 +114,10 @@ export default function Router() {
         </Route>
 
         <Route path="/auth/magic-login" element={<MagicLogin />} />
+
+        <Route path="/user">
+          <Route path="changePassword" element={<ChangePassword />} />
+        </Route>
 
         <Route path="/forbidden" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />

@@ -9,9 +9,14 @@ import {
 } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import EventIcon from "@mui/icons-material/Event";
+import GroupIcon from "@mui/icons-material/Group";
+import useAuth from "@/hooks/useAuth";
 
 export function AppSelection() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const isAdmin = user?.profile?.name?.toLowerCase() === "admin";
 
   return (
     <Container maxWidth="lg">
@@ -44,8 +49,7 @@ export function AppSelection() {
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              sm: "1fr 1fr",
-              md: `repeat(2 , 1fr)`,
+              md: isAdmin ? "repeat(3, 1fr)" : "repeat(2, 1fr)",
             },
             gap: { xs: 2, sm: 3, md: 4 },
             mt: { xs: 3, sm: 4 },
@@ -125,6 +129,45 @@ export function AppSelection() {
               </CardContent>
             </CardActionArea>
           </Card>
+
+          {isAdmin && (
+            <Card
+              sx={{
+                height: "100%",
+                display: "flex",
+                "&:hover": {
+                  transform: "scale(1.02)",
+                  transition: "transform 0.2s ease-in-out",
+                },
+              }}
+            >
+              <CardActionArea
+                onClick={() => navigate("/users")}
+                sx={{ flexGrow: 1 }}
+              >
+                <CardContent
+                  sx={{
+                    textAlign: "center",
+                    p: { xs: 3, sm: 4 },
+                  }}
+                >
+                  <GroupIcon
+                    sx={{
+                      fontSize: { xs: 45, sm: 60 },
+                      color: "primary.main",
+                      mb: 2
+                    }}
+                  />
+                  <Typography variant="h5" component="h2" gutterBottom>
+                    Usuários
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Gestão de usuários do sistema
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          )}
 
         </Box>
       </Box>

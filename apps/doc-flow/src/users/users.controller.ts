@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserByAdminDto } from './dto/create-user-by-admin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Profiles } from 'src/profile/decorators/profile.decorator';
 import { Profile } from 'src/profile/enum/profile.enum';
@@ -46,6 +47,36 @@ export class UsersController {
     const userCreateResult = await this.usersService.create(createUserDto);
 
     return userCreateResult.data
+  }
+
+  @ApiOperation({ summary: 'Admin creates any user (except admin) with default password' })
+  @ApiResponse({
+    status: 201,
+    description: 'User created with default password',
+    type: CreateUserResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ApiResponseDto,
+  })
+  @Profiles(Profile.Admin)
+  @Post('admin-create')
+  async adminCreate(@Body() createUserByAdminDto: CreateUserByAdminDto) {
+    const result = await this.usersService.createByAdmin(createUserByAdminDto);
+    return result.data;
+  }
+
+  @ApiOperation({ summary: 'Admin resets user password to default' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successful',
+  })
+  @Profiles(Profile.Admin)
+  @Post(':id/reset-password')
+  async resetPassword(@Param('id') id: string) {
+    await this.usersService.resetPassword(id);
+    return { message: 'Senha redefinida para a senha padrão.' };
   }
 
   @ApiOperation({ summary: 'Return all users' })

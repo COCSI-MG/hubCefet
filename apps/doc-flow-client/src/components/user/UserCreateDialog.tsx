@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
-import { CreateUser, createUserSchema } from "@/lib/schemas/user.schema";
+import { CreateUserByAdmin, createUserByAdminSchema } from "@/lib/schemas/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import {
 } from "../ui/select";
 import { LoaderCircle } from "lucide-react";
 import { ApiError } from "@/api/errors/ApiError";
+import { userService } from "@/api/services/users.service";
 
 interface UserCreateDialogProps {
   children: React.ReactNode;
@@ -46,8 +47,8 @@ export default function UserCreateDialog({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<CreateUser>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<CreateUserByAdmin>({
+    resolver: zodResolver(createUserByAdminSchema),
     defaultValues: {
       full_name: "",
       email: "",
@@ -60,8 +61,8 @@ export default function UserCreateDialog({
     try {
       const response = await profileService.getAll({ limit: 100, offset: 0 });
 
-      if (response.profiles) {
-        setProfiles(response.profiles);
+      if (response) {
+        setProfiles(response.filter(profile => profile.name.toLowerCase() !== "admin" && profile.name.toLowerCase() !== "user"));
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -77,18 +78,21 @@ export default function UserCreateDialog({
     fetchProfiles();
   }, []);
 
-  const handleSubmit = async (data: CreateUser) => {
+  const handleSubmit = async (data: CreateUserByAdmin) => {
     setIsSubmitting(true);
     try {
-      // const newUser = await createUser(data);
-      console.log("Creating user:", data);
+      await userService.adminCreate(data);
 
       toast.success("Usuário criado com sucesso");
       form.reset();
       setIsOpen(false);
       onSuccess?.();
     } catch (err) {
-      console.error("Error creating user:", err);
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+
       toast.error("Erro ao criar usuário");
     } finally {
       setIsSubmitting(false);

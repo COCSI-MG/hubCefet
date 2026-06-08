@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { SignUpAuthDto } from './dto/singup-auth.dto';
@@ -8,6 +8,8 @@ import { ApiResponseDto } from 'src/lib/dto/api-response.dto';
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { MagicLoginRequestDto } from './dto/magic-login-request.dto';
 import { MagicLoginVerifyDto } from './dto/magic-login-verify.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UserRequest } from 'src';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -99,5 +101,25 @@ export class AuthController {
     const accessToken = await this.authService.verifyMagicLogin(verifyDto);
 
     return accessToken
+  }
+
+  @ApiOperation({ summary: 'Alterar senha do usuário logado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Senha alterada com sucesso',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Senha atual incorreta',
+    type: ApiResponseDto,
+  })
+  @Post('change-password')
+  async changePassword(
+    @Req() req: UserRequest,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const userId = req.user.sub;
+    await this.authService.changePassword(userId, changePasswordDto);
+    return { message: 'Senha alterada com sucesso' };
   }
 }

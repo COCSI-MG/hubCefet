@@ -10,7 +10,7 @@ const useProfiles = () => {
   const fetchProfiles = async () => {
     try {
       const response = await profileService.getAll({ limit: 1000, offset: 0 });
-      const { profiles } = response.data;
+      const profiles = response;
 
       if (!profiles) return;
 
