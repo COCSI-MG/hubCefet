@@ -44,7 +44,7 @@ export const useGeolocation = (
       } catch {
         setError({
           code: 0,
-          message: "Failed to check geolocation permission",
+          message: "Não foi possível verificar a permissão de geolocalização",
         });
       }
     };
@@ -127,10 +127,10 @@ export const usePresenceGeolocation = () => {
 
       return {
         success: false,
-        error: "Location not available",
+        error: "Localização não disponível",
       };
     } catch {
-      const errorMessage = error?.message || "Failed to get location";
+      const errorMessage = error?.message || "Falha ao obter localização";
       return {
         success: false,
         error: errorMessage,

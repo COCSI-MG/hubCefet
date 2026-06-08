@@ -7,10 +7,12 @@ export type FileSchema = Omit<File, "user">;
 
 export const createFileSchema = z.object({
   name: z
-    .string()
+    .string({ required_error: "Nome do arquivo é obrigatório" })
+    .min(1, "Nome do arquivo é obrigatório")
     .max(30, { message: "Nome do arquivo deve ter no máximo 30 caracteres" }),
   type: z.enum(["image", "document", "certificate"], {
     required_error: "Tipo do arquivo é obrigatório",
+    invalid_type_error: "Tipo do arquivo inválido",
   }),
 });
 
