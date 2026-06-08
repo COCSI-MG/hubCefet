@@ -17,6 +17,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import { Award } from 'lucide-react';
 import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
 import ExtensionIcon from '@mui/icons-material/Extension';
+import FolderIcon from '@mui/icons-material/Folder';
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -74,6 +75,13 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
               onClick={() => navigate("/apps")}
               activeNavItem={location.pathname === "/apps"}
               icon={<AppsIcon />}
+            />
+
+            <NavMenuItem
+              text="Seus Arquivos"
+              onClick={() => navigate("/docflow/files")}
+              activeNavItem={location.pathname === "/docflow/files"}
+              icon={<FolderIcon />}
             />
 
             {isStudent && (

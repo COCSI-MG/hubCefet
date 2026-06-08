@@ -802,8 +802,12 @@ export interface components {
       };
     };
     UpdatePresenceDto: {
-      check_out_date?: string;
-      check_in_date?: string;
+      /** @description Tipo de marcação de presença */
+      type: "check-in" | "check-out";
+      /** @description Latitude do usuário (obrigatória para eventos por geolocalização) */
+      latitude?: number;
+      /** @description Longitude do usuário (obrigatória para eventos por geolocalização) */
+      longitude?: number;
     };
     GetAllPresencesByEventResponseDto: {
       presences?: components["schemas"]["Presence"][];

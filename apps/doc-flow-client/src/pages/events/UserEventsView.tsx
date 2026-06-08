@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Event, Pagination as PaginationArgs } from "@/lib/types";
+import { isEventOngoing } from "@/lib/utils";
 import useAuth from "@/hooks/useAuth";
 
 export interface Pagination {
@@ -47,7 +48,7 @@ export default function UserEventsView() {
 
   const handleEventsOnGoing = useCallback(async () => {
     const eventsOnGoing = events.filter((event) => {
-      return event.status === "started";
+      return isEventOngoing(event.start_at, event.end_at);
     });
     setEventsOnGoing(eventsOnGoing);
   }, [events]);
