@@ -32,23 +32,9 @@ export const eventsSchema = z.object({
   end_at: z.string(),
 });
 
-export const roleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  profiles_roles: z.object({
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
-    profile_id: z.string(),
-    role_id: z.string(),
-  }),
-});
-
 export const profileSchema = z.object({
   id: z.string(),
   name: z.nativeEnum(Profile),
-  roles: z.array(roleSchema),
 });
 
 export const userPayloadSchema = z.object({
@@ -94,8 +80,14 @@ export const singupFormSchema = authFormSchema.merge(
     fullName: z.string().max(255, {
       message: "Nome muito longo.",
     }),
+    confirmPassword: z.string().min(2, {
+      message: "A senha deve ter no mínimo 8 caracteres.",
+    }),
   })
-);
+).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
 
 export const presenceSchema = z.object({
   event_id: z.string().min(1, { message: "O ID do evento é obrigatório." }),

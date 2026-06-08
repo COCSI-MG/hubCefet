@@ -27,3 +27,17 @@ export const createUserSchema = z
   });
 
 export type CreateUser = z.infer<typeof createUserSchema>;
+
+export const createUserByAdminSchema = z.object({
+  full_name: z.string(),
+  email: z
+    .string()
+    .email()
+    .regex(/(@cefet-rj\.br|@aluno\.cefet-rj\.br)$/, {
+      message: "Email deve ser @cefet-rj.br ou @aluno.cefet-rj.br",
+    }),
+  enrollment: z.string().optional(),
+  profileId: z.string(),
+});
+
+export type CreateUserByAdmin = z.infer<typeof createUserByAdminSchema>;

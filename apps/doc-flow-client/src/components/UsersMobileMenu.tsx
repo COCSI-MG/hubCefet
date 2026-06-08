@@ -6,17 +6,14 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Menu } from "lucide-react";
 import AppsIcon from '@mui/icons-material/Apps';
-import EventIcon from '@mui/icons-material/Event';
-import AddIcon from '@mui/icons-material/Add';
-import { PermContactCalendar } from "@mui/icons-material";
+import GroupIcon from '@mui/icons-material/Group';
 
-export function EventsMobileMenu() {
+export function UsersMobileMenu() {
   const navigate = useNavigate();
   const { user, logout, token } = useAuth();
   const [open, setOpen] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isProfessor, setIsProfessor] = useState(false);
 
   useEffect(() => {
     const getUserProfile = () => {
@@ -25,14 +22,16 @@ export function EventsMobileMenu() {
           const decoded: any = jwtDecode(token);
 
           let profileName = '';
-          if (decoded.profile.name) {
+          if (typeof decoded.profile === 'string') {
+            profileName = decoded.profile;
+          } else if (decoded.profile?.name) {
             profileName = decoded.profile.name;
+          } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
+            profileName = decoded.profile.roles[0];
           }
 
           const profileLower = profileName.toLowerCase();
-
-          setIsAdmin(profileLower === 'admin');
-          setIsProfessor(profileLower === 'professor');
+          setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
         }
       } catch (err) {
         console.error('Erro ao decodificar token:', err);
@@ -49,7 +48,7 @@ export function EventsMobileMenu() {
 
   return (
     <header className="bg-sky-900 text-white p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold">Eventos</h1>
+      <h1 className="text-xl font-bold">Usuários</h1>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
@@ -70,35 +69,16 @@ export function EventsMobileMenu() {
                   Voltar para Apps
                 </Button>
 
-
-                {(isAdmin || isProfessor) && (
+                {isAdmin && (
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => handleNavigation("/events/create")}
+                    onClick={() => handleNavigation("/users")}
                   >
-                    <AddIcon className="mr-2 h-4 w-4" />
-                    Criar Evento
+                    <GroupIcon className="mr-2 h-4 w-4" />
+                    Gerenciar Usuários
                   </Button>
                 )}
-
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleNavigation("/events/user")}
-                >
-                  <PermContactCalendar className="mr-2 h-4 w-4" />
-                  Meus eventos
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleNavigation("/events/all")}
-                >
-                  <EventIcon className="mr-2 h-4 w-4" />
-                  Todos Eventos
-                </Button>
               </nav>
             </div>
 
@@ -108,7 +88,7 @@ export function EventsMobileMenu() {
                 <p className="text-muted-foreground">{user?.email || "Email não encontrado"}</p>
               </div>
               <Button
-                className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
+                className="w-full bg-sky-900 text-white"
                 onClick={() => logout()}
               >
                 Sair

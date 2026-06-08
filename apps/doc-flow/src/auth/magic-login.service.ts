@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { MagicLink } from './entities/magic-link.entity';
 import { User } from '../users/entities/user.entity';
 import { Profile } from '../profile/entities/profile.entity';
-import { Role } from '../roles/entities/role.entity';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
@@ -21,20 +20,20 @@ export class MagicLoginService {
     private readonly userModel: typeof User,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async requestMagicLink(email: string): Promise<{ message: string }> {
     const user = await this.validateUserForMagicLogin(email);
     await this.cleanupExpiredTokens(user.id);
-    
+
     const token = this.generateSecureToken();
     const expiresAt = this.calculateExpirationTime();
-    
+
     await this.createMagicLinkRecord(user.id, token, expiresAt);
     await this.sendMagicLinkEmail(user, token);
 
     this.logger.log(`Magic link enviado para ${email}`);
-    
+
     return {
       message: 'Link de acesso enviado para seu email. Verifique sua caixa de entrada.',
     };
@@ -42,14 +41,14 @@ export class MagicLoginService {
 
   async verifyMagicLink(token: string): Promise<User> {
     const magicLink = await this.findValidMagicLink(token);
-    
+
     if (!magicLink) {
       throw new BadRequestException('Token inválido ou expirado');
     }
 
     await this.markTokenAsUsed(magicLink);
     this.logger.log(`Magic link verificado com sucesso para usuário ${magicLink.user.email}`);
-    
+
     return magicLink.user;
   }
 
@@ -74,15 +73,6 @@ export class MagicLoginService {
         {
           model: Profile,
           attributes: ['id', 'name'],
-          include: [
-            {
-              model: Role,
-              attributes: ['id', 'name'],
-              through: {
-                attributes: []
-              }
-            },
-          ],
         },
       ],
     });
@@ -128,22 +118,13 @@ export class MagicLoginService {
         },
       },
       include: [
-        { 
-          model: this.userModel, 
-          as: 'user', 
+        {
+          model: this.userModel,
+          as: 'user',
           include: [
             {
               model: Profile,
               attributes: ['id', 'name'],
-              include: [
-                {
-                  model: Role,
-                  attributes: ['id', 'name'],
-                  through: {
-                    attributes: []
-                  }
-                },
-              ],
             },
           ],
         }
@@ -162,20 +143,20 @@ export class MagicLoginService {
 
   private async sendMagicLinkEmail(user: User, token: string): Promise<void> {
     const magicUrl = this.buildMagicUrl(token);
-    
+
     const emailData: MagicLoginEmailData = {
       userName: user.full_name,
       magicUrl,
     };
 
     const emailHtml = generateMagicLoginEmailTemplate(emailData);
-    
+
     const success = await this.emailService.sendEmail({
       to: user.email,
       subject: '🔐 Seu Link de Acesso - DocFlow CEFET',
       html: emailHtml,
     });
-    
+
     if (!success) {
       this.logger.error(`Falha ao enviar magic link para ${user.email}`);
       throw new BadRequestException('Erro ao enviar email. Tente novamente.');
@@ -193,5 +174,5 @@ export class MagicLoginService {
       },
     });
   }
-} 
- 
+}
+

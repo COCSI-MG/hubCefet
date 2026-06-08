@@ -6,7 +6,6 @@ import { UsersModule } from './users/users.module';
 import { ProfileModule } from './profile/profile.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
-import { RolesModule } from './roles/roles.module';
 import { FilesModule } from './files/files.module';
 import { PresencesModule } from './presences/presences.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,7 +13,6 @@ import { AuthGuard } from './auth/auth.guard';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ProfileGuard } from './profile/profile.guard';
-import { RolesGuard } from './roles/roles.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { EmailModule } from './email/email.module';
@@ -75,7 +73,6 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
     }),
     UsersModule,
     ProfileModule,
-    RolesModule,
     AuthModule,
     EventsModule,
     FilesModule,
@@ -96,10 +93,6 @@ import { GeneralExceptionFilter } from './lib/filters/general.filter';
     {
       provide: APP_GUARD,
       useClass: ProfileGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
     },
     {
       provide: APP_FILTER,
