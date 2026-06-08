@@ -39,8 +39,11 @@ export class CreateEventDto {
     description: 'Event end date',
     example: '2024-12-17T10:00:00Z',
   })
+  @IsNotEmpty({
+    message: 'Event end date is required',
+  })
   @IsISO8601({}, { message: 'Incorrect date format' })
-  end_at?: string;
+  end_at: string;
 
   @ApiPropertyOptional({
     description: 'Status of the event',
