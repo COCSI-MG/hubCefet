@@ -77,7 +77,7 @@ export const singupFormSchema = authFormSchema.merge(
     enrollment: z.string().regex(/\d{4}\d{3}[A-Z]{4}$/, {
       message: "Matrícula inválida.",
     }),
-    fullName: z.string().max(255, {
+    fullName: z.string({ required_error: "Nome completo é obrigatório" }).min(1, "Nome completo é obrigatório").max(255, {
       message: "Nome muito longo.",
     }),
     confirmPassword: z.string().min(2, {
@@ -127,9 +127,8 @@ export const createEventSchema = z
         message: "Data de término é obrigatória",
       })
       .date(),
-    eventStartTime: z.string().regex(/\d{1,2}:\d{1,2}/),
-    eventEndTime: z.string().regex(/\d{1,2}:\d{1,2}/),
-
+    eventStartTime: z.string({ required_error: "Horário de início é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de início inválido (use HH:MM)"),
+    eventEndTime: z.string({ required_error: "Horário de término é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de término inválido (use HH:MM)"),
     latitude: z.preprocess(
       (a) => Number(a),
       z
@@ -169,7 +168,10 @@ export const createEventSchema = z
         .int({ message: "O número de vagas deve ser um inteiro" })
         .min(1, { message: "O número de vagas deve ser pelo menos 1" })
     ),
-    presence_option: z.enum(["qrcode", "geo"]),
+    presence_option: z.enum(["qrcode", "geo"], {
+      required_error: "Opção de presença é obrigatória",
+      invalid_type_error: "Opção de presença inválida",
+    }),
   })
   .superRefine((val, ctx) => {
     const [year, month, day] = val.start_at.split("-").map(Number);

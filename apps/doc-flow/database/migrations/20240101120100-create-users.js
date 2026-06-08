@@ -21,10 +21,12 @@ module.exports = {
       email: {
         type: Sequelize.STRING(254),
         allowNull: true,
+        unique: true,
       },
       enrollment: {
         type: Sequelize.STRING,
         allowNull: true,
+        unique: true,
       },
       profile_id: {
         type: Sequelize.UUID,

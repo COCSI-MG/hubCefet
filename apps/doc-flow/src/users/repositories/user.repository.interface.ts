@@ -9,6 +9,7 @@ export interface UserRepository {
   update(id: string, updateUserDto: UpdateUserDto): Promise<[number, User[]]>;
   remove(id: string): Promise<number>;
   findByEmail(email: string): Promise<User>;
+  findByEnrollment(enrollment: string): Promise<User>;
   findByPk(id: string): Promise<User>;
   search(term: string, limit: number, offset: number): Promise<User[]>;
 }

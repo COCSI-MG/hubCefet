@@ -7,25 +7,29 @@ export const createEventSchema = z
       .string({
         message: "Nome é obrigatório",
       })
-      .max(255),
-    description: z.string().max(500).optional(),
+      .min(1, "Nome é obrigatório")
+      .max(255, "Nome deve ter no máximo 255 caracteres"),
+    description: z.string().max(500, "Descrição deve ter no máximo 500 caracteres").optional(),
     start_at: z
       .string({
         message: "Data de início é obrigatória",
       })
-      .date(),
+      .date("Data de início inválida"),
     end_at: z
       .string({
         message: "Data de término é obrigatória",
       })
-      .date(),
-    eventStartTime: z.string().regex(/\d{1,2}:\d{1,2}/),
-    eventEndTime: z.string().regex(/\d{1,2}:\d{1,2}/),
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
-    radius: z.number().min(1).max(10000),
-    vacancies: z.number().min(1),
-    presence_option: z.enum(["qrcode", "geo"]),
+      .date("Data de término inválida"),
+    eventStartTime: z.string({ required_error: "Horário de início é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de início inválido (use HH:MM)"),
+    eventEndTime: z.string({ required_error: "Horário de término é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de término inválido (use HH:MM)"),
+    latitude: z.number({ required_error: "Latitude é obrigatória" }).min(-90, "Latitude deve ser entre -90 e 90").max(90, "Latitude deve ser entre -90 e 90"),
+    longitude: z.number({ required_error: "Longitude é obrigatória" }).min(-180, "Longitude deve ser entre -180 e 180").max(180, "Longitude deve ser entre -180 e 180"),
+    radius: z.number({ required_error: "Raio é obrigatório" }).min(1, "Raio mínimo é 1 metro").max(10000, "Raio máximo é 10.000 metros"),
+    vacancies: z.number({ required_error: "Vagas são obrigatórias" }).min(1, "Deve haver pelo menos 1 vaga"),
+    presence_option: z.enum(["qrcode", "geo"], {
+      required_error: "Opção de presença é obrigatória",
+      invalid_type_error: "Opção de presença inválida",
+    }),
   })
   .superRefine((val, ctx) => {
     const [year, month, day] = val.start_at.split("-").map(Number);
