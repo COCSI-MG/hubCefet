@@ -14,8 +14,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import AppsIcon from '@mui/icons-material/Apps';
-import FolderIcon from '@mui/icons-material/Folder';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { Award } from 'lucide-react';
 import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
 import ExtensionIcon from '@mui/icons-material/Extension';
@@ -80,22 +78,6 @@ export function DocFlowSidebar({ ...props }: React.ComponentProps<typeof Sidebar
 							activeNavItem={location.pathname === "/apps"}
 							icon={<AppsIcon />}
 						/>
-
-						<NavMenuItem
-							text="Seus Arquivos"
-							onClick={() => navigate("/docflow/files")}
-							activeNavItem={location.pathname === "/docflow/files"}
-							icon={<FolderIcon />}
-						/>
-
-						{(isAdmin || isProfessor) && (
-							<NavMenuItem
-								text="Criar Arquivo"
-								onClick={() => navigate("/docflow/files/create")}
-								activeNavItem={location.pathname === "/docflow/files/create"}
-								icon={<CreateNewFolderIcon />}
-							/>
-						)}
 
 						{isStudent && (
 							<NavMenuItem

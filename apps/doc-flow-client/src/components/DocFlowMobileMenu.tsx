@@ -1,49 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import useAuth from "@/hooks/useAuth";
+import useProfile from "@/hooks/useProfile";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Menu, Award } from "lucide-react";
 import AppsIcon from '@mui/icons-material/Apps';
-import FolderIcon from '@mui/icons-material/Folder';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
+import ExtensionIcon from '@mui/icons-material/Extension';
 
 export function DocFlowMobileMenu() {
   const navigate = useNavigate();
-  const { user, logout, token } = useAuth();
+  const { user, logout } = useAuth();
+  const { profile } = useProfile();
   const [open, setOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isProfessor, setIsProfessor] = useState(false);
-
-  useEffect(() => {
-    const getUserProfile = () => {
-      try {
-        if (token) {
-          const decoded: any = jwtDecode(token);
-
-          let profileName = '';
-          if (typeof decoded.profile === 'string') {
-            profileName = decoded.profile;
-          } else if (decoded.profile?.name) {
-            profileName = decoded.profile.name;
-          } else if (decoded.profile?.roles && decoded.profile.roles.length > 0) {
-            profileName = decoded.profile.roles[0];
-          }
-
-          const profileLower = profileName.toLowerCase();
-
-          setIsAdmin(profileLower === 'admin' || profileLower === 'coordinator');
-          setIsProfessor(profileLower === 'professor');
-        }
-      } catch (err) {
-        console.error('Erro ao decodificar token:', err);
-      }
-    };
-
-    getUserProfile();
-  }, [token]);
+  const profileLower = String(profile).toLowerCase();
+  const isAdmin = profileLower === 'admin' || profileLower === 'coordinator';
+  const isProfessor = profileLower === 'professor';
+  const isStudent = profileLower === 'student';
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -73,34 +48,60 @@ export function DocFlowMobileMenu() {
                   Voltar para Apps
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleNavigation("/docflow/files")}
-                >
-                  <FolderIcon className="mr-2 h-4 w-4" />
-                  Seus Arquivos
-                </Button>
-
-                {(isAdmin || isProfessor) && (
+                {isStudent && (
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => handleNavigation("/docflow/files/create")}
+                    onClick={() => handleNavigation("/docflow/certificates/create")}
                   >
-                    <CreateNewFolderIcon className="mr-2 h-4 w-4" />
-                    Criar Arquivo
+                    <Award className="mr-2 h-4 w-4" />
+                    Cadastrar Certificado
                   </Button>
                 )}
 
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleNavigation("/docflow/certificates/create")}
-                >
-                  <Award className="mr-2 h-4 w-4" />
-                  Certificados
-                </Button>
+                {isStudent && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation("/docflow/certificates/dashboard")}
+                  >
+                    <Dashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Button>
+                )}
+
+                {isProfessor && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation("/docflow/certificates/review")}
+                  >
+                    <RateReview className="mr-2 h-4 w-4" />
+                    Avaliar Certificados
+                  </Button>
+                )}
+
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation("/docflow/complementary")}
+                  >
+                    <AccessAlarm className="mr-2 h-4 w-4" />
+                    Horas Complementares
+                  </Button>
+                )}
+
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation("/docflow/extension")}
+                  >
+                    <ExtensionIcon className="mr-2 h-4 w-4" />
+                    Horas de Extensão
+                  </Button>
+                )}
               </nav>
             </div>
 

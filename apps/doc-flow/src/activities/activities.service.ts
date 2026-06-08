@@ -367,6 +367,10 @@ export class ActivitiesService {
       return 'Atividade revisada e aprovada pelo avaliador';
     }
 
+    if (decision === ReviewDecision.REQUEST_CHANGES) {
+      return 'Avaliador solicitou alterações na atividade';
+    }
+
     return 'Atividade revisada e rejeitada pelo avaliador';
   }
 
@@ -389,6 +393,7 @@ export class ActivitiesService {
       complementaryActivityType: activity.complementaryActivityType,
       extensionActivityType: activity.extensionActivityType,
       reviewers: activity.reviewers ?? [],
+      reviews: activity.reviews ?? [],
       history: this.mapActivityHistory(activity.history ?? []),
     };
   }

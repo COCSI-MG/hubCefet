@@ -129,6 +129,11 @@ export class ActivityRepository {
           include: [{ model: User, as: 'reviewer' }],
         },
         {
+          model: ActivityReview,
+          as: 'reviews',
+          include: [{ model: User, as: 'reviewer' }],
+        },
+        {
           model: ActivityHistory,
           as: 'history',
           include: [{ model: User, as: 'user' }],

@@ -76,6 +76,16 @@ export class ActivityReviewRepository {
     });
   }
 
+  async countRequestChangesByActivity(activityId: string, transaction?: any): Promise<number> {
+    return this.activityReviewModel.count({
+      where: {
+        activity_id: activityId,
+        decision: 'REQUEST_CHANGES',
+      },
+      transaction,
+    });
+  }
+
   async countTotalByActivity(activityId: string, transaction?: any): Promise<number> {
     return this.activityReviewModel.count({
       where: { activity_id: activityId },

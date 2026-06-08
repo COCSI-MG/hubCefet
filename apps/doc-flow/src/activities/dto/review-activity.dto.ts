@@ -4,6 +4,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 export enum ReviewDecision {
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
+  REQUEST_CHANGES = 'REQUEST_CHANGES',
 }
 
 export class ReviewActivityDto {

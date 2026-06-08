@@ -49,13 +49,13 @@ export class ActivityReview extends Model {
   @ApiProperty({
     example: 'APPROVED',
     description: 'Review decision',
-    enum: ['APPROVED', 'REJECTED'],
+    enum: ['APPROVED', 'REJECTED', 'REQUEST_CHANGES'],
   })
   @Column({
-    type: DataType.ENUM('APPROVED', 'REJECTED'),
+    type: DataType.ENUM('APPROVED', 'REJECTED', 'REQUEST_CHANGES'),
     allowNull: false,
   })
-  decision: 'APPROVED' | 'REJECTED';
+  decision: 'APPROVED' | 'REJECTED' | 'REQUEST_CHANGES';
 
   @ApiProperty({
     example: 'Certificado válido e atividade comprovada',

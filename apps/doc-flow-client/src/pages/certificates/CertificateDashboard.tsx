@@ -67,7 +67,15 @@ interface ActivityType {
 }
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336'];
-const TOTAL_HOURS_REQUIRED = 200;
+const COMPLEMENTARY_HOURS_REQUIRED = 100;
+const EXTENSION_HOURS_REQUIRED = 100;
+
+const ACTIVITY_TYPE = {
+  COMPLEMENTARY: 1,
+  EXTENSION: 2,
+} as const;
+
+const APPROVED_STATUS_ID = 2;
 
 const statusMap = {
   1: { label: 'Pendente', color: 'warning', icon: <PendingIcon /> },
@@ -134,7 +142,16 @@ export default function CertificateDashboard() {
     { name: 'Rejeitados', value: stats.rejected, color: COLORS[2] }
   ] : [];
 
-  const progressPercentage = stats ? Math.min((stats.totalHours / TOTAL_HOURS_REQUIRED) * 100, 100) : 0;
+  const sumApprovedHoursByType = (activityTypeId: number) =>
+    activities
+      .filter(a => a.activity_type_id === activityTypeId && a.status_id === APPROVED_STATUS_ID)
+      .reduce((sum, a) => sum + a.hours, 0);
+
+  const complementaryHours = sumApprovedHoursByType(ACTIVITY_TYPE.COMPLEMENTARY);
+  const extensionHours = sumApprovedHoursByType(ACTIVITY_TYPE.EXTENSION);
+
+  const complementaryPercentage = Math.min((complementaryHours / COMPLEMENTARY_HOURS_REQUIRED) * 100, 100);
+  const extensionPercentage = Math.min((extensionHours / EXTENSION_HOURS_REQUIRED) * 100, 100);
 
   const hoursData = activityTypes.map(type => {
     const typeActivities = activities.filter(a => a.activity_type_id === type.id && a.status_id === 2);
@@ -229,37 +246,71 @@ export default function CertificateDashboard() {
         </div>
 
         {/* Progresso das Horas */}
-        <Card className="border rounded-xl mb-6">
-          <CardContent>
-            <Typography variant="h6" className="font-semibold mb-4">
-              Progresso das Horas Complementares
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <Typography variant="body2" color="text.secondary">
-                  {stats?.totalHours || 0} de {TOTAL_HOURS_REQUIRED} horas
-                </Typography>
-                <Typography variant="body2" className="font-semibold">
-                  {progressPercentage.toFixed(1)}%
-                </Typography>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Card className="border rounded-xl">
+            <CardContent>
+              <Typography variant="h6" className="font-semibold mb-4">
+                Progresso das Horas Complementares
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    {complementaryHours} de {COMPLEMENTARY_HOURS_REQUIRED} horas
+                  </Typography>
+                  <Typography variant="body2" className="font-semibold">
+                    {complementaryPercentage.toFixed(1)}%
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={complementaryPercentage}
+                  sx={{ height: 8, borderRadius: 4 }}
+                />
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={progressPercentage}
-                sx={{ height: 8, borderRadius: 4 }}
-              />
-            </Box>
-            {progressPercentage >= 100 ? (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                🎉 Parabéns! Você completou todas as horas complementares necessárias!
-              </Alert>
-            ) : (
-              <Alert severity="info" sx={{ mt: 2 }}>
-                Você ainda precisa de {TOTAL_HOURS_REQUIRED - (stats?.totalHours || 0)} horas para completar os requisitos.
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
+              {complementaryPercentage >= 100 ? (
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  🎉 Parabéns! Você completou todas as horas complementares necessárias!
+                </Alert>
+              ) : (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  Você ainda precisa de {COMPLEMENTARY_HOURS_REQUIRED - complementaryHours} horas complementares.
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border rounded-xl">
+            <CardContent>
+              <Typography variant="h6" className="font-semibold mb-4">
+                Progresso das Horas de Extensão
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    {extensionHours} de {EXTENSION_HOURS_REQUIRED} horas
+                  </Typography>
+                  <Typography variant="body2" className="font-semibold">
+                    {extensionPercentage.toFixed(1)}%
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={extensionPercentage}
+                  sx={{ height: 8, borderRadius: 4 }}
+                />
+              </Box>
+              {extensionPercentage >= 100 ? (
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  🎉 Parabéns! Você completou todas as horas de extensão necessárias!
+                </Alert>
+              ) : (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  Você ainda precisa de {EXTENSION_HOURS_REQUIRED - extensionHours} horas de extensão.
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
