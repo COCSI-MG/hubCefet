@@ -35,6 +35,14 @@ export class FilesService {
       );
 
       const existingFile = existingFiles[0];
+
+      if (createFileDto.url && createFileDto.url !== existingFile.url) {
+        const urlInUse = await this.fileRepository.findByUrl(createFileDto.url);
+        if (urlInUse) {
+          throw new ConflictException('URL do arquivo já está em uso');
+        }
+      }
+
       await this.fileRepository.update(existingFile.id, {
         name: createFileDto.name,
         url: createFileDto.url,
@@ -42,6 +50,13 @@ export class FilesService {
       });
 
       return await this.fileRepository.findOne(existingFile.id);
+    }
+
+    if (createFileDto.url) {
+      const urlInUse = await this.fileRepository.findByUrl(createFileDto.url);
+      if (urlInUse) {
+        throw new ConflictException('URL do arquivo já está em uso');
+      }
     }
 
     console.log('Creating new file record', createFileDto, userId);

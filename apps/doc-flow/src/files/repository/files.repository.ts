@@ -100,4 +100,8 @@ export class FileRepositoryImpl implements FileRepository {
       },
     });
   }
+
+  async findByUrl(url: string): Promise<File | null> {
+    return await this.fileModel.findOne({ where: { url } }) ?? null;
+  }
 }

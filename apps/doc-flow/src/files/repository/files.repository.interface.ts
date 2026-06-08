@@ -21,4 +21,5 @@ export interface FileRepository {
     name: string,
     type: string,
   ): Promise<File[]>;
+  findByUrl(url: string): Promise<File | null>;
 }

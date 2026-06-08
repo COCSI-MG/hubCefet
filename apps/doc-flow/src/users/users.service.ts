@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByAdminDto } from './dto/create-user-by-admin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,24 +19,22 @@ export class UsersService {
     private configService: ConfigService
   ) { }
 
-  async create(
-    createUserDto: CreateUserDto,
-  ): Promise<ServiceLayerDto<{ user: User }>> {
-    const profile = await this.profileService.findOne(createUserDto.profileId);
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    const user = await this.userRepository.create(createUserDto, profile.id);
-    return new ServiceLayerDto<{ user: User }>({ user }, true);
-  }
-
   async createByAdmin(
     dto: CreateUserByAdminDto,
   ): Promise<ServiceLayerDto<{ user: User }>> {
     const profile = await this.profileService.findOne(dto.profileId);
     if (!profile) {
       throw new NotFoundException('Profile not found');
+    }
+
+    const emailInUse = await this.userRepository.findByEmail(dto.email);
+    if (emailInUse) {
+      throw new ConflictException('Email já está em uso');
+    }
+
+    const enrollmentInUse = await this.userRepository.findByEnrollment(dto.enrollment);
+    if (enrollmentInUse) {
+      throw new ConflictException('Matrícula já está em uso');
     }
 
     const defaultPassword = this.configService.get<string>('DEFAULT_USER_PASSWORD');
@@ -106,6 +104,20 @@ export class UsersService {
     const userExists = await this.userRepository.findOne(id);
     if (!userExists) {
       throw new NotFoundException('Usuario nao encontrado')
+    }
+
+    if (updateUserDto.email) {
+      const emailInUse = await this.userRepository.findByEmail(updateUserDto.email);
+      if (emailInUse && emailInUse.id !== id) {
+        throw new ConflictException('Email já está em uso');
+      }
+    }
+
+    if (updateUserDto.enrollment) {
+      const enrollmentInUse = await this.userRepository.findByEnrollment(updateUserDto.enrollment);
+      if (enrollmentInUse && enrollmentInUse.id !== id) {
+        throw new ConflictException('Matrícula já está em uso');
+      }
     }
 
     if (updateUserDto.password) {

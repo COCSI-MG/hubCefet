@@ -78,6 +78,13 @@ export class UserRepositoryImpl implements UserRepository {
     return user;
   }
 
+  async findByEnrollment(enrollment: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      where: { enrollment },
+    });
+    return user ?? null;
+  }
+
   async findByPk(id: string): Promise<User> {
     return this.userModel.scope('excludePassword').findByPk(id, {
       include: [
