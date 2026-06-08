@@ -107,4 +107,24 @@ export class UserRepositoryImpl implements UserRepository {
       ],
     });
   }
+
+  async findByEnrollment(enrollment: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      where: {
+        enrollment,
+      },
+      include: [
+        {
+          model: Profile,
+          attributes: ['id', 'name'],
+        },
+      ],
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+  }
 }

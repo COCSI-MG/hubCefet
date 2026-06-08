@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserByAdminDto } from './dto/create-user-by-admin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,17 +27,38 @@ export class UsersService {
       throw new NotFoundException('Profile not found');
     }
 
+    const emailsExists = await this.userRepository.findByEmail(createUserDto.email);
+    if (emailsExists) {
+      throw new ConflictException('Email ja esta em uso')
+    }
+
+    const enrollmentExists = await this.userRepository.findByEnrollment(createUserDto.enrollment);
+    if (enrollmentExists) {
+      throw new ConflictException('Matricula ja esta em uso')
+    }
+
     const user = await this.userRepository.create(createUserDto, profile.id);
     return new ServiceLayerDto<{ user: User }>({ user }, true);
   }
 
-  async createByAdmin(
+  async createUserByAdmin(
     dto: CreateUserByAdminDto,
   ): Promise<ServiceLayerDto<{ user: User }>> {
     const profile = await this.profileService.findOne(dto.profileId);
     if (!profile) {
       throw new NotFoundException('Profile not found');
     }
+
+    const emailsExists = await this.userRepository.findByEmail(dto.email);
+    if (emailsExists) {
+      throw new ConflictException('Email ja esta em uso')
+    }
+
+    const enrollmentExists = await this.userRepository.findByEnrollment(dto.enrollment);
+    if (enrollmentExists) {
+      throw new ConflictException('Matricula ja esta em uso')
+    }
+
 
     const defaultPassword = this.configService.get<string>('DEFAULT_USER_PASSWORD');
     if (!defaultPassword) {
@@ -108,14 +129,27 @@ export class UsersService {
       throw new NotFoundException('Usuario nao encontrado')
     }
 
+    if (updateUserDto.email) {
+      const emailsExists = await this.userRepository.findByEmail(updateUserDto.email);
+      if (emailsExists) {
+        throw new ConflictException('Email ja esta em uso')
+      }
+    }
+
+
+    if (updateUserDto.enrollment) {
+      const enrollmentExists = await this.userRepository.findByEnrollment(updateUserDto.enrollment);
+      if (enrollmentExists) {
+        throw new ConflictException('Matricula ja esta em uso')
+      }
+    }
+
     if (updateUserDto.password) {
       updateUserDto.password = await hash(updateUserDto.password, 10);
     }
 
-    const [number, user] = await this.userRepository.update(id, updateUserDto);
-    if (number === 0) {
-      throw new NotFoundException('User not found');
-    }
+    const [user] = await this.userRepository.update(id, updateUserDto);
+
     return user[0];
   }
 
