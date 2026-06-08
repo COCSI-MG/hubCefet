@@ -2,19 +2,19 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('activity_reviews', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
-        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        defaultValue: Sequelize.UUIDV4,
       },
       activity_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'complementary_activities',
+          model: 'activities',
           key: 'id',
         },
         onDelete: 'CASCADE',
@@ -28,7 +28,7 @@ module.exports = {
         },
       },
       decision: {
-        type: Sequelize.ENUM('APPROVED', 'REJECTED'),
+        type: Sequelize.ENUM('APPROVED', 'REJECTED', 'REQUEST_CHANGES'),
         allowNull: false,
       },
       comments: {
@@ -40,19 +40,24 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
+      deleted_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      }
     });
 
-    // Adicionando constraint UNIQUE para evitar duplicação
-    await queryInterface.addConstraint('activity_reviews', {
-      fields: ['activity_id', 'reviewer_user_id'],
-      type: 'unique',
-      name: 'unique_activity_review',
+    await queryInterface.addIndex('activity_reviews', ['activity_id', 'reviewer_user_id'], {
+      name: 'unique_activity_review_active',
+      unique: true,
+      where: {
+        deleted_at: null,
+      },
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('activity_reviews');
   }
-}; 
- 
- 
+};
+
+

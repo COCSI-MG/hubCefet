@@ -2,24 +2,21 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    return queryInterface.createTable('users', {
+    return await queryInterface.createTable('profiles', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
+        allowNull: false,
         defaultValue: Sequelize.UUIDV4,
       },
-      username: {
-        type: Sequelize.STRING(30),
-        allowNull: false,
-      },
-      password: {
+      name: {
         type: Sequelize.STRING(60),
         allowNull: false,
       },
@@ -36,13 +33,13 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
      * Example:
      * await queryInterface.dropTable('users');
      */
-    return queryInterface.dropTable('users');
+    return await queryInterface.dropTable('profiles');
   }
 };

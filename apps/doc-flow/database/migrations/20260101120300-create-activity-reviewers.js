@@ -2,19 +2,19 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('activity_reviewers', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
-        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        defaultValue: Sequelize.UUIDV4,
       },
       activity_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'complementary_activities',
+          model: 'activities',
           key: 'id',
         },
         onDelete: 'CASCADE',
@@ -34,7 +34,6 @@ module.exports = {
       },
     });
 
-    // Adicionando constraint UNIQUE para evitar duplicação
     await queryInterface.addConstraint('activity_reviewers', {
       fields: ['activity_id', 'reviewer_user_id'],
       type: 'unique',
@@ -42,9 +41,9 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('activity_reviewers');
   }
-}; 
- 
- 
+};
+
+

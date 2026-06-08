@@ -23,6 +23,19 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      status: {
+        type: Sequelize.ENUM('registred', 'present', 'finalized'),
+        allowNull: false,
+        defaultValue: 'registred',
+      },
+      check_in_date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      check_out_date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

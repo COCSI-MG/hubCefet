@@ -3,10 +3,6 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.changeColumn('files', 'url', {
-      type: Sequelize.STRING(255),
-      allowNull: false,
-    });
   },
 
   async down(queryInterface, Sequelize) {
@@ -15,6 +11,6 @@ module.exports = {
       allowNull: false,
     });
   }
-}; 
- 
- 
+};
+
+
