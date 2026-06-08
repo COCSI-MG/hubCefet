@@ -5,7 +5,8 @@ import UserEditDialogAdmin from "./UserEditDialogAdmin";
 import { Button } from "../ui/button";
 
 export const GetUserColumns = (
-  openResetPasswordModal: (item: User) => void
+  openResetPasswordModal: (item: User) => void,
+  onRefresh?: () => void
 ): ColumnDef<User>[] => {
   return [
     {
@@ -38,7 +39,7 @@ export const GetUserColumns = (
 
         return (
           <div className="flex gap-2">
-            <UserEditDialogAdmin user={item as any} onSuccess={() => window.location.reload()}>
+            <UserEditDialogAdmin user={item as any} onSuccess={onRefresh}>
               <Button className="bg-orange-400 hover:bg-orange-500 text-white rounded-2xl">
                 Atualizar
               </Button>

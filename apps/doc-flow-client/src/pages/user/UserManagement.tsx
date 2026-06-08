@@ -61,7 +61,10 @@ export function UserManagement() {
   };
 
   const table = useReactTable({
-    columns: GetUserColumns(openResetPasswordModal),
+    columns: GetUserColumns(openResetPasswordModal, () => fetchUsers({
+      limit: pagination.pageSize,
+      offset: pagination.pageIndex * pagination.pageSize,
+    })),
     data: users,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
