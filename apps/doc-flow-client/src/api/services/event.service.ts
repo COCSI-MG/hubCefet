@@ -2,7 +2,7 @@ import { ApiResponse } from "@/lib/types";
 import AbstractService from "./abstract.service";
 import type {
   GetAllEventsResponseDto,
-  EventCreate,
+  EventCreateSchema,
   GetEventResponseDto,
   Event,
 } from "@/lib/schemas/event.schema";
@@ -21,7 +21,7 @@ export default class EventService extends AbstractService {
     );
   }
 
-  async create(data: EventCreate): Promise<ApiResponse<Event>> {
+  async create(data: EventCreateSchema): Promise<ApiResponse<Event>> {
     return await this.api.post(this.basePath, data);
   }
 
@@ -43,7 +43,7 @@ export default class EventService extends AbstractService {
 
   async patch(
     id: string,
-    data: EventCreate,
+    data: EventCreateSchema,
   ): Promise<Event> {
     return await this.api.patch(this.basePath + `/${id}`, data);
   }

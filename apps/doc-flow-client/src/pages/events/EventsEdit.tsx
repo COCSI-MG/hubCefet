@@ -1,4 +1,4 @@
-import { EventCreateSchema, Event, createEventSchema, EventCreate } from "@/lib/types";
+import { EventCreateSchema, Event, createEventSchema } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,6 @@ export default function EventsEdit() {
     defaultValues: event
       ? {
         name: event.name,
-        status: event.status,
         start_at: event.start_at,
         end_at: event.end_at,
         description: event.description,
@@ -55,7 +54,7 @@ export default function EventsEdit() {
     fetchEvent(id);
   }, [location.pathname, navigate]);
 
-  const handleSubmit = async (data: EventCreate) => {
+  const handleSubmit = async (data: EventCreateSchema) => {
     try {
       await eventService.patch(event!.id, data);
       toast.success("Evento atualizado com sucesso");
@@ -77,7 +76,6 @@ export default function EventsEdit() {
 
       form.reset({
         name: event.name,
-        status: event.status,
         start_at: startParts.date,
         eventStartTime: startParts.time,
         end_at: endParts.date,

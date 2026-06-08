@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException, ConflictException, forwardRef } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException, ConflictException, forwardRef } from '@nestjs/common';
 import { CreatePresenceDto } from './dto/create-presence.dto';
 import { UpdatePresenceDto } from './dto/update-presence.dto';
 import { PresenceRepository } from './repositories/presence.repository.interface';
+import { UpdatePresenceData } from './types/update-presence-data.type';
 import { EventsService } from '../events/events.service';
 import { UsersService } from '../users/users.service';
 import { Presence } from './entities/presence.entity';
@@ -9,6 +10,11 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PdfGenerationJobData } from '../queues/interfaces/pdf-generation-job.interface';
 import { PresenceStatus } from './enum/presence-status.enum';
+import { PresenceCheckType } from './enum/presence-check-type.enum';
+import { EventPresenceOptionEnum } from '../events/enum/event-presence-option.enum';
+import { getDistanceInMeters } from '../lib/geo';
+import { Profile } from '../profile/enum/profile.enum';
+import { UserJwtPayload } from 'src';
 
 @Injectable()
 export class PresencesService {
@@ -60,7 +66,7 @@ export class PresencesService {
     return presence
   }
 
-  async update(id: string, updatePresenceDto: UpdatePresenceDto) {
+  async update(id: string, updatePresenceDto: UpdatePresenceDto, requester: UserJwtPayload) {
     const presence = await this.presenceRepository.findOne(id);
     if (!presence) {
       throw new NotFoundException('Inscrição não encontrada para este evento.');
@@ -73,6 +79,10 @@ export class PresencesService {
       throw new NotFoundException('Evento nao encontrado')
     }
 
+    this.validatePresencePermission(event, presence, requester);
+
+    this.validatePresenceLocation(event, updatePresenceDto);
+
     const user = await this.userService.findOne(
       presence.user_id,
     );
@@ -80,35 +90,29 @@ export class PresencesService {
       throw new NotFoundException('Usuario nao encontrado')
     }
 
+    const now = new Date();
     const eventStartDate = new Date(event.start_at);
     const eventEndDate = new Date(event.end_at);
 
-    const payloadToUpdate = { ...updatePresenceDto }
+    const payloadToUpdate: UpdatePresenceData = {};
 
-    if (!payloadToUpdate.check_in_date && !updatePresenceDto.check_out_date) {
-      throw new UnprocessableEntityException('Informe data de check-in ou check-out.')
-    }
-
-    if (payloadToUpdate.check_in_date) {
+    if (updatePresenceDto.type === PresenceCheckType.CHECK_IN) {
       if (presence.check_in_date) {
         throw new UnprocessableEntityException('Check-in já realizado anteriormente.');
       }
 
-      const checkInDate = new Date(payloadToUpdate.check_in_date);
-
-      if (checkInDate < eventStartDate) {
+      if (now < eventStartDate) {
         throw new UnprocessableEntityException('Check-in não permitido antes do início do evento.');
       }
 
-      if (checkInDate > eventEndDate) {
+      if (now > eventEndDate) {
         throw new UnprocessableEntityException('Evento já encerrado.');
       }
 
       payloadToUpdate.status = 'present';
-    }
-
-    if (payloadToUpdate.check_out_date) {
-      if (!presence.check_in_date && !payloadToUpdate.check_in_date) {
+      payloadToUpdate.check_in_date = now.toISOString();
+    } else {
+      if (!presence.check_in_date) {
         throw new UnprocessableEntityException('Impossível realizar check-out sem check-in prévio.');
       }
 
@@ -116,21 +120,21 @@ export class PresencesService {
         throw new UnprocessableEntityException('Check-out já realizado anteriormente.');
       }
 
-      const checkInDate = new Date(presence.check_in_date || payloadToUpdate.check_in_date);
-      const checkOutDate = new Date(payloadToUpdate.check_out_date);
+      const checkInDate = new Date(presence.check_in_date);
       const maxCheckOutTime = new Date(eventEndDate.getTime() + 2 * 60 * 60 * 1000);
 
-      if (checkInDate >= checkOutDate) {
+      if (now <= checkInDate) {
         throw new UnprocessableEntityException('Data de check-out deve ser posterior ao check-in.');
       }
 
-      if (checkOutDate > maxCheckOutTime) {
+      if (now > maxCheckOutTime) {
         throw new UnprocessableEntityException('Check-out permitido apenas até 2 horas após o término.');
       }
 
       payloadToUpdate.status = 'finalized';
+      payloadToUpdate.check_out_date = now.toISOString();
 
-      const totalHours = Math.max(0, (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60));
+      const totalHours = Math.max(0, (now.getTime() - checkInDate.getTime()) / (1000 * 60 * 60));
 
       const pdfJobData = {
         presenceId: presence.id,
@@ -139,7 +143,7 @@ export class PresencesService {
         userName: user.data.user.full_name,
         eventName: event.name,
         checkInDate: checkInDate.toISOString(),
-        checkOutDate: checkOutDate.toISOString(),
+        checkOutDate: now.toISOString(),
         totalHours: Number(totalHours.toFixed(2)),
       };
 
@@ -154,6 +158,63 @@ export class PresencesService {
     await this.presenceRepository.update(id, payloadToUpdate)
 
     return 'presenca atualizada com sucesso';
+  }
+
+  private validatePresencePermission(
+    event: { presence_option: string },
+    presence: Presence,
+    requester: UserJwtPayload,
+  ) {
+    const isQrCodeEvent =
+      event.presence_option === EventPresenceOptionEnum.QR_CODE;
+
+    if (isQrCodeEvent) {
+      const profile = requester.profile?.name?.toLowerCase();
+      const isProfessorOrAdmin =
+        profile === Profile.Professor || profile === Profile.Admin;
+
+      if (!isProfessorOrAdmin) {
+        throw new ForbiddenException(
+          'Apenas professores ou administradores podem registrar presença via QR Code.',
+        );
+      }
+
+      return;
+    }
+
+    if (presence.user_id !== requester.sub) {
+      throw new ForbiddenException('Você só pode registrar a própria presença.');
+    }
+  }
+
+  private validatePresenceLocation(
+    event: { presence_option: string; latitude: number; longitude: number; radius: number },
+    updatePresenceDto: UpdatePresenceDto,
+  ) {
+    if (event.presence_option !== EventPresenceOptionEnum.GEO_LOCALIZAtiON) {
+      return;
+    }
+
+    const { latitude, longitude } = updatePresenceDto;
+
+    if (latitude == null || longitude == null) {
+      throw new UnprocessableEntityException(
+        'Localização obrigatória para marcar presença neste evento.',
+      );
+    }
+
+    const distance = getDistanceInMeters(
+      event.latitude,
+      event.longitude,
+      latitude,
+      longitude,
+    );
+
+    if (distance > event.radius) {
+      throw new UnprocessableEntityException(
+        'Você está fora do raio permitido para marcar presença neste evento.',
+      );
+    }
   }
 
   async remove(id: string) {

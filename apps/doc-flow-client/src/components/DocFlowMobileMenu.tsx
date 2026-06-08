@@ -8,6 +8,7 @@ import { Menu, Award } from "lucide-react";
 import AppsIcon from '@mui/icons-material/Apps';
 import { AccessAlarm, Dashboard, RateReview } from '@mui/icons-material';
 import ExtensionIcon from '@mui/icons-material/Extension';
+import FolderIcon from '@mui/icons-material/Folder';
 
 export function DocFlowMobileMenu() {
   const navigate = useNavigate();
@@ -46,6 +47,15 @@ export function DocFlowMobileMenu() {
                 >
                   <AppsIcon className="mr-2 h-4 w-4" />
                   Voltar para Apps
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleNavigation("/docflow/files")}
+                >
+                  <FolderIcon className="mr-2 h-4 w-4" />
+                  Seus Arquivos
                 </Button>
 
                 {isStudent && (

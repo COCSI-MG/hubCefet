@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsISO8601,
@@ -39,15 +39,19 @@ export class CreateEventDto {
     description: 'Event end date',
     example: '2024-12-17T10:00:00Z',
   })
+  @IsNotEmpty({
+    message: 'Event end date is required',
+  })
   @IsISO8601({}, { message: 'Incorrect date format' })
-  end_at?: string;
+  end_at: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Status of the event',
     example: 'upcoming',
   })
   @IsEnum(EventStatus)
-  status: EventStatus;
+  @IsOptional()
+  status?: EventStatus;
 
   @ApiProperty({
     example: 'user-id',

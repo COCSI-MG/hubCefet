@@ -53,6 +53,7 @@ export class Event extends Model {
   })
   @Column({
     type: DataType.DATE,
+    allowNull: false,
   })
   end_at: Date;
   @ApiProperty({

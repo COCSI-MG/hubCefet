@@ -1,29 +1,33 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsISO8601, IsOptional, ValidateIf } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { PresenceCheckType } from '../enum/presence-check-type.enum';
 
 export class UpdatePresenceDto {
-  status: 'registered' | 'present' | 'finalized';
-
   @ApiProperty({
-    description: 'Check in date',
-    example: '2024-12-14T10:00:00Z',
-    required: false,
+    description: 'Tipo de marcação de presença',
+    enum: PresenceCheckType,
+    example: PresenceCheckType.CHECK_IN,
+  })
+  @IsEnum(PresenceCheckType)
+  type: PresenceCheckType;
+
+  @ApiPropertyOptional({
+    description: 'Latitude do usuário (obrigatória para eventos por geolocalização)',
+    example: -22.9035,
   })
   @IsOptional()
-  @Transform(({ value }) => (value === '' ? null : value))
-  @ValidateIf((o) => o.check_in_date !== null)
-  @IsISO8601({}, { message: 'Incorrect date format for check_in_date' })
-  check_in_date?: string | null;
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
 
-  @ApiProperty({
-    description: 'Check out date',
-    example: '2024-12-14T10:00:00Z',
-    required: false,
+  @ApiPropertyOptional({
+    description: 'Longitude do usuário (obrigatória para eventos por geolocalização)',
+    example: -43.2096,
   })
   @IsOptional()
-  @Transform(({ value }) => (value === '' ? null : value))
-  @ValidateIf((o) => o.check_out_date !== null)
-  @IsISO8601({}, { message: 'Incorrect date format for check_out_date' })
-  check_out_date?: string | null;
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 }

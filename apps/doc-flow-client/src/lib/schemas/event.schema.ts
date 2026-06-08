@@ -20,7 +20,6 @@ export const createEventSchema = z
         message: "Data de término é obrigatória",
       })
       .date("Data de término inválida"),
-    status: z.string({ required_error: "Status é obrigatório" }).min(1, "Status é obrigatório"),
     eventStartTime: z.string({ required_error: "Horário de início é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de início inválido (use HH:MM)"),
     eventEndTime: z.string({ required_error: "Horário de término é obrigatório" }).regex(/\d{1,2}:\d{1,2}/, "Horário de término inválido (use HH:MM)"),
     latitude: z.number({ required_error: "Latitude é obrigatória" }).min(-90, "Latitude deve ser entre -90 e 90").max(90, "Latitude deve ser entre -90 e 90"),
@@ -33,31 +32,9 @@ export const createEventSchema = z
     }),
   })
   .superRefine((val, ctx) => {
-    const now = new Date().toISOString();
-
     const [year, month, day] = val.start_at.split("-").map(Number);
     const [hour, minute] = val.eventStartTime.split(":").map(Number);
-    const zodEventStartDate = new Date(
-      year,
-      month - 1,
-      day,
-      hour,
-      minute
-    ).toISOString();
-    if (val.status === "upcoming") {
-      if (zodEventStartDate < now) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
-          message:
-            "Evento próximo não pode possuir a data de inicio menor que agora",
-          fatal: true,
-          path: ["start_at"],
-        });
-
-        return z.NEVER;
-      }
-      return;
-    }
+    const zodEventStartDate = new Date(year, month - 1, day, hour, minute);
 
     const [endYear, endMonth, endDay] = val.end_at.split("-").map(Number);
     const [endHour, endMinute] = val.eventEndTime.split(":").map(Number);
@@ -67,38 +44,20 @@ export const createEventSchema = z
       endDay,
       endHour,
       endMinute
-    ).toISOString();
-    if (val.status === "ended") {
-      if (zodEventEndDate < zodEventStartDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
-          message:
-            "Evento encerrado não pode possuir a data de inicio maior que a data de termino",
-          fatal: true,
-          path: ["end_at"],
-        });
+    );
 
-        return z.NEVER;
-      }
-      return;
-    }
-
-    if (val.status === "started") {
-      if (zodEventStartDate > now) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
-          message:
-            "Evento em andamento não pode possui uma data de inicio maior que agora",
-          fatal: true,
-          path: ["start_at"],
-        });
-      }
+    if (zodEventEndDate <= zodEventStartDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_date,
+        message: "A data de término deve ser posterior à data de início",
+        fatal: true,
+        path: ["end_at"],
+      });
     }
   })
   .transform(
     ({
       name,
-      status,
       start_at,
       end_at,
       eventStartTime,
@@ -126,7 +85,6 @@ export const createEventSchema = z
       const end = new Date(endYear, endMonth - 1, endDay, endHour, endMinute);
       return {
         name,
-        status,
         start_at: start.toISOString(),
         end_at: end.toISOString(),
         eventStartTime,

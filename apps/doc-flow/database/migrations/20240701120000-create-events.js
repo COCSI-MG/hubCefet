@@ -11,9 +11,10 @@ module.exports = {
      */
     return await queryInterface.createTable('events', {
       id: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
+        defaultValue: Sequelize.UUIDV4,
       },
       name: {
         type: Sequelize.STRING(60),

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { tableEventType } from "./EventsTable";
 import { EventsActionButtons } from "./EventsActionButtons";
 import { EventScannerModal } from "./EventScannerModal";
+import { getEventDateStatus, isEventOngoing } from "@/lib/utils";
 
 export function getColumns(
 	{ navigate }: { navigate: (path: string) => void },
@@ -89,7 +90,7 @@ export function getColumns(
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.status;
+        const status = getEventDateStatus(row.original.start_at, row.original.end_at);
         switch (status) {
           case "started":
             return <span>Em andamento</span>;
@@ -98,6 +99,13 @@ export function getColumns(
           case "upcoming":
             return <span>Próximo</span>;
         }
+      },
+      filterFn: (row, _columnId, filterValue) => {
+        if (!filterValue) return true;
+        return (
+          getEventDateStatus(row.original.start_at, row.original.end_at) ===
+          filterValue
+        );
       },
     },
     {
@@ -139,7 +147,7 @@ export function getColumns(
       cell: ({ row }) => {
         const item = row.original
         const canEditOrDelete = isAdmin || (tableType === 'user' && isProfessor)
-        const eventAlreadyStarted = item.status === 'started'
+        const eventAlreadyStarted = isEventOngoing(item.start_at, item.end_at)
 
         return (
           <div className="flex justify-start items-center gap-2">
@@ -175,7 +183,7 @@ export function getColumns(
 
 
                 {item.presence_option === 'qrcode' && (
-                  <EventScannerModal eventId={item.id} eventStatus={item.status} eventAlreadyStarted={eventAlreadyStarted} />
+                  <EventScannerModal eventId={item.id} startAt={item.start_at} endAt={item.end_at} eventAlreadyStarted={eventAlreadyStarted} />
                 )}
               </>
             )}

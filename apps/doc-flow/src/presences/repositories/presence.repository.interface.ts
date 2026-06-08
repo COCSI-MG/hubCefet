@@ -1,13 +1,13 @@
 import { CreatePresenceDto } from '../dto/create-presence.dto';
-import { UpdatePresenceDto } from '../dto/update-presence.dto';
 import { Presence } from '../entities/presence.entity';
 import { PresenceStatus } from '../enum/presence-status.enum';
+import { UpdatePresenceData } from '../types/update-presence-data.type';
 
 export interface PresenceRepository {
   create(createPresenceDto: CreatePresenceDto): Promise<Presence>;
   findAll(): Promise<Presence[]>;
   findOne(id: string): Promise<Presence>;
-  update(id: string, updatePresenceDto: UpdatePresenceDto): Promise<Presence>;
+  update(id: string, data: UpdatePresenceData): Promise<Presence>;
   remove(id: string): Promise<void>;
   findPresenceByName(name: string): Promise<Presence>;
   findOrCreatedPresence(

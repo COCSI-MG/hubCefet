@@ -79,36 +79,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               <div>
                 <FormField
                   control={form.control}
-                  name="status"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={event ? event.status : "upcoming"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Defina um status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="upcoming">Próximo</SelectItem>
-                            <SelectItem value="started">
-                              Em andamento
-                            </SelectItem>
-                            <SelectItem value="ended">Finalizado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    );
-                  }}
-                />
-              </div>
-              <div>
-                <FormField
-                  control={form.control}
                   name="presence_option"
                   render={({ field }) => {
                     return (
@@ -284,7 +254,6 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
 
                   form.reset({
                     name: event.name,
-                    status: event.status,
                     start_at: startParts.date,
                     eventStartTime: startParts.time,
                     end_at: endParts.date,
