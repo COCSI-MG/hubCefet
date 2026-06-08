@@ -22,7 +22,7 @@ module.exports = {
         allowNull: false,
       },
       url: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING(255),
         allowNull: false,
       },
       type: {
@@ -44,10 +44,6 @@ module.exports = {
         allowNull: false,
         defaultValue: 'waiting',
         after: 'type',
-      },
-      url: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
       },
       created_at: {
         type: Sequelize.DATE,

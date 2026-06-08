@@ -17,7 +17,7 @@ module.exports = {
           model: 'activities',
           key: 'id',
         },
-        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       reviewer_user_id: {
         type: Sequelize.UUID,

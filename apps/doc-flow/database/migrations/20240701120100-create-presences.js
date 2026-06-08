@@ -11,9 +11,10 @@ module.exports = {
      */
     return await queryInterface.createTable('presences', {
       id: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
+        defaultValue: Sequelize.UUIDV4,
       },
       event_id: {
         type: Sequelize.STRING,
@@ -30,11 +31,11 @@ module.exports = {
       },
       check_in_date: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       check_out_date: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       created_at: {
         type: Sequelize.DATE,
