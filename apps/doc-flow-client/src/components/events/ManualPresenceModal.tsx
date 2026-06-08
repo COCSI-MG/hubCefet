@@ -29,9 +29,8 @@ export function ManualPresenceModal({ eventId, userId, modalType, disabled = fal
     try {
       const presence = await presenceService.findByUserAndEventId(userId, eventId);
 
-      const now = new Date().toISOString();
       const payload: PresenceUpdate = {
-        ...(isCheckIn ? { check_in_date: now } : { check_out_date: now }),
+        type: isCheckIn ? 'check-in' : 'check-out',
       };
 
       await presenceService.update(presence.id, payload);

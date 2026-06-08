@@ -1,8 +1,8 @@
 import { InjectModel } from '@nestjs/sequelize';
 import { PresenceRepository } from './presence.repository.interface';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
-import { UpdatePresenceDto } from '../dto/update-presence.dto';
 import { Presence } from '../entities/presence.entity';
+import { UpdatePresenceData } from '../types/update-presence-data.type';
 import { Op } from 'sequelize';
 import { PresenceStatus } from '../enum/presence-status.enum';
 
@@ -28,10 +28,10 @@ export class PresenceRepositoryImpl implements PresenceRepository {
 
   async update(
     id: string,
-    updatePresenceDto: UpdatePresenceDto,
+    data: UpdatePresenceData,
   ): Promise<Presence> {
     const presence = await this.findOne(id);
-    return await presence.update(updatePresenceDto);
+    return await presence.update(data);
   }
 
   async remove(id: string): Promise<void> {

@@ -842,8 +842,8 @@ export interface components {
       };
     };
     UpdatePresenceDto: {
-      check_out_date?: string;
-      check_in_date?: string;
+      /** @description Tipo de marcação de presença */
+      type: "check-in" | "check-out";
     };
     GetAllPresencesByEventResponseDto: {
       presences?: components["schemas"]["Presence"][];

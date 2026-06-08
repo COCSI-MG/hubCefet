@@ -45,10 +45,9 @@ export const EventScanner = ({ eventId, startAt, endAt }: EventScannerProps) => 
       }
 
       const isCheckIn = data.qrType === 'Check-In';
-      const now = new Date().toISOString();
 
       const payload: PresenceUpdate = {
-        ...(isCheckIn ? { check_in_date: now } : { check_out_date: now }),
+        type: isCheckIn ? 'check-in' : 'check-out',
       };
 
       const presence = await presenceService.findByUserAndEventId(data.userId, data.eventId)
