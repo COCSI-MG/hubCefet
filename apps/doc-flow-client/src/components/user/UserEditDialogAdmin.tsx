@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
-import { CreateUser, createUserSchema } from "@/lib/schemas/user.schema";
+import { CreateUserByAdmin, createUserByAdminSchema } from "@/lib/schemas/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -49,8 +49,8 @@ export default function UserEditDialogAdmin({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<CreateUser>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<CreateUserByAdmin>({
+    resolver: zodResolver(createUserByAdminSchema),
     defaultValues: {
       full_name: user.full_name,
       email: user.email,
@@ -90,7 +90,7 @@ export default function UserEditDialogAdmin({
     });
   }, [form, user]);
 
-  const handleSubmit = async (data: CreateUser) => {
+  const handleSubmit = async (data: CreateUserByAdmin) => {
     setIsSubmitting(true);
     try {
       await userService.patch(user.id, data);

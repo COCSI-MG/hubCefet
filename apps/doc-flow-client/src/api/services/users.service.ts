@@ -41,7 +41,7 @@ export default class UserService extends AbstractService {
 
   async patch(
     id: string,
-    data: CreateUser
+    data: CreateUserByAdmin
   ): Promise<User> {
     return await this.api.patch(this.basePath + `/${id}`, { ...data });
   }
