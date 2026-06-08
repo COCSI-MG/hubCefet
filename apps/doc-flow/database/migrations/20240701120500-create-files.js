@@ -4,7 +4,7 @@ const { type } = require('os');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
@@ -22,7 +22,7 @@ module.exports = {
         allowNull: false,
       },
       url: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.STRING(255),
         allowNull: false,
       },
       type: {
@@ -39,9 +39,11 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
       },
-      event_id: {
-        type: Sequelize.UUID,
+      status: {
+        type: Sequelize.ENUM('done', 'processing', 'waiting', 'error'),
         allowNull: false,
+        defaultValue: 'waiting',
+        after: 'type',
       },
       created_at: {
         type: Sequelize.DATE,
@@ -56,7 +58,7 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *

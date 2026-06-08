@@ -58,15 +58,8 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       const decoded: any = jwtDecode(token);
 
       let profileName = "";
-      if (typeof decoded.profile === "string") {
-        profileName = decoded.profile;
-      } else if (decoded.profile?.name) {
+      if (decoded.profile.name) {
         profileName = decoded.profile.name;
-      } else if (
-        decoded.profile?.roles &&
-        decoded.profile.roles.length > 0
-      ) {
-        profileName = decoded.profile.roles[0];
       }
 
       const profileLower = profileName.toLowerCase();

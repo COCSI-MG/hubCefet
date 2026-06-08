@@ -11,12 +11,51 @@ module.exports = {
      */
     return await queryInterface.createTable('events', {
       id: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
+        defaultValue: Sequelize.UUIDV4,
       },
       name: {
         type: Sequelize.STRING(60),
+        allowNull: false,
+      },
+      start_at: {
+        type: Sequelize.DATE(6),
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      end_at: {
+        type: Sequelize.DATE(6),
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.ENUM('started', 'ended', 'upcoming'),
+        allowNull: false,
+        defaultValue: 'upcoming',
+      },
+      latitude: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
+      longitude: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
+      vacancies: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      radius: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      presence_option: {
+        type: Sequelize.ENUM('geo', 'qrcode'),
         allowNull: false,
       },
       created_at: {
@@ -28,6 +67,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      created_by_user_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
       },
     });
   },

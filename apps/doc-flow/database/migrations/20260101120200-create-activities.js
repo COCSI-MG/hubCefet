@@ -2,13 +2,13 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('complementary_activities', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('activities', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
-        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        defaultValue: Sequelize.UUIDV4,
       },
       user_id: {
         type: Sequelize.UUID,
@@ -55,19 +55,34 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
+      complementary_activity_type_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'complementary_activities_types',
+          key: 'id',
+        }
+      },
+      extension_activity_type_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'extension_activities_types',
+          key: 'id',
+        },
+      },
     });
 
-    // Adicionando constraint de CHECK para hours > 0
     await queryInterface.sequelize.query(`
-      ALTER TABLE complementary_activities 
+      ALTER TABLE activities 
       ADD CONSTRAINT check_hours_positive 
       CHECK (hours > 0)
     `);
   },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('complementary_activities');
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('activities');
   }
-}; 
- 
- 
+};
+
+

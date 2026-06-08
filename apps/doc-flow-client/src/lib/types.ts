@@ -32,23 +32,9 @@ export const eventsSchema = z.object({
   end_at: z.string(),
 });
 
-export const roleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  profiles_roles: z.object({
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
-    profile_id: z.string(),
-    role_id: z.string(),
-  }),
-});
-
 export const profileSchema = z.object({
   id: z.string(),
   name: z.nativeEnum(Profile),
-  roles: z.array(roleSchema),
 });
 
 export const userPayloadSchema = z.object({
