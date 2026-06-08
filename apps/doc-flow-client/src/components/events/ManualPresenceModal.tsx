@@ -5,6 +5,7 @@ import { presenceService } from '@/api/services/presence.service';
 import { ApiError } from '@/api/errors/ApiError';
 import { toast } from 'sonner';
 import { PresenceUpdate } from '@/lib/types';
+import { getCurrentPosition } from '@/lib/utils/geolocation';
 
 interface ManualPresenceModalProps {
   eventId: string;
@@ -27,10 +28,20 @@ export function ManualPresenceModal({ eventId, userId, modalType, disabled = fal
   const handleConfirm = async () => {
     setLoading(true);
     try {
+      let coordinates;
+      try {
+        coordinates = await getCurrentPosition();
+      } catch {
+        toast.error('Não foi possível obter sua localização. Habilite o GPS e permita o acesso à localização.');
+        return;
+      }
+
       const presence = await presenceService.findByUserAndEventId(userId, eventId);
 
       const payload: PresenceUpdate = {
         type: isCheckIn ? 'check-in' : 'check-out',
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
       };
 
       await presenceService.update(presence.id, payload);

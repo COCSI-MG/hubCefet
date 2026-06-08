@@ -12,6 +12,7 @@ import { PdfGenerationJobData } from '../queues/interfaces/pdf-generation-job.in
 import { PresenceStatus } from './enum/presence-status.enum';
 import { PresenceCheckType } from './enum/presence-check-type.enum';
 import { EventPresenceOptionEnum } from '../events/enum/event-presence-option.enum';
+import { getDistanceInMeters } from '../lib/geo';
 import { Profile } from '../profile/enum/profile.enum';
 import { UserJwtPayload } from 'src';
 
@@ -79,6 +80,8 @@ export class PresencesService {
     }
 
     this.validatePresencePermission(event, presence, requester);
+
+    this.validatePresenceLocation(event, updatePresenceDto);
 
     const user = await this.userService.findOne(
       presence.user_id,
@@ -181,6 +184,36 @@ export class PresencesService {
 
     if (presence.user_id !== requester.sub) {
       throw new ForbiddenException('Você só pode registrar a própria presença.');
+    }
+  }
+
+  private validatePresenceLocation(
+    event: { presence_option: string; latitude: number; longitude: number; radius: number },
+    updatePresenceDto: UpdatePresenceDto,
+  ) {
+    if (event.presence_option !== EventPresenceOptionEnum.GEO_LOCALIZAtiON) {
+      return;
+    }
+
+    const { latitude, longitude } = updatePresenceDto;
+
+    if (latitude == null || longitude == null) {
+      throw new UnprocessableEntityException(
+        'Localização obrigatória para marcar presença neste evento.',
+      );
+    }
+
+    const distance = getDistanceInMeters(
+      event.latitude,
+      event.longitude,
+      latitude,
+      longitude,
+    );
+
+    if (distance > event.radius) {
+      throw new UnprocessableEntityException(
+        'Você está fora do raio permitido para marcar presença neste evento.',
+      );
     }
   }
 
