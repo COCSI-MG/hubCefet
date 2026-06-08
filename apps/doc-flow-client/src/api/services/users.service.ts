@@ -6,6 +6,13 @@ import { CreateUser } from "@/lib/schemas/user.schema";
 type UsersGetAllResponse = components["schemas"]["GetAllUsersResponseDto"];
 type User = components["schemas"]["User"];
 
+export type CreateUserByAdmin = {
+  full_name: string;
+  email: string;
+  enrollment?: string;
+  profileId: string;
+};
+
 export default class UserService extends AbstractService {
   constructor() {
     super("/users", true);
@@ -45,6 +52,14 @@ export default class UserService extends AbstractService {
 
   async create(data: CreateUser): Promise<User> {
     return await this.api.post(this.basePath, { ...data });
+  }
+
+  async adminCreate(data: CreateUserByAdmin): Promise<{ user: User }> {
+    return await this.api.post(this.basePath + "/admin-create", { ...data });
+  }
+
+  async resetPassword(id: string): Promise<{ message: string }> {
+    return await this.api.post(this.basePath + `/${id}/reset-password`, {});
   }
 }
 

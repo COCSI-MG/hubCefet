@@ -18,6 +18,10 @@ export default function Signup() {
     resolver: zodResolver(singupFormSchema),
     defaultValues: {
       email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      enrollment: "",
     },
   });
 
