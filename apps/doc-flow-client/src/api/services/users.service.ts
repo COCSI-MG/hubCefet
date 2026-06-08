@@ -1,7 +1,7 @@
 import { ApiResponse } from "@/lib/types";
 import AbstractService from "./abstract.service";
 import type { components } from "@/lib/schema";
-import { CreateUser } from "@/lib/schemas/user.schema";
+import { CreateUser, UpdateUserByAdmin } from "@/lib/schemas/user.schema";
 
 type UsersGetAllResponse = components["schemas"]["GetAllUsersResponseDto"];
 type User = components["schemas"]["User"];
@@ -41,7 +41,7 @@ export default class UserService extends AbstractService {
 
   async patch(
     id: string,
-    data: CreateUser
+    data: UpdateUserByAdmin
   ): Promise<User> {
     return await this.api.patch(this.basePath + `/${id}`, { ...data });
   }

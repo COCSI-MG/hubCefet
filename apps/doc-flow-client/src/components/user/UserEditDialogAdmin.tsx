@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
-import { CreateUser, createUserSchema } from "@/lib/schemas/user.schema";
+import { UpdateUserByAdmin, updateUserByAdminSchema } from "@/lib/schemas/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -49,8 +49,8 @@ export default function UserEditDialogAdmin({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<CreateUser>({
-    resolver: zodResolver(createUserSchema),
+  const form = useForm<UpdateUserByAdmin>({
+    resolver: zodResolver(updateUserByAdminSchema),
     defaultValues: {
       full_name: user.full_name,
       email: user.email,
@@ -90,10 +90,16 @@ export default function UserEditDialogAdmin({
     });
   }, [form, user]);
 
-  const handleSubmit = async (data: CreateUser) => {
+  const handleSubmit = async (data: UpdateUserByAdmin) => {
     setIsSubmitting(true);
     try {
-      await userService.patch(user.id, data);
+      const changedFields: Partial<UpdateUserByAdmin> = {};
+      if (data.full_name !== user.full_name) changedFields.full_name = data.full_name;
+      if (data.email !== user.email) changedFields.email = data.email;
+      if (data.enrollment !== user.enrollment) changedFields.enrollment = data.enrollment;
+      if (data.profileId !== user.profile_id) changedFields.profileId = data.profileId;
+
+      await userService.patch(user.id, changedFields);
 
       toast.success("Usuário atualizado com sucesso");
       setIsOpen(false);
