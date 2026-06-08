@@ -82,12 +82,19 @@ export class PresencesController {
 
   @Patch(':id')
   async update(
+    @Req() req: UserRequest,
     @Param('id') id: string,
     @Body() updatePresenceDto: UpdatePresenceDto,
   ) {
+    const user = req.user;
+    if (!user) {
+      throw new UnauthorizedException('Nao autorizado');
+    }
+
     return await this.presencesService.update(
       id,
       updatePresenceDto,
+      user,
     );
   }
 

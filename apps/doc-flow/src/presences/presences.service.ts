@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException, ConflictException, forwardRef } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException, ConflictException, forwardRef } from '@nestjs/common';
 import { CreatePresenceDto } from './dto/create-presence.dto';
 import { UpdatePresenceDto } from './dto/update-presence.dto';
 import { PresenceRepository } from './repositories/presence.repository.interface';
@@ -9,6 +9,9 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PdfGenerationJobData } from '../queues/interfaces/pdf-generation-job.interface';
 import { PresenceStatus } from './enum/presence-status.enum';
+import { EventPresenceOptionEnum } from '../events/enum/event-presence-option.enum';
+import { Profile } from '../profile/enum/profile.enum';
+import { UserJwtPayload } from 'src';
 
 @Injectable()
 export class PresencesService {
@@ -60,7 +63,7 @@ export class PresencesService {
     return presence
   }
 
-  async update(id: string, updatePresenceDto: UpdatePresenceDto) {
+  async update(id: string, updatePresenceDto: UpdatePresenceDto, requester: UserJwtPayload) {
     const presence = await this.presenceRepository.findOne(id);
     if (!presence) {
       throw new NotFoundException('Inscrição não encontrada para este evento.');
@@ -72,6 +75,8 @@ export class PresencesService {
     if (!event) {
       throw new NotFoundException('Evento nao encontrado')
     }
+
+    this.validatePresencePermission(event, presence, requester);
 
     const user = await this.userService.findOne(
       presence.user_id,
@@ -154,6 +159,33 @@ export class PresencesService {
     await this.presenceRepository.update(id, payloadToUpdate)
 
     return 'presenca atualizada com sucesso';
+  }
+
+  private validatePresencePermission(
+    event: { presence_option: string },
+    presence: Presence,
+    requester: UserJwtPayload,
+  ) {
+    const isQrCodeEvent =
+      event.presence_option === EventPresenceOptionEnum.QR_CODE;
+
+    if (isQrCodeEvent) {
+      const profile = requester.profile?.name?.toLowerCase();
+      const isProfessorOrAdmin =
+        profile === Profile.Professor || profile === Profile.Admin;
+
+      if (!isProfessorOrAdmin) {
+        throw new ForbiddenException(
+          'Apenas professores ou administradores podem registrar presença via QR Code.',
+        );
+      }
+
+      return;
+    }
+
+    if (presence.user_id !== requester.sub) {
+      throw new ForbiddenException('Você só pode registrar a própria presença.');
+    }
   }
 
   async remove(id: string) {
