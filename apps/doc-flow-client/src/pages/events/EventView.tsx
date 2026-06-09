@@ -60,7 +60,7 @@ export function EventView() {
         <h1 className="mb-4 text-3xl font-medium text-sky-900">
           Local do Evento
         </h1>
-        <div className="w-full h-full rounded-xl border-2 border-neutral-200 shadow-md">
+        <div className="relative z-0 isolate overflow-hidden w-full h-full rounded-xl border-2 border-neutral-200 shadow-md">
           {event && (
             <EventMap
               lat={event.latitude}

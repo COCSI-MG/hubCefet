@@ -10,9 +10,11 @@ import { Button } from "../ui/button";
 import React, { useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
+import EventsMobileCards from "./EventsMobileCards";
 import { Event } from "@/lib/schemas/event.schema";
 import { getColumns } from "./EventsTableColumns";
 import useAuth from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { jwtDecode } from "jwt-decode";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DeleteEventDialog } from "./DeleteEventDialog";
@@ -43,6 +45,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
   const [itemToDelete, setItemToDelete] = useState<Event | null>(null)
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const isMyEventsPage = location.pathname === "/events/user";
 
@@ -151,7 +154,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
           setItem={setItemToDelete}
         />
 
-        <div className="flex flex-col xl:flex-row justify-between xl:items-center w-full space-y-4">
+        <div className="flex flex-col xl:flex-row justify-between xl:items-center w-full space-y-4 mt-4">
           <div className="flex flex-col gap-1 md:flex-row max-md:w-full">
             <Button
               variant="outline"
@@ -193,14 +196,18 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
         </div>
 
       </div>
-      <div className="w-full mb-3 mt-2 bg-sky-50 border rounded-xl h-fit-content flex items-center space-x-1 px-2">
+      <div className="w-full mb-3 mt-2 bg-sky-50 border rounded-xl h-fit-content hidden md:flex items-center space-x-1 px-2">
         <BadgeMinus />
         <div className="text-left text-neutral-600 p-2 ">
           Selecionados ({table.getFilteredSelectedRowModel().rows.length})
         </div>
       </div>
 
-      <DataTable table={table} />
+      {isMobile ? (
+        <EventsMobileCards table={table} tableType={tableType} />
+      ) : (
+        <DataTable table={table} />
+      )}
     </div>
   );
 }

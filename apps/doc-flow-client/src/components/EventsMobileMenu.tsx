@@ -48,7 +48,7 @@ export function EventsMobileMenu() {
   };
 
   return (
-    <header className="bg-sky-900 text-white p-4 flex justify-between items-center">
+    <header className="relative z-50 bg-sky-900 text-white p-4 flex justify-between items-center">
       <h1 className="text-xl font-bold">Eventos</h1>
 
       <Sheet open={open} onOpenChange={setOpen}>
