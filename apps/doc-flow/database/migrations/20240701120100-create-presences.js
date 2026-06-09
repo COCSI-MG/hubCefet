@@ -17,11 +17,11 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       event_id: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false,
       },
       user_id: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false,
       },
       status: {
