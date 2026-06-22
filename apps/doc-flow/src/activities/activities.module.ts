@@ -17,6 +17,7 @@ import {
   ReviewSetting,
 } from './entities';
 import { UsersModule } from '../users/users.module';
+import { FilesModule } from '../files/files.module';
 import { ActivityRepository } from './repositories/activity.repository';
 import { ActivitiesService } from './activities.service';
 import { ActivitiesController } from './activities.controller';
@@ -33,6 +34,7 @@ import { ActivitiesController } from './activities.controller';
       ReviewSetting,
     ]),
     UsersModule,
+    FilesModule,
   ],
   controllers: [ActivitiesController],
   providers: [

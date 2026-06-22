@@ -14,6 +14,7 @@ import { UploadCertificateDto } from './dto/upload-certificate.dto';
 import { Activity, ActivityHistory, ActivityType } from './entities';
 import { ProfessorSelectionService } from './services/professor-selection.service';
 import { FileUploadService } from './services/file-upload.service';
+import { FilesService } from '../files/files.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { ActivityHistoryType } from './enum/activity-history-type.enum';
@@ -31,6 +32,7 @@ export class ActivitiesService {
     private readonly reviewSettingRepository: ReviewSettingRepository,
     private readonly professorSelectionService: ProfessorSelectionService,
     private readonly fileUploadService: FileUploadService,
+    private readonly filesService: FilesService,
   ) { }
 
   async uploadCertificate(
@@ -310,15 +312,19 @@ export class ActivitiesService {
         transaction,
       );
 
-      await this.checkAndUpdateActivityStatus(id, transaction);
+      const approved = await this.checkAndUpdateActivityStatus(id, transaction);
       await transaction.commit();
+
+      if (approved) {
+        await this.registerApprovedCertificateFile(activity);
+      }
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
 
-  private async checkAndUpdateActivityStatus(activityId: string, transaction?: any): Promise<void> {
+  private async checkAndUpdateActivityStatus(activityId: string, transaction?: any): Promise<boolean> {
     const requiredReviewers = await this.reviewSettingRepository.getRequiredReviewers();
     const totalReviews = await this.activityReviewRepository.countTotalByActivity(activityId, transaction);
     const approvedCount = await this.activityReviewRepository.countApprovedByActivity(activityId, transaction);
@@ -327,17 +333,36 @@ export class ActivitiesService {
     if (rejectedCount > 0) {
       await this.activityRepository.updateStatus(activityId, 3, transaction);
       Logger.log(`[REVIEW] Atividade ${activityId} rejeitada por ${rejectedCount} professor(es)`);
-      return;
+      return false;
     }
 
     if (totalReviews >= requiredReviewers && approvedCount === requiredReviewers) {
       await this.activityRepository.updateStatus(activityId, 2, transaction);
       Logger.log(`[REVIEW] Atividade ${activityId} aprovada por todos os ${requiredReviewers} revisores`);
-      return;
+      return true;
     }
 
     if (totalReviews < requiredReviewers) {
       Logger.log(`[REVIEW] Atividade ${activityId} ainda aguardando mais revisões (${totalReviews}/${requiredReviewers})`);
+    }
+
+    return false;
+  }
+
+  private async registerApprovedCertificateFile(activity: Activity): Promise<void> {
+    if (!activity.certificate_url) {
+      return;
+    }
+
+    try {
+      const file = await this.filesService.registerApprovedCertificate({
+        courseName: activity.course_name,
+        certificateUrl: activity.certificate_url,
+        userId: activity.user_id,
+      });
+      Logger.log(`[REVIEW] Registro de arquivo ${file.id} criado para a atividade aprovada ${activity.id}`);
+    } catch (error) {
+      Logger.error(`[REVIEW] Falha ao registrar arquivo do certificado da atividade ${activity.id}: ${error.message}`);
     }
   }
 

@@ -1,9 +1,11 @@
 import { File } from '../entities/file.entity';
 import { CreateFileDto } from '../dto/create-file.dto';
 import { UpdateFileDto } from '../dto/update-file.dto';
+import { CreateCertificateFileDto } from '../dto/create-certificate-file.dto';
 
 export interface FileRepository {
   create(createFileDto: CreateFileDto, userId: string): Promise<File>;
+  createCertificate(data: CreateCertificateFileDto): Promise<File>;
   findAll(): Promise<File[]>;
   findOne(id: string): Promise<File>;
   update(id: string, updateFileDto: UpdateFileDto): Promise<string>;

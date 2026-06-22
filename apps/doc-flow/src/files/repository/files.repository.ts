@@ -3,7 +3,10 @@ import { FileRepository } from './files.repository.interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { File } from '../entities/file.entity';
 import { CreateFileDto } from '../dto/create-file.dto';
+import { CreateCertificateFileDto } from '../dto/create-certificate-file.dto';
 import { User } from 'src/users/entities/user.entity';
+import { FileType } from '../enum/file-type.enum';
+import { FileStatus } from '../enum/file-status.enum';
 
 @Injectable()
 export class FileRepositoryImpl implements FileRepository {
@@ -31,6 +34,16 @@ export class FileRepositoryImpl implements FileRepository {
       url: createFileDto.url,
       type: createFileDto.type,
       user_id: userId,
+    });
+  }
+
+  async createCertificate(data: CreateCertificateFileDto): Promise<File> {
+    return await this.fileModel.create({
+      name: data.name,
+      url: data.url,
+      type: FileType.CERTIFICATE,
+      user_id: data.userId,
+      status: FileStatus.STATUS_DONE,
     });
   }
 
