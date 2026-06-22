@@ -8,6 +8,8 @@ import { Queue } from 'bull';
 import { FileToUpload } from './file-to-upload';
 import { unlink } from 'node:fs/promises';
 import { FileStatus } from './enum/file-status.enum';
+import { File } from './entities/file.entity';
+import { RegisterApprovedCertificateDto } from './dto/register-approved-certificate.dto';
 import { createReadStream, existsSync } from 'node:fs';
 import { Response } from 'express';
 import { join } from 'node:path';
@@ -47,6 +49,19 @@ export class FilesService {
     console.log('Creating new file record', createFileDto, userId);
 
     return await this.fileRepository.create(createFileDto, userId);
+  }
+
+  async registerApprovedCertificate(params: RegisterApprovedCertificateDto): Promise<File> {
+    const name = params.courseName.slice(0, 30);
+    const url = params.certificateUrl.startsWith('storage/')
+      ? params.certificateUrl
+      : `storage/${params.certificateUrl}`;
+
+    return await this.fileRepository.createCertificate({
+      name,
+      url,
+      userId: params.userId,
+    });
   }
 
   async findAll() {

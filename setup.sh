@@ -27,9 +27,10 @@ compose() {
     "${COMPOSE_CMD[@]}" "$@"
 }
 
-# Build and start all services
-echo "Building and starting services..."
-compose up --build -d
+# Start only the infrastructure first. Starting every service here would also
+# run the one-off migrate and seed services before the explicit commands below.
+echo "Starting database and cache services..."
+compose up -d postgres redis
 
 echo "Waiting for services to be ready..."
 sleep 30
@@ -40,7 +41,11 @@ compose run --rm migrate
 
 # Run database seeds
 echo "Running database seeds..."
-compose run --rm seed
+compose run --rm --no-deps seed
+
+# Build and start the long-running application services after the database is ready.
+echo "Building and starting application services..."
+compose up --build -d nginx frontend app adminer
 
 echo ""
 echo "✅ Setup complete!"
