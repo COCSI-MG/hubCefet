@@ -1,13 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   BelongsTo,
-  Column, DataType, HasMany, Model, Scopes,
+  Column, DataType, ForeignKey, HasMany, Model, Scopes,
   Table,
 } from 'sequelize-typescript';
 import { Presence } from 'src/presences/entities/presence.entity';
 import { EventStatus } from '../enum/event-status.enum';
 import { User } from 'src/users/entities/user.entity';
 import { EventPresenceOptionEnum } from '../enum/event-presence-option.enum';
+import { ActivityType } from '../../activities/entities/activity-type.entity';
+import { ComplementaryActivityType } from '../../complementary-activity-type/entities/complementary-activity-type.entity';
+import { ExtensionActivityType } from '../../extension-activity-type/entities/extension-activity-type.entity';
 @Scopes(() => ({
   withoutTimestamps: {
     attributes: {
@@ -128,9 +131,61 @@ export class Event extends Model {
   })
   presence_option: string;
 
+  @ApiProperty({
+    example: 1,
+    description: 'Tipo de atividade gerada para participantes (1=complementar, 2=extensão)',
+  })
+  @ForeignKey(() => ActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  activity_type_id: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Subtipo de atividade complementar gerada para participantes',
+  })
+  @ForeignKey(() => ComplementaryActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  complementary_activity_type_id: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Subtipo de atividade de extensão gerada para participantes',
+  })
+  @ForeignKey(() => ExtensionActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  extension_activity_type_id: number;
+
+  @ApiProperty({
+    example: 4,
+    description: 'Quantidade de horas atribuída à atividade gerada para participantes',
+  })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  activity_hours: number;
+
   @HasMany(() => Presence, 'event_id')
   presences: Presence[];
 
   @BelongsTo(() => User, 'created_by_user_id')
   user: User;
+
+  @BelongsTo(() => ActivityType, 'activity_type_id')
+  activityType: ActivityType;
+
+  @BelongsTo(() => ComplementaryActivityType, 'complementary_activity_type_id')
+  complementaryActivityType: ComplementaryActivityType;
+
+  @BelongsTo(() => ExtensionActivityType, 'extension_activity_type_id')
+  extensionActivityType: ExtensionActivityType;
 }
