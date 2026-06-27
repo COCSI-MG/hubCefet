@@ -203,11 +203,13 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
         </div>
       </div>
 
-      {isMobile ? (
-        <EventsMobileCards table={table} tableType={tableType} />
-      ) : (
-        <DataTable table={table} />
-      )}
+      <div className="mt-4">
+        {isMobile ? (
+          <EventsMobileCards table={table} tableType={tableType} />
+        ) : (
+          <DataTable table={table} />
+        )}
+      </div>
     </div>
   );
 }

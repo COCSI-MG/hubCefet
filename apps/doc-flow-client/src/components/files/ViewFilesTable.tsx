@@ -8,9 +8,10 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "../ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
+import DataTablePagination from "../DataTablePagination";
 import { getColumns } from "./ViewFileTableColumns";
 import { File } from "@/lib/schemas/file.schema";
 import { fileService } from "@/api/services/files.service";
@@ -21,13 +22,37 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Filter } from "lucide-react";
+import { CalendarDays, FileText, Filter } from "lucide-react";
 import { ApiError } from "@/api/errors/ApiError";
 import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import ActionsTableColumn from "./ActionsTableColumn";
 
 interface Pagination {
   pageIndex: number;
   pageSize: number;
+}
+
+const fileTypeLabels: Record<File["type"], string> = {
+  certificate: "Certificado",
+  document: "Documento",
+  image: "Imagem",
+};
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function ViewFilesTable() {
@@ -55,13 +80,6 @@ export function ViewFilesTable() {
     }
   };
 
-  const onDelete = useCallback(() => {
-    fetchEvents({
-      limit: pagination.pageSize,
-      offset: pagination.pageIndex * pagination.pageSize,
-    });
-  }, [pagination]);
-
   useEffect(() => {
     fetchEvents({
       limit: pagination.pageSize,
@@ -69,7 +87,7 @@ export function ViewFilesTable() {
     });
   }, [pagination, pagination.pageIndex, pagination.pageSize]);
 
-  const columns = useMemo(() => getColumns({ onDelete }), [onDelete]);
+  const columns = useMemo(() => getColumns(), []);
 
   const table = useReactTable({
     data: files,
@@ -183,7 +201,52 @@ export function ViewFilesTable() {
         </div>
       </div>
 
-      <DataTable table={table} />
+      <div className="md:hidden space-y-3">
+        {table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map((row) => {
+            const file = row.original;
+
+            return (
+              <Card key={row.id} className="transition-colors hover:bg-sky-50">
+                <CardHeader>
+                  <CardTitle className="min-w-0 text-neutral-800">
+                    <span className="block truncate">{file.name}</span>
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
+                  <dl className="space-y-1.5 text-sm text-neutral-600">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 shrink-0 text-sky-700" />
+                      <dt className="sr-only">Tipo de arquivo</dt>
+                      <dd>{fileTypeLabels[file.type] ?? file.type}</dd>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 shrink-0 text-sky-700" />
+                      <dt className="sr-only">Data de criação</dt>
+                      <dd>{formatDateTime(file.created_at)}</dd>
+                    </div>
+                  </dl>
+                </CardContent>
+
+                <CardFooter className="flex-wrap gap-2 border-t pt-3">
+                  <ActionsTableColumn fileId={file.id} />
+                </CardFooter>
+              </Card>
+            );
+          })
+        ) : (
+          <Card className="py-10 text-center text-sm text-neutral-500">
+            Nenhum arquivo encontrado.
+          </Card>
+        )}
+
+        <DataTablePagination table={table} />
+      </div>
+
+      <div className="hidden md:block">
+        <DataTable table={table} />
+      </div>
     </div>
   );
 }

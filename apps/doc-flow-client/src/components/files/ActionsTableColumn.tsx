@@ -7,14 +7,12 @@ import { ApiError } from "@/api/errors/ApiError";
 
 interface ActionsTableColumnProps {
   fileId: string;
-  onDelete: () => void;
 }
 
 export default function ActionsTableColumn({
   ...props
 }: ActionsTableColumnProps) {
   const [isDownloading, setisDownloading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const handlePrimaryClick = async () => {
     try {
@@ -33,27 +31,6 @@ export default function ActionsTableColumn({
     }
   };
 
-
-  const handleDestructiveClick = async () => {
-    try {
-      setIsDeleting(true);
-
-      await fileService.remove(props.fileId);
-
-      toast.success("Arquivo excluído com sucesso");
-      props.onDelete?.();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.error(err.message);
-        return
-      }
-
-      toast.error("Erro ao excluir arquivo.");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   return (
     <div className="flex items-center space-x-2">
       <Button
@@ -61,28 +38,13 @@ export default function ActionsTableColumn({
         className="rounded-2xl bg-sky-900 text-white hover:bg-sky-700"
         size="sm"
         onClick={handlePrimaryClick}
-        disabled={isDownloading || isDeleting}
+        disabled={isDownloading}
       >
         {
           isDownloading ? (
             <LoaderCircle className="animate-spin" size={20} />
           ) : (
             "Baixar"
-          )
-        }
-      </Button>
-      <Button
-        variant="destructive"
-        className="rounded-2xl"
-        size="sm"
-        onClick={handleDestructiveClick}
-        disabled={isDeleting || isDownloading}
-      >
-        {
-          isDeleting ? (
-            <LoaderCircle className="animate-spin" size={20} />
-          ) : (
-            "Excluir"
           )
         }
       </Button>
