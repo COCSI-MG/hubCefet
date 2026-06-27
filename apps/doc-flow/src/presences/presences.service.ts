@@ -136,7 +136,7 @@ export class PresencesService {
 
       const totalHours = Math.max(0, (now.getTime() - checkInDate.getTime()) / (1000 * 60 * 60));
 
-      const pdfJobData = {
+      const pdfJobData: PdfGenerationJobData = {
         presenceId: presence.id,
         userId: user.data.user.id,
         eventId: event.id,
@@ -145,6 +145,10 @@ export class PresencesService {
         checkInDate: checkInDate.toISOString(),
         checkOutDate: now.toISOString(),
         totalHours: Number(totalHours.toFixed(2)),
+        activityTypeId: event.activity_type_id ?? null,
+        complementaryActivityTypeId: event.complementary_activity_type_id ?? null,
+        extensionActivityTypeId: event.extension_activity_type_id ?? null,
+        activityHours: event.activity_hours ?? null,
       };
 
       try {

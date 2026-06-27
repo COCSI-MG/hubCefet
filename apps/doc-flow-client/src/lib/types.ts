@@ -172,6 +172,17 @@ export const createEventSchema = z
       required_error: "Opção de presença é obrigatória",
       invalid_type_error: "Opção de presença inválida",
     }),
+    activity_type_id: z.string().optional(),
+    complementary_activity_type_id: z.string().optional(),
+    extension_activity_type_id: z.string().optional(),
+    activity_hours: z.preprocess(
+      (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
+      z
+        .number({ invalid_type_error: "Quantidade de horas inválida" })
+        .min(1, "Quantidade de horas deve ser maior que 0")
+        .max(1000, "Quantidade máxima é 1000 horas")
+        .optional()
+    ),
   })
   .superRefine((val, ctx) => {
     const [year, month, day] = val.start_at.split("-").map(Number);
@@ -196,6 +207,32 @@ export const createEventSchema = z
         path: ["end_at"],
       });
     }
+
+    if (val.activity_type_id) {
+      if (val.activity_hours == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Informe a quantidade de horas da atividade",
+          path: ["activity_hours"],
+        });
+      }
+
+      if (val.activity_type_id === "1" && !val.complementary_activity_type_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Selecione o tipo de atividade complementar",
+          path: ["complementary_activity_type_id"],
+        });
+      }
+
+      if (val.activity_type_id === "2" && !val.extension_activity_type_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Selecione o tipo de atividade de extensão",
+          path: ["extension_activity_type_id"],
+        });
+      }
+    }
   })
   .transform(
     ({
@@ -210,6 +247,10 @@ export const createEventSchema = z
       longitude,
       vacancies,
       presence_option,
+      activity_type_id,
+      complementary_activity_type_id,
+      extension_activity_type_id,
+      activity_hours,
     }) => {
       const [startYear, startMonth, startDay] = start_at
         .split("-")
@@ -225,6 +266,7 @@ export const createEventSchema = z
         startMinute
       );
       const end = new Date(endYear, endMonth - 1, endDay, endHour, endMinute);
+      const hasActivity = !!activity_type_id;
       return {
         name,
         start_at: start.toISOString(),
@@ -237,6 +279,16 @@ export const createEventSchema = z
         description,
         radius,
         presence_option,
+        activity_type_id: hasActivity ? activity_type_id : undefined,
+        complementary_activity_type_id:
+          hasActivity && activity_type_id === "1"
+            ? complementary_activity_type_id
+            : undefined,
+        extension_activity_type_id:
+          hasActivity && activity_type_id === "2"
+            ? extension_activity_type_id
+            : undefined,
+        activity_hours: hasActivity ? activity_hours : undefined,
       };
     }
   );

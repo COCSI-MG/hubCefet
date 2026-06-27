@@ -5,6 +5,7 @@ import { PdfGenerationJobData } from '../interfaces/pdf-generation-job.interface
 import { PdfGenerationService } from '../services/pdf-generation.service';
 import { FilesService } from '../../files/files.service';
 import { FileType } from '../../files/enum/file-type.enum';
+import { ActivitiesService } from '../../activities/activities.service';
 
 @Processor('pdf-generation')
 export class PdfGenerationProcessor {
@@ -13,6 +14,7 @@ export class PdfGenerationProcessor {
   constructor(
     private readonly pdfGenerationService: PdfGenerationService,
     private readonly filesService: FilesService,
+    private readonly activitiesService: ActivitiesService,
   ) {}
 
   @Process('generate-certificate')
@@ -34,6 +36,27 @@ export class PdfGenerationProcessor {
         },
         data.userId,
       );
+
+      if (data.activityTypeId && data.activityHours) {
+        try {
+          const activity = await this.activitiesService.createApprovedFromEvent({
+            userId: data.userId,
+            eventName: data.eventName,
+            certificateUrl: filePath,
+            activityTypeId: data.activityTypeId,
+            hours: data.activityHours,
+            complementaryActivityTypeId: data.complementaryActivityTypeId,
+            extensionActivityTypeId: data.extensionActivityTypeId,
+          });
+          this.logger.log(
+            `[QUEUE] ✅ Atividade aprovada ${activity.id} criada a partir do evento ${data.eventId}`,
+          );
+        } catch (activityError) {
+          this.logger.error(
+            `[QUEUE] ❌ Falha ao criar atividade automática para presença ${data.presenceId}: ${activityError.message}`,
+          );
+        }
+      }
 
       this.logger.log(
         `[QUEUE] ✅ Job PDF concluído com SUCESSO para presença ${data.presenceId}`,

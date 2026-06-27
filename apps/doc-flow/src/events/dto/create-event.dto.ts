@@ -6,9 +6,12 @@ import {
   IsOptional,
   IsString,
   IsNumber,
+  Min,
+  Max,
 } from 'class-validator';
 import { EventStatus } from '../enum/event-status.enum';
 import { EventPresenceOptionEnum } from '../enum/event-presence-option.enum';
+import { ActivityTypeEnum } from '../../activities/enum/activity-type.enum';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -98,4 +101,38 @@ export class CreateEventDto {
   })
   @IsEnum(EventPresenceOptionEnum)
   presence_option: EventPresenceOptionEnum;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Tipo de atividade gerada para participantes (1=complementar, 2=extensão)',
+  })
+  @IsEnum(ActivityTypeEnum)
+  @IsOptional()
+  activity_type_id?: ActivityTypeEnum;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Subtipo de atividade complementar (obrigatório quando activity_type_id=1)',
+  })
+  @IsNumber()
+  @IsOptional()
+  complementary_activity_type_id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Subtipo de atividade de extensão (obrigatório quando activity_type_id=2)',
+  })
+  @IsNumber()
+  @IsOptional()
+  extension_activity_type_id?: number;
+
+  @ApiPropertyOptional({
+    example: 4,
+    description: 'Quantidade de horas da atividade gerada (obrigatório quando activity_type_id é informado)',
+  })
+  @IsNumber()
+  @Min(1)
+  @Max(1000)
+  @IsOptional()
+  activity_hours?: number;
 }

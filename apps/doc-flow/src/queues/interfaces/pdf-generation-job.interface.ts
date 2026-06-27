@@ -7,4 +7,8 @@ export interface PdfGenerationJobData {
   checkInDate: string;
   checkOutDate: string;
   totalHours: number;
-} 
+  activityTypeId?: number | null;
+  complementaryActivityTypeId?: number | null;
+  extensionActivityTypeId?: number | null;
+  activityHours?: number | null;
+}

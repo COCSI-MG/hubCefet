@@ -13,6 +13,7 @@ import { EventStatus } from './enum/event-status.enum';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UsersService } from 'src/users/users.service';
 import { Profile } from 'src/profile/enum/profile.enum';
+import { ActivityTypeEnum } from 'src/activities/enum/activity-type.enum';
 
 @Injectable()
 export class EventsService {
@@ -50,6 +51,8 @@ export class EventsService {
       }
     }
 
+    this.validateActivityConfig(createEventDto);
+
     return await this.eventRepository.create({
       name: createEventDto.name,
       start_at: eventStartDate.toISOString(),
@@ -62,7 +65,68 @@ export class EventsService {
       radius: createEventDto.radius,
       description: createEventDto.description,
       presence_option: createEventDto.presence_option,
+      activity_type_id: createEventDto.activity_type_id ?? null,
+      complementary_activity_type_id: createEventDto.complementary_activity_type_id ?? null,
+      extension_activity_type_id: createEventDto.extension_activity_type_id ?? null,
+      activity_hours: createEventDto.activity_hours ?? null,
     });
+  }
+
+  /**
+   * Valida a configuração opcional de atividade vinculada ao evento.
+   * Espelha as regras de cadastro de atividades (activities.service).
+   */
+  private validateActivityConfig(dto: {
+    activity_type_id?: number;
+    activity_hours?: number;
+    complementary_activity_type_id?: number;
+    extension_activity_type_id?: number;
+  }): void {
+    if (dto.activity_type_id == null) {
+      if (
+        dto.activity_hours != null ||
+        dto.complementary_activity_type_id != null ||
+        dto.extension_activity_type_id != null
+      ) {
+        throw new UnprocessableEntityException(
+          'É necessário selecionar o tipo de atividade para vincular uma atividade ao evento',
+        );
+      }
+      return;
+    }
+
+    if (dto.activity_hours == null) {
+      throw new UnprocessableEntityException(
+        'É necessário informar a quantidade de horas da atividade vinculada ao evento',
+      );
+    }
+
+    if (dto.activity_type_id === ActivityTypeEnum.COMPLEMENTARY) {
+      if (!dto.complementary_activity_type_id) {
+        throw new UnprocessableEntityException(
+          'É necessário selecionar um tipo de atividade complementar',
+        );
+      }
+      if (dto.extension_activity_type_id) {
+        throw new UnprocessableEntityException(
+          'Não é possível selecionar um subtipo de extensão para uma atividade complementar',
+        );
+      }
+      return;
+    }
+
+    if (dto.activity_type_id === ActivityTypeEnum.EXTENSION) {
+      if (!dto.extension_activity_type_id) {
+        throw new UnprocessableEntityException(
+          'É necessário selecionar um tipo de atividade de extensão',
+        );
+      }
+      if (dto.complementary_activity_type_id) {
+        throw new UnprocessableEntityException(
+          'Não é possível selecionar um subtipo complementar para uma atividade de extensão',
+        );
+      }
+    }
   }
 
   async findAll(offset: number, limit: number): Promise<Event[]> {

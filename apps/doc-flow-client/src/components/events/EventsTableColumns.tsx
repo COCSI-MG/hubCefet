@@ -150,7 +150,7 @@ export function getColumns(
         const eventAlreadyStarted = isEventOngoing(item.start_at, item.end_at)
 
         return (
-          <div className="flex justify-start items-center gap-2">
+          <div className="flex flex-wrap justify-start items-center gap-2">
             <Button
               className="rounded-2xl bg-blue-700 text-white hover:bg-blue-500"
               variant="secondary"

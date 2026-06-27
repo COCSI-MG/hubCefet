@@ -59,7 +59,7 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
   return (
     <div className="flex flex-col gap-1 md:flex-row min-h-[32px]">
       {isMyEventsPage ? (
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-2'>
           {event.presence_option === 'qrcode' ? (
             <>
               <QRCodeGeneratorModal

@@ -4,6 +4,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import {
   Select,
@@ -12,11 +13,25 @@ import {
   SelectValue,
   SelectItem,
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { EventCreateSchema, Event } from "@/lib/schemas/event.schema";
 import FormItemField from "../FormItemField";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
 import { FormatFormDateToLocal } from "@/lib/utils/form";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useActivityTypes } from "@/hooks/useActivityTypes";
+import { ActivityTypeEnum } from "@/lib/types/certificate.types";
+import {
+  ComplementaryActivityType,
+  complementaryActivityTypeService,
+} from "@/api/services/complementary-activity-type.service";
+import {
+  ExtensionActivityType,
+  extensionActivityTypeService,
+} from "@/api/services/extension-activity-type.service";
+import { ApiError } from "@/api/errors/ApiError";
 
 type modes = 'create' | 'edit';
 
@@ -31,6 +46,49 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
   const discardText = mode === "edit"
     ? "Desfazer alterações"
     : "Limpar formulario";
+
+  const { activityTypes } = useActivityTypes();
+  const [complementaryActivityTypes, setComplementaryActivityTypes] =
+    useState<ComplementaryActivityType[]>();
+  const [extensionActivityTypes, setExtensionActivityTypes] =
+    useState<ExtensionActivityType[]>();
+
+  const activityTypeValue = form.watch("activity_type_id");
+
+  async function fetchComplementaryActivityTypes() {
+    try {
+      const response = await complementaryActivityTypeService.findAll();
+      setComplementaryActivityTypes(response.rows);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+      toast.error("Erro ao carregar tipos de atividade complementar");
+    }
+  }
+
+  async function fetchExtensionActivityTypes() {
+    try {
+      const response = await extensionActivityTypeService.findAll();
+      setExtensionActivityTypes(response.rows);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        return;
+      }
+      toast.error("Erro ao carregar tipos de atividade de extensão");
+    }
+  }
+
+  useEffect(() => {
+    if (activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString()) {
+      fetchComplementaryActivityTypes();
+    }
+    if (activityTypeValue === ActivityTypeEnum.EXTENSION.toString()) {
+      fetchExtensionActivityTypes();
+    }
+  }, [activityTypeValue]);
 
   return (
     <>
@@ -239,6 +297,111 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                 </div>
                 <span className="text-xs ml-2">metro(s)</span>
               </div>
+            </div>
+            <div className="p-4 border rounded-xl space-y-3">
+              <span className="font-bold">Atividade vinculada</span>
+              <FormField
+                control={form.control}
+                name="activity_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Atividade</FormLabel>
+                    <FormControl>
+                      <SearchableSelect
+                        options={activityTypes.map((type) => ({
+                          value: type.id,
+                          label: type.name,
+                        }))}
+                        value={field.value ?? ""}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue("complementary_activity_type_id", undefined);
+                          form.setValue("extension_activity_type_id", undefined);
+                        }}
+                        placeholder="Selecione o tipo de atividade"
+                        searchPlaceholder="Buscar tipos de atividade..."
+                        emptyText="Nenhum tipo encontrado"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {activityTypeValue === ActivityTypeEnum.COMPLEMENTARY.toString() && (
+                <FormField
+                  control={form.control}
+                  name="complementary_activity_type_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Atividade Complementar</FormLabel>
+                      <FormControl>
+                        <SearchableSelect
+                          options={(complementaryActivityTypes ?? []).map((type) => ({
+                            value: type.id.toString(),
+                            label: type.name,
+                          }))}
+                          value={field.value ?? ""}
+                          onValueChange={field.onChange}
+                          placeholder="Selecione o tipo de atividade complementar"
+                          searchPlaceholder="Buscar tipos de atividades complementares..."
+                          emptyText="Nenhum tipo encontrado"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {activityTypeValue === ActivityTypeEnum.EXTENSION.toString() && (
+                <FormField
+                  control={form.control}
+                  name="extension_activity_type_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Atividade de Extensão</FormLabel>
+                      <FormControl>
+                        <SearchableSelect
+                          options={(extensionActivityTypes ?? []).map((type) => ({
+                            value: type.id.toString(),
+                            label: type.name,
+                          }))}
+                          value={field.value ?? ""}
+                          onValueChange={field.onChange}
+                          placeholder="Selecione o tipo de atividade de extensão"
+                          searchPlaceholder="Buscar tipos de atividades de extensão..."
+                          emptyText="Nenhum tipo encontrado"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {activityTypeValue && (
+                <FormField
+                  control={form.control}
+                  name="activity_hours"
+                  render={({ field }) => (
+                    <FormItemField
+                      field={{
+                        ...field,
+                        value: field.value ?? "",
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                          field.onChange(
+                            e.target.value === "" ? undefined : Number(e.target.value)
+                          ),
+                      }}
+                      label="Quantidade de Horas"
+                      error={form.formState.errors.activity_hours?.message}
+                      type="number"
+                      placeholder="Horas da atividade"
+                    />
+                  )}
+                />
+              )}
             </div>
           </div>
 
