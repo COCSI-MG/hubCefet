@@ -16,6 +16,7 @@ import { ProfessorSelectionService } from './services/professor-selection.servic
 import { FileUploadService } from './services/file-upload.service';
 import { FilesService } from '../files/files.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
+import { CreateApprovedActivityFromEventDto } from './dto/create-approved-activity-from-event.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { ActivityHistoryType } from './enum/activity-history-type.enum';
 import { ActivityHistoryLogItemDto, GetActivityResponseDto } from './dto/get-activity-response.dto';
@@ -147,6 +148,46 @@ export class ActivitiesService {
         userId,
         ActivityHistoryType.CREATED,
         'Atividade criada pelo aluno',
+        transaction,
+      );
+
+      await transaction.commit();
+      return activity;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma atividade já APROVADA (status_id = 2) a partir da participação
+   * em um evento. Usada pelo processador da fila de certificados após o
+   * check-out do aluno, quando o evento possui uma atividade vinculada.
+   * Não cria revisores nem passa por revisão.
+   */
+  async createApprovedFromEvent(params: CreateApprovedActivityFromEventDto): Promise<Activity> {
+    const sequelize = this.activityRepository.getSequelize();
+    const transaction = await sequelize.transaction();
+
+    try {
+      const activity = await this.activityRepository.createApproved(
+        {
+          course_name: params.eventName,
+          hours: params.hours,
+          activity_type_id: params.activityTypeId,
+          certificate_url: params.certificateUrl,
+          complementary_activity_type_id: params.complementaryActivityTypeId ?? undefined,
+          extension_activity_type_id: params.extensionActivityTypeId ?? undefined,
+        },
+        params.userId,
+        transaction,
+      );
+
+      await this.createHistory(
+        activity.id,
+        params.userId,
+        ActivityHistoryType.CREATED,
+        'Atividade gerada automaticamente pela participação no evento',
         transaction,
       );
 

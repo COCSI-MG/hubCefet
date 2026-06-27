@@ -38,6 +38,18 @@ export class ActivityRepository {
     }, { transaction });
   }
 
+  async createApproved(
+    createDto: CreateActivityDto,
+    userId: string,
+    transaction?: any,
+  ): Promise<Activity> {
+    return this.activityModel.create({
+      ...createDto,
+      user_id: userId,
+      status_id: 2,
+    }, { transaction });
+  }
+
   async findAll(options?: FindOptions): Promise<Activity[]> {
     return this.activityModel.findAll({
       include: [

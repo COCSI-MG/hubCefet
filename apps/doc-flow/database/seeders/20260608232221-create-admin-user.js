@@ -20,9 +20,10 @@ module.exports = {
         CURRENT_TIMESTAMP, 
         CURRENT_TIMESTAMP, 
         '514c5e8d-d430-40e2-b878-f263c3f9d796', 
-        'admin@cefet-rj.br', 
+        'admin@cefet-rj.br',
         '1234567SINF'
-      );
+      )
+      ON CONFLICT DO NOTHING;
     `);
   },
 

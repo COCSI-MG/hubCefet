@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bull';
 import { PdfGenerationProcessor } from './processors/pdf-generation.processor';
 import { PdfGenerationService } from './services/pdf-generation.service';
 import { FilesModule } from '../files/files.module';
+import { ActivitiesModule } from '../activities/activities.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { FilesModule } from '../files/files.module';
       name: 'pdf-generation',
     }),
     FilesModule,
+    ActivitiesModule,
   ],
   providers: [
     PdfGenerationProcessor,
