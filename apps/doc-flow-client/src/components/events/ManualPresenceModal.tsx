@@ -12,7 +12,7 @@ interface ManualPresenceModalProps {
   userId: string;
   modalType: 'Check-In' | 'Check-Out';
   disabled?: boolean;
-  onSuccess?: () => void;
+  onSuccess?: () => void | Promise<void>;
 }
 
 export function ManualPresenceModal({ eventId, userId, modalType, disabled = false, onSuccess }: ManualPresenceModalProps) {
@@ -48,7 +48,7 @@ export function ManualPresenceModal({ eventId, userId, modalType, disabled = fal
 
       toast.success(`${modalType} realizado com sucesso!`);
       setOpenModal(false);
-      onSuccess?.();
+      await onSuccess?.();
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

@@ -8,9 +8,10 @@ interface QRCodeGeneratorModalProps {
   eventId: string;
   modalType: 'Check-In' | 'Check-Out'
   disabled?: boolean;
+  onSuccess?: () => void | Promise<void>;
 }
 
-export function QRCodeGeneratorModal({ userId, eventId, modalType, disabled = false }: QRCodeGeneratorModalProps) {
+export function QRCodeGeneratorModal({ userId, eventId, modalType, disabled = false, onSuccess }: QRCodeGeneratorModalProps) {
   const [openModal, setOpenModal] = useState(false)
 
   const isCheckIn = modalType === 'Check-In';
@@ -20,8 +21,16 @@ export function QRCodeGeneratorModal({ userId, eventId, modalType, disabled = fa
     ? "bg-emerald-600 hover:bg-emerald-500"
     : "bg-red-600 hover:bg-red-500";
 
+  const handleOpenChange = async (open: boolean) => {
+    setOpenModal(open)
+
+    if (!open) {
+      await onSuccess?.()
+    }
+  }
+
   return (
-    <Dialog.Root open={openModal} onOpenChange={setOpenModal}>
+    <Dialog.Root open={openModal} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
         <Button
           variant="secondary"

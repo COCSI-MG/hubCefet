@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { BadgeMinus } from "lucide-react";
 import { Button } from "../ui/button";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import SearchBar from "../SearchBar";
 import DataTable from "../DataTable";
 import EventsMobileCards from "./EventsMobileCards";
@@ -49,7 +49,7 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
 
   const isMyEventsPage = location.pathname === "/events/user";
 
-  const getUserProfile = () => {
+  const getUserProfile = useCallback(() => {
     if (!user || !token) {
       <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-semibold">
         Carregando...
@@ -72,16 +72,23 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       );
       setIsProfessor(profileLower === "professor");
     }
-  };
+  }, [token, user]);
 
-  const openDeleteModal = (item: Event) => {
+  const openDeleteModal = useCallback((item: Event) => {
     setItemToDelete(item);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
+
+  const refreshCurrentPage = useCallback(() => {
+    return fetchEvents({
+      limit: pagination.pageSize,
+      offset: pagination.pageIndex * pagination.pageSize,
+    });
+  }, [fetchEvents, pagination.pageIndex, pagination.pageSize]);
 
   useEffect(() => {
     getUserProfile();
-  }, [token, user]);
+  }, [getUserProfile]);
 
   useEffect(() => {
     if (error) {
@@ -109,8 +116,9 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
       isProfessor,
       user!.sub,
       isMyEventsPage,
+      refreshCurrentPage,
     ),
-    [openDeleteModal, tableType, isAdmin, isProfessor, user, isMyEventsPage]
+    [openDeleteModal, tableType, isAdmin, isProfessor, user, isMyEventsPage, refreshCurrentPage, navigate]
   );
 
   const table = useReactTable({
@@ -203,11 +211,13 @@ export function EventsDataTable({ events, setPagination, pagination, fetchEvents
         </div>
       </div>
 
-      {isMobile ? (
-        <EventsMobileCards table={table} tableType={tableType} />
-      ) : (
-        <DataTable table={table} />
-      )}
+      <div className="mt-4">
+        {isMobile ? (
+          <EventsMobileCards table={table} tableType={tableType} />
+        ) : (
+          <DataTable table={table} />
+        )}
+      </div>
     </div>
   );
 }

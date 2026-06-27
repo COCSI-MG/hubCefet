@@ -2,11 +2,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { File } from "@/lib/schemas/file.schema";
 import ActionsTableColumn from "./ActionsTableColumn";
 
-interface getColumnsProps {
-  onDelete: () => void;
-}
-
-export function getColumns({ onDelete }: getColumnsProps): ColumnDef<File>[] {
+export function getColumns(): ColumnDef<File>[];
+export function getColumns(_props: unknown): ColumnDef<File>[];
+export function getColumns(): ColumnDef<File>[] {
   return [
     {
       accessorKey: "name",
@@ -62,7 +60,7 @@ export function getColumns({ onDelete }: getColumnsProps): ColumnDef<File>[] {
       header: "Ações",
       cell: ({ row }) => {
         const fileId = row.original.id;
-        return <ActionsTableColumn fileId={fileId} onDelete={onDelete} />;
+        return <ActionsTableColumn fileId={fileId} />;
       },
     },
   ];

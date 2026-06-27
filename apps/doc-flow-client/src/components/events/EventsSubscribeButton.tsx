@@ -10,9 +10,10 @@ import { Button } from "../ui/button";
 interface EventsSubscribeButtonProps {
   selectedRow: Row<Event>;
   userIsSubscribed: boolean;
+  onSuccess?: () => void | Promise<void>;
 }
 
-export function EventsSubscribeButton({ selectedRow, userIsSubscribed }: EventsSubscribeButtonProps) {
+export function EventsSubscribeButton({ selectedRow, userIsSubscribed, onSuccess }: EventsSubscribeButtonProps) {
   const handleSubscribe = async () => {
 
     const event = selectedRow.original;
@@ -34,6 +35,7 @@ export function EventsSubscribeButton({ selectedRow, userIsSubscribed }: EventsS
       toast.success(
         `Inscrito com sucesso! Agora você pode fazer check-in no evento ${event.name}.`
       );
+      await onSuccess?.();
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

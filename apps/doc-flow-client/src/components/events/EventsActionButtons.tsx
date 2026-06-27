@@ -3,7 +3,7 @@ import { Row } from '@tanstack/react-table';
 import { Event } from '@/lib/types';
 import { QRCodeGeneratorModal } from '../QRCodeGeneratorModal';
 import { ManualPresenceModal } from './ManualPresenceModal';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { presenceService } from '@/api/services/presence.service';
 import { ApiError } from '@/api/errors/ApiError';
 import { toast } from 'sonner';
@@ -13,22 +13,27 @@ interface EventsActionButtonsProps {
   selectedRow: Row<Event>;
   userId: string;
   eventAlreadyStarted: boolean;
+  onEventsChanged?: () => void | Promise<void>;
 }
 
-export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, eventAlreadyStarted }: EventsActionButtonsProps) {
+export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, eventAlreadyStarted, onEventsChanged }: EventsActionButtonsProps) {
   const [userHasCheckedIn, setUserHasCheckedIn] = useState(false)
   const [userHasCheckedOut, setUserHasCheckedOut] = useState(false)
   const [userIsSubscribed, setUserIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const event = selectedRow.original;
 
-  const fetchPresenceStatus = async () => {
+  const fetchPresenceStatus = useCallback(async () => {
     try {
       const presence = await presenceService.findByUserAndEventId(userId, event.id)
       if (presence) {
         setUserIsSubscribed(!!presence)
         setUserHasCheckedIn(!!presence.check_in_date)
         setUserHasCheckedOut(!!presence.check_out_date)
+      } else {
+        setUserIsSubscribed(false)
+        setUserHasCheckedIn(false)
+        setUserHasCheckedOut(false)
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -40,11 +45,16 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [event.id, userId])
+
+  const handlePresenceChange = useCallback(async () => {
+    await fetchPresenceStatus()
+    await onEventsChanged?.()
+  }, [fetchPresenceStatus, onEventsChanged])
 
   useEffect(() => {
     fetchPresenceStatus()
-  }, [userId, event.id])
+  }, [fetchPresenceStatus])
 
 
   if (isLoading) {
@@ -67,12 +77,14 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
                 modalType='Check-In'
                 userId={userId}
                 disabled={userHasCheckedIn || !eventAlreadyStarted}
+                onSuccess={handlePresenceChange}
               />
               <QRCodeGeneratorModal
                 eventId={event.id}
                 modalType='Check-Out'
                 userId={userId}
                 disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+                onSuccess={handlePresenceChange}
               />
             </>
           ) : (
@@ -82,21 +94,25 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
                 userId={userId}
                 modalType='Check-In'
                 disabled={userHasCheckedIn || !eventAlreadyStarted}
-                onSuccess={fetchPresenceStatus}
+                onSuccess={handlePresenceChange}
               />
               <ManualPresenceModal
                 eventId={event.id}
                 userId={userId}
                 modalType='Check-Out'
                 disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
-                onSuccess={fetchPresenceStatus}
+                onSuccess={handlePresenceChange}
               />
             </>
           )}
         </div>
 
       ) : (
-        <EventsSubscribeButton selectedRow={selectedRow} userIsSubscribed={userIsSubscribed} />
+        <EventsSubscribeButton
+          selectedRow={selectedRow}
+          userIsSubscribed={userIsSubscribed}
+          onSuccess={handlePresenceChange}
+        />
       )}
     </div>
   )

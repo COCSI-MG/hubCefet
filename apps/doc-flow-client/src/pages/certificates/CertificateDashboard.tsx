@@ -6,6 +6,7 @@ import {
   CardContent,
   LinearProgress,
   Chip,
+  type ChipProps,
   Table,
   TableBody,
   TableCell,
@@ -77,7 +78,7 @@ const ACTIVITY_TYPE = {
 
 const APPROVED_STATUS_ID = 2;
 
-const statusMap = {
+const statusMap: Record<number, { label: string; color: ChipProps["color"]; icon: JSX.Element }> = {
   1: { label: 'Pendente', color: 'warning', icon: <PendingIcon /> },
   2: { label: 'Aprovado', color: 'success', icon: <CheckCircleIcon /> },
   3: { label: 'Rejeitado', color: 'error', icon: <CancelIcon /> }
@@ -417,46 +418,49 @@ export default function CertificateDashboard() {
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {activities.length > 0 ? (
-              <TableContainer component={Paper} elevation={0}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell className="font-semibold">Curso/Atividade</TableCell>
-                      <TableCell className="font-semibold">Tipo</TableCell>
-                      <TableCell className="font-semibold">Horas</TableCell>
-                      <TableCell className="font-semibold">Status</TableCell>
-                      <TableCell className="font-semibold">Data</TableCell>
-                      <TableCell className="font-semibold">Ações</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {activities.slice(0, 10).map((activity) => (
-                      <TableRow key={activity.id} hover>
-                        <TableCell>{activity.course_name}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {getActivityTypeName(activity.activity_type_id)}
+              <>
+                <div className="space-y-3 md:hidden">
+                  {activities.slice(0, 10).map((activity) => {
+                    const status = statusMap[activity.status_id as keyof typeof statusMap];
+
+                    return (
+                      <div
+                        key={activity.id}
+                        className="rounded-xl border bg-white p-4 transition-colors hover:bg-sky-50"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <Typography className="min-w-0 font-semibold text-neutral-800">
+                            {activity.course_name}
                           </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography className="font-semibold">
-                            {activity.hours}h
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
                           <Chip
-                            icon={statusMap[activity.status_id as keyof typeof statusMap]?.icon}
-                            label={statusMap[activity.status_id as keyof typeof statusMap]?.label || 'Desconhecido'}
-                            color={statusMap[activity.status_id as keyof typeof statusMap]?.color as any || 'default'}
+                            icon={status?.icon}
+                            label={status?.label || 'Desconhecido'}
+                            color={status?.color || 'default'}
                             size="small"
+                            className="shrink-0"
                           />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDate(activity.created_at)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
+                        </div>
+
+                        <div className="mt-3 space-y-1.5 text-sm text-neutral-600">
+                          <div className="flex justify-between gap-3">
+                            <span>Tipo</span>
+                            <span className="text-right font-medium text-neutral-800">
+                              {getActivityTypeName(activity.activity_type_id)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between gap-3">
+                            <span>Horas</span>
+                            <span className="font-semibold text-neutral-800">{activity.hours}h</span>
+                          </div>
+                          <div className="flex justify-between gap-3">
+                            <span>Data</span>
+                            <span className="font-medium text-neutral-800">
+                              {formatDate(activity.created_at)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 border-t pt-3">
                           <IconButton
                             onClick={() => navigate(`/docflow/certificates/${activity.id}`)}
                             color="primary"
@@ -465,12 +469,67 @@ export default function CertificateDashboard() {
                           >
                             <EditIcon />
                           </IconButton>
-                        </TableCell>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <TableContainer component={Paper} elevation={0} className="hidden md:block">
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell className="font-semibold">Curso/Atividade</TableCell>
+                        <TableCell className="font-semibold">Tipo</TableCell>
+                        <TableCell className="font-semibold">Horas</TableCell>
+                        <TableCell className="font-semibold">Status</TableCell>
+                        <TableCell className="font-semibold">Data</TableCell>
+                        <TableCell className="font-semibold">Ações</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {activities.slice(0, 10).map((activity) => (
+                        <TableRow key={activity.id} hover>
+                          <TableCell>{activity.course_name}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {getActivityTypeName(activity.activity_type_id)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography className="font-semibold">
+                              {activity.hours}h
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={statusMap[activity.status_id as keyof typeof statusMap]?.icon}
+                              label={statusMap[activity.status_id as keyof typeof statusMap]?.label || 'Desconhecido'}
+                              color={statusMap[activity.status_id as keyof typeof statusMap]?.color || 'default'}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {formatDate(activity.created_at)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={() => navigate(`/docflow/certificates/${activity.id}`)}
+                              color="primary"
+                              title="Abrir certificado"
+                              size="small"
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
             ) : (
               <Box display="flex" justifyContent="center" alignItems="center" height={200}>
                 <Typography color="text.secondary">
@@ -484,4 +543,3 @@ export default function CertificateDashboard() {
     </>
   );
 }
-
