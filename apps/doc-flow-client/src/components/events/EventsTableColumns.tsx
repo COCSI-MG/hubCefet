@@ -15,7 +15,8 @@ export function getColumns(
 	isAdmin: boolean,
 	isProfessor: boolean,
 	userId: string,
-	isMyEventsPage: boolean
+	isMyEventsPage: boolean,
+	onEventsChanged?: () => void | Promise<void>
 ): ColumnDef<Event>[] {
 
   const columns: ColumnDef<Event>[] = [
@@ -189,7 +190,13 @@ export function getColumns(
             )}
 
             {!isAdmin && !isProfessor && (
-              <EventsActionButtons userId={userId} selectedRow={row} isMyEventsPage={isMyEventsPage} eventAlreadyStarted={eventAlreadyStarted} />
+              <EventsActionButtons
+                userId={userId}
+                selectedRow={row}
+                isMyEventsPage={isMyEventsPage}
+                eventAlreadyStarted={eventAlreadyStarted}
+                onEventsChanged={onEventsChanged}
+              />
             )}
 
           </div>
