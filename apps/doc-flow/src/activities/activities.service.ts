@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, UnprocessableEntityException } from '@nestjs/common';
 import { Response } from 'express';
 import { createReadStream, existsSync } from 'fs';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { Logger } from '@nestjs/common';
 import { ActivityRepository } from './repositories/activity.repository';
 import { ActivityTypeRepository } from './repositories/activity-type.repository';
@@ -564,7 +564,7 @@ export class ActivitiesService {
     }
 
     const uploadsDir = process.env.PDF_STORAGE_PATH || './storage/certificates';
-    const fileName = activity.certificate_url.replace('certificates/', '');
+    const fileName = basename(activity.certificate_url);
     const fullPath = join(uploadsDir, fileName);
 
     if (!existsSync(fullPath)) {
