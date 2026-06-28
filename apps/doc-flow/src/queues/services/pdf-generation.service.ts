@@ -85,26 +85,71 @@ export class PdfGenerationService {
     const checkInDate = this.formatDateToBrazilian(jobData.checkInDate);
     const checkOutDate = this.formatDateToBrazilian(jobData.checkOutDate);
     const currentDate = this.formatDateToBrazilian(new Date().toISOString());
+    const eventDateText = this.buildEventDateText(jobData.checkInDate, jobData.checkOutDate);
+    const certificateHours = jobData.activityHours ?? jobData.totalHours;
+    const totalHoursText = this.formatHoursText(certificateHours);
+    const certificateNumber = this.buildCertificateNumber(jobData);
     
     const imagePath = await this.findImagesDirectory();
 
-    const headerImage = await this.imageToBase64(join(imagePath, 'header_sepex.png'));
+    const brasaoImage = await this.imageToBase64(join(imagePath, 'brasao-republica.png'));
+    const cefetLogo = await this.imageToBase64(join(imagePath, 'cefet-logo-horizontal.png'));
     const mariaSignature = await this.imageToBase64(join(imagePath, 'assinatura_maria_flow.png'));
     const renataSignature = await this.imageToBase64(join(imagePath, 'assinatura_renata_flow.png'));
-    const footerImage = await this.imageToBase64(join(imagePath, 'final_text_sepex.png'));
 
     return {
       '{{userName}}': jobData.userName || 'Nome não informado',
       '{{eventName}}': jobData.eventName || 'Evento não informado',
-      '{{totalHours}}': jobData.totalHours?.toString() || '0',
+      '{{totalHours}}': certificateHours?.toString() || '0',
       '{{checkInDate}}': checkInDate,
       '{{checkOutDate}}': checkOutDate,
       '{{currentDate}}': currentDate,
-      '{{headerImage}}': headerImage,
+      '{{eventDateText}}': eventDateText,
+      '{{totalHoursText}}': totalHoursText,
+      '{{certificateNumber}}': certificateNumber,
+      '{{brasaoImage}}': brasaoImage,
+      '{{cefetLogo}}': cefetLogo,
       '{{mariaSignature}}': mariaSignature,
       '{{renataSignature}}': renataSignature,
-      '{{footerImage}}': footerImage,
     };
+  }
+
+  private buildEventDateText(checkInDateString: string, checkOutDateString: string): string {
+    const checkInDate = new Date(checkInDateString);
+    const checkOutDate = new Date(checkOutDateString);
+
+    if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+      return 'ocorrida em data não informada';
+    }
+
+    const sameDay =
+      checkInDate.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) ===
+      checkOutDate.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+    if (sameDay) {
+      return `ocorrida no dia ${this.formatDateToBrazilian(checkInDateString)}`;
+    }
+
+    return `ocorrida no período de ${this.formatDateToBrazilian(checkInDateString)} a ${this.formatDateToBrazilian(checkOutDateString)}`;
+  }
+
+  private formatHoursText(totalHours?: number): string {
+    const hours = Number(totalHours ?? 0);
+    const formattedHours = Number.isInteger(hours)
+      ? hours.toString()
+      : hours.toLocaleString('pt-BR', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
+
+    return `${formattedHours} ${hours === 1 ? 'hora' : 'horas'}`;
+  }
+
+  private buildCertificateNumber(jobData: PdfGenerationJobData): string {
+    const year = new Date().getFullYear();
+    const shortPresenceId = (jobData.presenceId || '').replace(/-/g, '').slice(0, 8).toUpperCase();
+
+    return `${year}.${shortPresenceId || '00000000'}`;
   }
 
   private async findImagesDirectory(): Promise<string> {
