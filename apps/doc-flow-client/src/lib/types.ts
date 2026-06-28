@@ -183,6 +183,34 @@ export const createEventSchema = z
         .max(1000, "Quantidade máxima é 1000 horas")
         .optional()
     ),
+    min_checkin_time: z.preprocess(
+      (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
+      z.number({ 
+        required_error: "Tempo de check-in mínimo é obrigatório", 
+        invalid_type_error: "Tempo de check-in mínimo deve ser um número" 
+      }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
+    ),
+    max_checkin_time: z.preprocess(
+      (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
+      z.number({ 
+        required_error: "Tempo de check-in máximo é obrigatório", 
+        invalid_type_error: "Tempo de check-in máximo deve ser um número" 
+      }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
+    ),
+    min_checkout_time: z.preprocess(
+      (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
+      z.number({ 
+        required_error: "Tempo de check-out mínimo é obrigatório", 
+        invalid_type_error: "Tempo de check-out mínimo deve ser um número" 
+      }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
+    ),
+    max_checkout_time: z.preprocess(
+      (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
+      z.number({ 
+        required_error: "Tempo de check-out máximo é obrigatório", 
+        invalid_type_error: "Tempo de check-out máximo deve ser um número" 
+      }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
+    ),
   })
   .superRefine((val, ctx) => {
     const [year, month, day] = val.start_at.split("-").map(Number);
@@ -251,6 +279,10 @@ export const createEventSchema = z
       complementary_activity_type_id,
       extension_activity_type_id,
       activity_hours,
+      min_checkin_time,
+      max_checkin_time,
+      min_checkout_time,
+      max_checkout_time,
     }) => {
       const [startYear, startMonth, startDay] = start_at
         .split("-")
@@ -289,6 +321,10 @@ export const createEventSchema = z
             ? extension_activity_type_id
             : undefined,
         activity_hours: hasActivity ? activity_hours : undefined,
+        min_checkin_time,
+        max_checkin_time,
+        min_checkout_time,
+        max_checkout_time,
       };
     }
   );

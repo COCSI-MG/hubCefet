@@ -64,7 +64,7 @@ export default function CertificateReview() {
     return activity.user.full_name || activity.user.fullName || 'Aluno não encontrado';
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 

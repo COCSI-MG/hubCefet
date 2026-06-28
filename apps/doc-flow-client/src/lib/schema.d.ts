@@ -653,7 +653,16 @@ export interface components {
 
       radius: number;
 
-      presence_option: 'qrcode' | geo;
+      presence_option: 'qrcode' | 'geo';
+
+      min_checkin_time: number;
+      max_checkin_time: number;
+      min_checkout_time: number;
+      max_checkout_time: number;
+      activity_type_id: number | null;
+      complementary_activity_type_id: number | null;
+      extension_activity_type_id: number | null;
+      activity_hours: number | null;
 
       user: {
         id: string;
