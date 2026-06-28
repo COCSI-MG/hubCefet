@@ -40,30 +40,30 @@ export const createEventSchema = z
       .optional(),
     min_checkin_time: z.preprocess(
       (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
-      z.number({ 
-        required_error: "Tempo de check-in mínimo é obrigatório", 
-        invalid_type_error: "Tempo de check-in mínimo deve ser um número" 
+      z.number({
+        required_error: "Tempo de check-in mínimo é obrigatório",
+        invalid_type_error: "Tempo de check-in mínimo deve ser um número"
       }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
     ),
     max_checkin_time: z.preprocess(
       (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
-      z.number({ 
-        required_error: "Tempo de check-in máximo é obrigatório", 
-        invalid_type_error: "Tempo de check-in máximo deve ser um número" 
+      z.number({
+        required_error: "Tempo de check-in máximo é obrigatório",
+        invalid_type_error: "Tempo de check-in máximo deve ser um número"
       }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
     ),
     min_checkout_time: z.preprocess(
       (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
-      z.number({ 
-        required_error: "Tempo de check-out mínimo é obrigatório", 
-        invalid_type_error: "Tempo de check-out mínimo deve ser um número" 
+      z.number({
+        required_error: "Tempo de check-out mínimo é obrigatório",
+        invalid_type_error: "Tempo de check-out mínimo deve ser um número"
       }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
     ),
     max_checkout_time: z.preprocess(
       (a) => (a === "" || a === undefined || a === null ? undefined : Number(a)),
-      z.number({ 
-        required_error: "Tempo de check-out máximo é obrigatório", 
-        invalid_type_error: "Tempo de check-out máximo deve ser um número" 
+      z.number({
+        required_error: "Tempo de check-out máximo é obrigatório",
+        invalid_type_error: "Tempo de check-out máximo deve ser um número"
       }).min(0, "Tempo mínimo é 0").max(60, "Tempo máximo é 60")
     ),
   })
@@ -190,12 +190,7 @@ export type EventUpdateSchema = Partial<EventCreateSchema>;
 
 export type EventCreate = components["schemas"]["CreateEventDto"];
 
-export type Event = components["schemas"]["Event"] & {
-  min_checkin_time: number;
-  max_checkin_time: number;
-  min_checkout_time: number;
-  max_checkout_time: number;
-};
+export type Event = components["schemas"]["Event"];
 
 export type GetAllEvents = {
   offset: number;
