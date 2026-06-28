@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   BelongsTo,
-  Column, DataType, ForeignKey, HasMany, Model, Scopes,
+  Column, DataType, ForeignKey, HasMany, Model,
+  Scopes,
   Table,
 } from 'sequelize-typescript';
 import { Presence } from 'src/presences/entities/presence.entity';
@@ -173,6 +174,51 @@ export class Event extends Model {
     allowNull: true,
   })
   activity_hours: number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Min checkin time',
+  })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 15,
+  })
+  min_checkin_time: number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Max checkin time',
+  })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 15,
+  })
+  max_checkin_time: number;
+
+
+  @ApiProperty({
+    example: '15',
+    description: 'Min checkout time',
+  })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 15,
+  })
+  min_checkout_time: number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Max checkout time',
+  })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 15,
+  })
+  max_checkout_time: number;
 
   @HasMany(() => Presence, 'event_id')
   presences: Presence[];
