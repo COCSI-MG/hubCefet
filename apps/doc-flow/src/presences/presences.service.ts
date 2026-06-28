@@ -42,6 +42,10 @@ export class PresencesService {
       throw new NotFoundException('Evento encontrado');
     }
 
+    if (Date.now() > event.start_at.getDate()) {
+      throw new UnprocessableEntityException('Nao e possivel se inscrever em eventos ja iniciados ou finalizados')
+    }
+
     const [presence, created] = await this.presenceRepository.findOrCreatedPresence(
       userId,
       createPresenceDto.event_id,
@@ -93,6 +97,22 @@ export class PresencesService {
     const now = new Date();
     const eventStartDate = new Date(event.start_at);
     const eventEndDate = new Date(event.end_at);
+    const minCheckinTimeInMinutes = event.min_checkin_time * 60 * 1000
+    const maxCheckinTimeInMinutes = event.max_checkin_time * 60 * 1000
+
+    const minCheckinDate = new Date(eventStartDate.getTime() + minCheckinTimeInMinutes)
+    const maxCheckinDate = new Date(eventStartDate.getTime() + maxCheckinTimeInMinutes)
+    const minCheckinHour = minCheckinDate.toLocaleTimeString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const maxCheckinHour = maxCheckinDate.toLocaleTimeString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     const payloadToUpdate: UpdatePresenceData = {};
 
@@ -101,17 +121,35 @@ export class PresencesService {
         throw new UnprocessableEntityException('Check-in já realizado anteriormente.');
       }
 
-      if (now < eventStartDate) {
-        throw new UnprocessableEntityException('Check-in não permitido antes do início do evento.');
+      if (now < minCheckinDate) {
+        throw new UnprocessableEntityException(`Check-in não permitido antes das ${minCheckinHour}.`);
       }
 
-      if (now > eventEndDate) {
-        throw new UnprocessableEntityException('Evento já encerrado.');
+      if (now > maxCheckinDate) {
+        throw new UnprocessableEntityException(`Não é possível fazer check-in após às ${maxCheckinHour}`);
       }
 
       payloadToUpdate.status = 'present';
       payloadToUpdate.check_in_date = now.toISOString();
     } else {
+      const minCheckoutTimeInMinutes = event.min_checkout_time * 60 * 1000
+      const maxCheckoutTimeInMinutes = event.max_checkout_time * 60 * 1000
+
+      const minCheckoutDate = new Date(eventEndDate.getTime() + minCheckoutTimeInMinutes)
+      const maxCheckoutDate = new Date(eventEndDate.getTime() + maxCheckoutTimeInMinutes)
+
+      const minCheckoutHour = minCheckoutDate.toLocaleTimeString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const maxCheckoutHour = maxCheckoutDate.toLocaleTimeString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
       if (!presence.check_in_date) {
         throw new UnprocessableEntityException('Impossível realizar check-out sem check-in prévio.');
       }
@@ -121,14 +159,17 @@ export class PresencesService {
       }
 
       const checkInDate = new Date(presence.check_in_date);
-      const maxCheckOutTime = new Date(eventEndDate.getTime() + 2 * 60 * 60 * 1000);
 
       if (now <= checkInDate) {
         throw new UnprocessableEntityException('Data de check-out deve ser posterior ao check-in.');
       }
 
-      if (now > maxCheckOutTime) {
-        throw new UnprocessableEntityException('Check-out permitido apenas até 2 horas após o término.');
+      if (now < minCheckoutDate) {
+        throw new UnprocessableEntityException(`Check-out permitido antes das ${minCheckoutHour}`);
+      }
+
+      if (now > maxCheckoutDate) {
+        throw new UnprocessableEntityException(`Check-out permitido apenas até às ${maxCheckoutHour}`);
       }
 
       payloadToUpdate.status = 'finalized';

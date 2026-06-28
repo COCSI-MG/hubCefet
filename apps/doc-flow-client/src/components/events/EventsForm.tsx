@@ -14,7 +14,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import { EventCreateSchema, Event } from "@/lib/schemas/event.schema";
+import { EventCreateSchema, Event } from "@/lib/types";
 import FormItemField from "../FormItemField";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
@@ -299,6 +299,65 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
               </div>
             </div>
             <div className="p-4 border rounded-xl space-y-3">
+              <span className="font-bold">Limites de Tolerância (minutos)</span>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="min_checkin_time"
+                  render={({ field }) => (
+                    <FormItemField
+                      field={field}
+                      label="Mínimo Check-in (minutos)"
+                      error={form.formState.errors.min_checkin_time?.message}
+                      type="number"
+                      placeholder="Ex: 15"
+                    />
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="max_checkin_time"
+                  render={({ field }) => (
+                    <FormItemField
+                      field={field}
+                      label="Máximo Check-in (minutos)"
+                      error={form.formState.errors.max_checkin_time?.message}
+                      type="number"
+                      placeholder="Ex: 15"
+                    />
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="min_checkout_time"
+                  render={({ field }) => (
+                    <FormItemField
+                      field={field}
+                      label="Mínimo Check-out (minutos)"
+                      error={form.formState.errors.min_checkout_time?.message}
+                      type="number"
+                      placeholder="Ex: 15"
+                    />
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="max_checkout_time"
+                  render={({ field }) => (
+                    <FormItemField
+                      field={field}
+                      label="Máximo Check-out (minutos)"
+                      error={form.formState.errors.max_checkout_time?.message}
+                      type="number"
+                      placeholder="Ex: 15"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+            <div className="p-4 border rounded-xl space-y-3">
               <span className="font-bold">Atividade vinculada</span>
               <FormField
                 control={form.control}
@@ -386,14 +445,7 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                   name="activity_hours"
                   render={({ field }) => (
                     <FormItemField
-                      field={{
-                        ...field,
-                        value: field.value ?? "",
-                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.onChange(
-                            e.target.value === "" ? undefined : Number(e.target.value)
-                          ),
-                      }}
+                      field={field}
                       label="Quantidade de Horas"
                       error={form.formState.errors.activity_hours?.message}
                       type="number"
@@ -427,6 +479,10 @@ export default function EventsForm({ form, onSubmit, event, mode }: EventsFormPr
                     radius: event.radius,
                     vacancies: event.vacancies,
                     presence_option: event.presence_option,
+                    min_checkin_time: event.min_checkin_time,
+                    max_checkin_time: event.max_checkin_time,
+                    min_checkout_time: event.min_checkout_time,
+                    max_checkout_time: event.max_checkout_time,
                   })
                 } else {
                   form.reset()

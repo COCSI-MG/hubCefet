@@ -69,13 +69,13 @@ export class EventsService {
       complementary_activity_type_id: createEventDto.complementary_activity_type_id ?? null,
       extension_activity_type_id: createEventDto.extension_activity_type_id ?? null,
       activity_hours: createEventDto.activity_hours ?? null,
+      min_checkin_time: createEventDto.min_checkin_time,
+      max_checkin_time: createEventDto.max_checkin_time,
+      min_checkout_time: createEventDto.min_checkout_time,
+      max_checkout_time: createEventDto.max_checkout_time,
     });
   }
 
-  /**
-   * Valida a configuração opcional de atividade vinculada ao evento.
-   * Espelha as regras de cadastro de atividades (activities.service).
-   */
   private validateActivityConfig(dto: {
     activity_type_id?: number;
     activity_hours?: number;
@@ -151,11 +151,31 @@ export class EventsService {
     if (!event) throw new NotFoundException('Evento não encontrado');
 
     const now = new Date();
-    if (event.end_at < now) {
+    if (event.end_at && event.end_at < now) {
       throw new UnprocessableEntityException('Não é possível editar eventos já finalizados');
     }
 
     await this.validatePermission(event, userId);
+
+    const newTypeId = updateEventDto.activity_type_id;
+    if (newTypeId !== undefined && newTypeId !== event.activity_type_id) {
+      if (newTypeId === ActivityTypeEnum.COMPLEMENTARY) {
+        updateEventDto.extension_activity_type_id = null;
+      } else if (newTypeId === ActivityTypeEnum.EXTENSION) {
+        updateEventDto.complementary_activity_type_id = null;
+      } else if (newTypeId === null) {
+        updateEventDto.extension_activity_type_id = null;
+        updateEventDto.complementary_activity_type_id = null;
+        updateEventDto.activity_hours = null;
+      }
+    }
+
+    this.validateActivityConfig({
+      activity_type_id: newTypeId !== undefined ? newTypeId : event.activity_type_id,
+      activity_hours: updateEventDto.activity_hours !== undefined ? updateEventDto.activity_hours : event.activity_hours,
+      complementary_activity_type_id: updateEventDto.complementary_activity_type_id !== undefined ? updateEventDto.complementary_activity_type_id : event.complementary_activity_type_id,
+      extension_activity_type_id: updateEventDto.extension_activity_type_id !== undefined ? updateEventDto.extension_activity_type_id : event.extension_activity_type_id,
+    });
 
     if (updateEventDto.status != null) {
       const [result, message] = this.isValidEventStatusForEventDates(
@@ -176,7 +196,7 @@ export class EventsService {
     if (!event) throw new NotFoundException('Evento não encontrado');
 
     const now = new Date();
-    if (event.end_at < now) {
+    if (event.end_at && event.end_at < now) {
       throw new UnprocessableEntityException('Não é possível excluir eventos já finalizados');
     }
 
@@ -196,7 +216,7 @@ export class EventsService {
     }
 
     const now = new Date();
-    if (event.end_at < now) {
+    if (event.end_at && event.end_at < now) {
       throw new UnprocessableEntityException('Não é possível finalizar eventos já finalizados');
     }
 

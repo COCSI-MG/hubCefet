@@ -1,11 +1,10 @@
-import { ApiResponse } from "@/lib/types";
 import AbstractService from "./abstract.service";
 import type {
   GetAllEventsResponseDto,
   EventCreateSchema,
   GetEventResponseDto,
   Event,
-} from "@/lib/schemas/event.schema";
+} from "@/lib/types";
 
 export default class EventService extends AbstractService {
   constructor() {
@@ -21,7 +20,7 @@ export default class EventService extends AbstractService {
     );
   }
 
-  async create(data: EventCreateSchema): Promise<ApiResponse<Event>> {
+  async create(data: EventCreateSchema): Promise<Event> {
     return await this.api.post(this.basePath, data);
   }
 

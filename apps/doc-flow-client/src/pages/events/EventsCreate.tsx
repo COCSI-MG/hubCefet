@@ -26,6 +26,14 @@ export default function EventsCreate() {
       longitude: 0,
       radius: 10,
       presence_option: "qrcode",
+      min_checkin_time: 15,
+      max_checkin_time: 15,
+      min_checkout_time: 15,
+      max_checkout_time: 15,
+      activity_type_id: undefined,
+      complementary_activity_type_id: undefined,
+      extension_activity_type_id: undefined,
+      activity_hours: undefined,
     },
   });
 

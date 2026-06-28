@@ -194,7 +194,6 @@ export function getColumns(
                 userId={userId}
                 selectedRow={row}
                 isMyEventsPage={isMyEventsPage}
-                eventAlreadyStarted={eventAlreadyStarted}
                 onEventsChanged={onEventsChanged}
               />
             )}

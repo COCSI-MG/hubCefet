@@ -12,11 +12,10 @@ interface EventsActionButtonsProps {
   isMyEventsPage: boolean;
   selectedRow: Row<Event>;
   userId: string;
-  eventAlreadyStarted: boolean;
   onEventsChanged?: () => void | Promise<void>;
 }
 
-export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, eventAlreadyStarted, onEventsChanged }: EventsActionButtonsProps) {
+export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, onEventsChanged }: EventsActionButtonsProps) {
   const [userHasCheckedIn, setUserHasCheckedIn] = useState(false)
   const [userHasCheckedOut, setUserHasCheckedOut] = useState(false)
   const [userIsSubscribed, setUserIsSubscribed] = useState(false)
@@ -57,6 +56,23 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
   }, [fetchPresenceStatus])
 
 
+  const minCheckIn = event.min_checkin_time ?? 15;
+  const maxCheckIn = event.max_checkin_time ?? 15;
+  const minCheckOut = event.min_checkout_time ?? 15;
+  const maxCheckOut = event.max_checkout_time ?? 15;
+
+  const now = new Date();
+  const startAtDate = new Date(event.start_at);
+  const endAtDate = new Date(event.end_at);
+
+  const checkInStart = new Date(startAtDate.getTime() - minCheckIn * 60 * 1000);
+  const checkInEnd = new Date(startAtDate.getTime() + maxCheckIn * 60 * 1000);
+  const checkOutStart = new Date(endAtDate.getTime() - minCheckOut * 60 * 1000);
+  const checkOutEnd = new Date(endAtDate.getTime() + maxCheckOut * 60 * 1000);
+
+  const isCheckInAllowed = now >= checkInStart && now <= checkInEnd;
+  const isCheckOutAllowed = now >= checkOutStart && now <= checkOutEnd;
+
   if (isLoading) {
     return (
       <div className="flex gap-2">
@@ -76,14 +92,14 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
                 eventId={event.id}
                 modalType='Check-In'
                 userId={userId}
-                disabled={userHasCheckedIn || !eventAlreadyStarted}
+                disabled={userHasCheckedIn || !isCheckInAllowed}
                 onSuccess={handlePresenceChange}
               />
               <QRCodeGeneratorModal
                 eventId={event.id}
                 modalType='Check-Out'
                 userId={userId}
-                disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+                disabled={userHasCheckedOut || !userHasCheckedIn || !isCheckOutAllowed}
                 onSuccess={handlePresenceChange}
               />
             </>
@@ -93,14 +109,14 @@ export function EventsActionButtons({ isMyEventsPage, selectedRow, userId, event
                 eventId={event.id}
                 userId={userId}
                 modalType='Check-In'
-                disabled={userHasCheckedIn || !eventAlreadyStarted}
+                disabled={userHasCheckedIn || !isCheckInAllowed}
                 onSuccess={handlePresenceChange}
               />
               <ManualPresenceModal
                 eventId={event.id}
                 userId={userId}
                 modalType='Check-Out'
-                disabled={userHasCheckedOut || !userHasCheckedIn || !eventAlreadyStarted}
+                disabled={userHasCheckedOut || !userHasCheckedIn || !isCheckOutAllowed}
                 onSuccess={handlePresenceChange}
               />
             </>

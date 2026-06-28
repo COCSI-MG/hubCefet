@@ -135,4 +135,41 @@ export class CreateEventDto {
   @Max(1000)
   @IsOptional()
   activity_hours?: number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Min checkin time',
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(60)
+  min_checkin_time: Number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Max checkin time',
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(60)
+  max_checkin_time: Number;
+
+
+  @ApiProperty({
+    example: '15',
+    description: 'Min checkout time',
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(60)
+  min_checkout_time: Number;
+
+  @ApiProperty({
+    example: '15',
+    description: 'Max checkout time',
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(60)
+  max_checkout_time: Number;
 }
